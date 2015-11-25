@@ -15,16 +15,17 @@ import java.util.Vector;
 import org.apache.commons.net.nntp.ArticleInfo;
 import org.workcast.streams.CSVHelper;
 import org.workcast.streams.MemFile;
+import org.workcast.streams.StreamHelper;
 
 /**
  * represents a news article on a news server
  */
 public class NewsArticle {
     // these are constants for getEncodingType()
-    public final int UNKNOWN_ENCODING = 0;
-    public final int UU_ENCODING = 1;
-    public final int YENC_ENCODING = 2;
-    public final int BASE64_ENCODING = 3;
+    public static final int UNKNOWN_ENCODING = 0;
+    public static final int UU_ENCODING = 1;
+    public static final int YENC_ENCODING = 2;
+    public static final int BASE64_ENCODING = 3;
 
     //public String groupName;
     public long articleNo;
@@ -485,16 +486,31 @@ public class NewsArticle {
         return new BodyContentInputStream(buffer.getInputStream());
     }
 
+    /**
+     * Determine the encoding by looking at the body of the message.
+     * (Which means this might download the body for you.)
+     */
     public int getEncodingType() throws Exception {
         String subj = getHeaderSubject();
         if (subj.indexOf("yEnc") > 0) {
             return YENC_ENCODING;
         }
         if (buffer == null) {
-            return UNKNOWN_ENCODING;
+        	getMsgBody();
         }
-        getBodyContent();
-        return 0;
+        InputStream is = getBodyContent();
+        StringBuffer firstTwenty = new StringBuffer(22);
+        for (int i=0; i<20; i++) {
+        	int b = is.read();
+        	firstTwenty.append((char)b);
+        }
+        if (firstTwenty.indexOf("=ybegin")>=0) {
+        	return YENC_ENCODING;
+        }
+        if (firstTwenty.indexOf("begin 644")>=0) {
+        	return UU_ENCODING;
+        }
+        return UNKNOWN_ENCODING;
     }
 
     public void streamDecodedContent(OutputStream os) throws Exception {
@@ -502,19 +518,26 @@ public class NewsArticle {
             throw new Exception(
                     "body has not been read yet.  Do that before calling streamDecodedContent.");
         }
-        if (nBunch.isYEnc) {
+        
+        int encoding = getEncodingType();
+        
+        //if not able to figure out on our own, use the flag the user can set
+        //to force YEnc
+        if (encoding == UNKNOWN_ENCODING) {
+        	if (nBunch.isYEnc) {
+        		encoding = YENC_ENCODING;
+        	}
+        }
+        
+        if (encoding==YENC_ENCODING) {
             InputStream is = getBodyContent();
             YEnc.decode(is, os);
         }
         else {
             InputStream is = new UUDecoderStream(getBodyContent());
-            byte[] buf = new byte[2048];
-            int got = is.read(buf);
-            while (got >= 0) {
-                os.write(buf, 0, got);
-                got = is.read(buf);
-            }
+            StreamHelper.copyInputToOutput(is, os);
             is.close();
+            os.flush();
         }
     }
 

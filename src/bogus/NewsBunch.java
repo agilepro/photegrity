@@ -3,6 +3,7 @@ package bogus;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collections;
@@ -1358,4 +1359,36 @@ public class NewsBunch {
         return rec;
     }
 
+    public void updateFromJSON(JSONObject objIn) throws Exception {
+    	if (objIn.has("folderLoc") || objIn.has("template")) {
+    		boolean changed = false;
+    		String folderLoc = getFolderLoc();
+    		if (objIn.has("folderLoc")) {
+    			String newFolderLoc = objIn.getString("folderLoc");
+    			if (!newFolderLoc.equals(folderLoc)) {
+    				changed = true;
+    				folderLoc = newFolderLoc;
+    			}
+    		}
+    		String template = getTemplate();
+    		if (template==null)  {
+    			template = "";
+    		}
+    		if (objIn.has("template")) {
+    			String newTemplate = objIn.getString("template");
+    			if (!newTemplate.equals(folderLoc)) {
+    				changed = true;
+    				template = newTemplate;
+    			}
+    		}
+    		if (changed) {
+    			PrintWriter pw = new PrintWriter(System.out);
+    			changeLocAndTemplate(folderLoc, template, true, pw, false);
+    			pw.flush();
+    		}
+    	}
+    	if (objIn.has("state")) {
+	    	changeState(objIn.getInt("state"));
+    	}    	
+    }
 }

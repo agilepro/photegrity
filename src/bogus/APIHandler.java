@@ -296,8 +296,7 @@ public class APIHandler {
 	    }
 	    
 	    if (isPost) {
-	    	int newState = objIn.getInt("state");
-	    	bunch.changeState(newState);
+	    	bunch.updateFromJSON(objIn);
 	    }
 	    return bunch.getJSON();
 	}

@@ -491,8 +491,39 @@
                 $scope.session = data;
             });
         }
+        $scope.setPath = function(bunch) {
+            var newBunch = {};
+            newBunch.key = bunch.key;
+            newBunch.folderLoc = $scope.session.destVec[0];
+            $scope.saveBunch(newBunch);
+        }
+        $scope.fixTemplate = function(bunch) {
+            var newBunch = {};
+            var template = bunch.template;
+            var pos = template.indexOf(".zip");
+            if (pos<=0) {
+                return;
+            }
+            var tail = template.substring(pos+4);
+            if (tail.length==4) {
+                //this is the $3$4 case
+                template = template.substring(0,pos+4);
+            }
+            if (tail.length==6) {
+                //this is the 1$31$4 case
+                template = template.substring(0,pos+4) + "." + tail.substring(0,3);
+            }
+            newBunch.key = bunch.key;
+            newBunch.template = template;
+            $scope.saveBunch(newBunch);
+        }
         $scope.changeState = function(bunch, newState) {
-            bunch.state = newState;
+            var newBunch = {};
+            newBunch.key = bunch.key;
+            newBunch.state = newState;
+            $scope.saveBunch(newBunch);
+        }
+        $scope.saveBunch = function(bunch) {
             postURL = "api/b="+bunch.key;
             postdata = JSON.stringify(bunch);
             console.log("ASKING: "+postdata);
@@ -721,6 +752,8 @@ Filter: <input ng-model="photoSettings.filter">
                     <span class="caret"></span></button>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
                   <li role="presentation"><a role="menuitem" ng-click="markThis(rec)">Mark Row</a></li>
+                  <li role="presentation"><a role="menuitem" ng-click="setPath(rec)">Set PATH</a></li>
+                  <li role="presentation"><a role="menuitem" ng-click="fixTemplate(rec)">Fix ZIP Template</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,9)">Get A Bit</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,2)">Seek All</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,4)">Download All</a></li>

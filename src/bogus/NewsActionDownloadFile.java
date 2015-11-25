@@ -92,10 +92,20 @@ public class NewsActionDownloadFile extends NewsAction {
             MemFile mf = new MemFile();
             OutputStream memoryBuffer = mf.getOutputStream();
 
-            // this is not the perfect way to do this. yEnc should be parsed for
-            // each piece, and UUEncode should be combined first. But for now
-            // those are the only two supported, so it works.
-            boolean combineFirst = !bunch.isYEnc;
+            // yEnc should be parsed for each piece, and UUEncode should be combined first. 
+            // But for now those are the only two supported, so it works.
+            // To determine this, we have to know which we are dealing with.
+            // To know that, we need to get the first batch, and peek at it.
+            boolean combineFirstForUUDecode = false;
+            
+            {
+            	NewsArticle art = newsFile.getPartOrFail(1);
+            	art.getMsgBody();
+            	int encoding = art.getEncodingType();
+            	if (encoding!=NewsArticle.YENC_ENCODING) {
+            		combineFirstForUUDecode = true;
+            	}
+            }
             
             workingTotal = numParts;
 
@@ -115,7 +125,7 @@ public class NewsActionDownloadFile extends NewsAction {
                 writeDuration(out,startTime);
                 out.flush();
                 if (art.buffer != null) {
-                    if (combineFirst) {
+                    if (combineFirstForUUDecode) {
                         mf.fillWithInputStream(art.getBodyContent());
                     }
                     else {
@@ -124,7 +134,7 @@ public class NewsActionDownloadFile extends NewsAction {
                 }
             }
             // now, take the combined input, and decode it into another memFile
-            if (combineFirst) {
+            if (combineFirstForUUDecode) {
                 MemFile mf2 = new MemFile();
                 InputStream in1 = mf.getInputStream();
                 UUDecoderStream uuds = new UUDecoderStream(in1);
@@ -206,6 +216,10 @@ public class NewsActionDownloadFile extends NewsAction {
             String msg = UtilityMethods.getErrorString(e);
             out.write("\n    Fail: " + msg);
             out.flush();
+            
+            System.out.println("############# ERROR DOWNLOADING FILE #########");
+            e.printStackTrace(System.out);
+            System.out.println("############# ###################### #########");
 
             //this will get the thread to reset the
             if (msg.contains("SocketException")) {

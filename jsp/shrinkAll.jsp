@@ -12,6 +12,7 @@
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Vector"
 %><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="bogus.NewsActionShrink"
 %>
 
 <%
@@ -30,6 +31,13 @@
     String check = request.getParameter("doubleCheck");
     if (check == null) {
         throw new Exception("Back up to the previous page, and check the checkbox if you really want to shrink this set of images.");
+    }
+
+    NewsActionShrink nada = new NewsActionShrink(query);
+    nada.addToFrontOfMid();
+
+    if (true) {
+        return;
     }
 
 

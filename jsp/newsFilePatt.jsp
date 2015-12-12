@@ -340,6 +340,7 @@
 <tr>
 <td>min <%=minArtNo%>, max <%=maxArtNo%>,
 <a href="newsFetch.jsp?start=<%=minArtNo%>&step=1&count=<%=(maxArtNo-minArtNo)%>&command=Refetch">Fetch All Missing Interior Articles</a>
+<a href="newsFetch.jsp?start=<%=minArtNo%>&step=1&count=<%=(maxArtNo-minArtNo)%>&command=UnError">(ERR)</a>
 <a href="newsFetch.jsp?start=<%=minArtNo-200%>&step=1&count=200&command=Refetch">Fetch 200 earlier Articles</a>
 <a href="newsFetch.jsp?start=<%=maxArtNo%>&step=1&count=200&command=Refetch">Fetch 200 later Articles</a>
 </body>

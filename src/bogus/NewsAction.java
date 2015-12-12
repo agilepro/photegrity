@@ -1,7 +1,6 @@
 package bogus;
 
 import java.io.Writer;
-import java.lang.Thread;
 import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
@@ -29,6 +28,7 @@ public abstract class NewsAction {
     private static Stack<NewsAction> jobQueueHigh = new Stack<NewsAction>();
     private static Stack<NewsAction> jobQueueMid = new Stack<NewsAction>();
     private static Stack<NewsAction> jobQueueLow = new Stack<NewsAction>();
+    private static Stack<NewsAction> failedList = new Stack<NewsAction>();
     protected static long serviceId = 0;
 
     // tells whether the thread is actively processing a command or not
@@ -47,6 +47,8 @@ public abstract class NewsAction {
     public long thisStartTime = 0;
 
     public String serviceLevelName = "Unknown";
+    
+    public Exception failure;
 
     public NewsAction() throws Exception {
     }
@@ -159,6 +161,16 @@ public abstract class NewsAction {
             }
         }
         return null;
+    }
+
+    public void addToFailedList(Exception e) {
+    	failure = e;
+        synchronized (failedList) {
+            if (!failedList.contains(this)) {
+            	failedList.add(this);
+            }
+        }
+        serviceLevelName="FAILED";
     }
 
 

@@ -29,20 +29,12 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             return;
         }
 
-        int pos = ii.fileName.length() - 4;
         File originalFile = new File(cacheDir, fileName);
         File tempFile = new File(cacheDir, fileName + ".temp");
-        File backupFile = new File(cacheDir, fileName.substring(0, pos) + ".-.jpg");
 
 
         // only one file operation on an image should run at a time
         synchronized (ii) {
-            if (backupFile.exists()) {
-                // silently ignore cases where the shrinking has already been done.
-                // so if you tried shrinking and it died in the middle, this will
-                // allow you to try again, and ignore the ones that succeeded before.
-                return;
-            }
             if (tempFile.exists()) {
                 //maybe something left over from earlier?
                 tempFile.delete();
@@ -69,7 +61,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
                 return;
             }
 
-            renameFile(originalFile, backupFile, "rename the original file to the backup file name");
+            originalFile.delete(); //go ahead and get rid of it..
 
             renameFile(tempFile, originalFile, "rename the temp file to the original file name");
 

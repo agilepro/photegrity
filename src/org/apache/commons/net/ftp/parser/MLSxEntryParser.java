@@ -132,7 +132,6 @@ public class MLSxEntryParser extends FTPFileEntryParserImpl
                 try {
                     gc.setTime(sdf.parse(factvalue));
                 } catch (ParseException e) {
-                    // TODO ??
                 }
                 file.setTimestamp(gc);
             }
@@ -159,7 +158,7 @@ public class MLSxEntryParser extends FTPFileEntryParserImpl
                                 file.setPermission(UNIX_GROUPS[i], p, true);
                             }
                         } else {
-                            // TODO should this cause failure, or can it be reported somehow?
+                            // ?? should this cause failure, or can it be reported somehow?
                         }
                     } // digits
                 } // mode
@@ -176,7 +175,7 @@ public class MLSxEntryParser extends FTPFileEntryParserImpl
     //                             "l" / "m" / "p" / "r" / "w"
     private void doUnixPerms(FTPFile file, String valueLowerCase) {
         for(char c : valueLowerCase.toCharArray()) {
-            // TODO these are mostly just guesses at present
+            // ?? these are mostly just guesses at present
             switch (c) {
                 case 'a':     // (file) may APPEnd
                     file.setPermission(FTPFile.USER_ACCESS, FTPFile.WRITE_PERMISSION, true);

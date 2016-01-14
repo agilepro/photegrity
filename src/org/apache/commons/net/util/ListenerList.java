@@ -56,7 +56,7 @@ public class ListenerList implements Serializable, Iterable<EventListener>
      *
      * @return an {@link Iterator} for the {@link EventListener} instances
      * @since 2.0
-     * TODO Check that this is a good defensive strategy
+     * ?? Check that this is a good defensive strategy
      */
     public Iterator<EventListener> iterator() {
             return __listeners.iterator();

@@ -40,7 +40,7 @@ final class TelnetInputStream extends BufferedInputStream implements Runnable
     /** Read would block */
     private static final int WOULD_BLOCK = -2;
 
-    // TODO should these be private enums?
+    // ?? should these be private enums?
     static final int _STATE_DATA = 0, _STATE_IAC = 1, _STATE_WILL = 2,
                      _STATE_WONT = 3, _STATE_DO = 4, _STATE_DONT = 5,
                      _STATE_SB = 6, _STATE_SE = 7, _STATE_CR = 8, _STATE_IAC_SB = 9;
@@ -97,7 +97,7 @@ final class TelnetInputStream extends BufferedInputStream implements Runnable
 
         int priority;
         __isClosed = false;
-        // TODO remove this
+        // ?? remove this
         // Need to set a higher priority in case JVM does not use pre-emptive
         // threads.  This should prevent scheduler induced deadlock (rather than
         // deadlock caused by a bug in this code).

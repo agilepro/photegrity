@@ -34,7 +34,7 @@ import java.io.OutputStream;
 final class TelnetOutputStream extends OutputStream
 {
     private final TelnetClient __client;
-    // TODO there does not appear to be any way to change this value - should it be a ctor parameter?
+    // ?? there does not appear to be any way to change this value - should it be a ctor parameter?
     private boolean __convertCRtoCRLF = true;
     private boolean __lastWasCR = false;
 

@@ -139,7 +139,7 @@ public class FTPHTTPClient extends FTPClient {
         final String connectString = "CONNECT "  + host + ":" + port  + " HTTP/1.1";
         final String hostString = "Host: " + host + ":" + port;
 
-        output.write(connectString.getBytes("UTF-8")); // TODO what is the correct encoding?
+        output.write(connectString.getBytes("UTF-8")); // ?? what is the correct encoding?
         output.write(CRLF);
         output.write(hostString.getBytes("UTF-8"));
         output.write(CRLF);

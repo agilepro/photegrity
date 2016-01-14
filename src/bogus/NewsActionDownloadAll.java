@@ -18,9 +18,12 @@ public class NewsActionDownloadAll extends NewsAction {
 
     public NewsActionDownloadAll(NewsBunch _seeker) throws Exception {
         seeker = _seeker;
-        if (!seeker.hasFolder()) {
-            throw new Exception(
-                    "must set the file storage folder on the NewsPattern in order to retrieve all message bodies.");
+        File storeFile = seeker.getFolderPath();
+        if (!storeFile.exists()) {
+            storeFile.mkdirs();
+        }
+        if (!storeFile.exists()) {
+            throw new Exception("unable to create the folder: "+storeFile);
         }
         if (!seeker.hasTemplate()) {
             throw new Exception(

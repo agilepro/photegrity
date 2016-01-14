@@ -462,6 +462,7 @@
             length = dispArray.length;
             for(var j = 0; j < length; j++) {
                 var rec = dispArray[j];
+                $scope.annotateSpecial(rec);
                 if (rec.digest == $scope.search) {
                     if (j<4) {
                         //$scope.offset = 0;
@@ -502,7 +503,10 @@
             var template = bunch.template;
             var pos = template.indexOf(".zip");
             if (pos<=0) {
-                return;
+                pos = template.indexOf(".rar");
+                if (pos<=0) {
+                    return;
+                }
             }
             var tail = template.substring(pos+4);
             if (tail.length==4) {
@@ -516,6 +520,45 @@
             newBunch.key = bunch.key;
             newBunch.template = template;
             $scope.saveBunch(newBunch);
+        }
+        $scope.annotateSpecial = function(bunch) {
+            if ($scope.showKiller(bunch)) {
+                bunch.special = "HIDE";
+                bunch.specialOp = 7;
+            }
+            else if (bunch.state<=1) {
+                bunch.special = "Seek";
+                bunch.specialOp = 2;
+            }
+            else if (bunch.state==3) {
+                bunch.special = "Down";
+                bunch.specialOp = 4;
+            }
+            else if (bunch.state==5) {
+                bunch.special = "Complete";
+                bunch.specialOp = 6;
+            }
+            return [];
+        }
+
+        $scope.showKiller = function(bunch) {
+            var template = bunch.template;
+            if (bunch.template.startsWith("Re: ")) {
+                return true;
+            }
+            if (bunch.template.indexOf(".par")>0) {
+                return true;
+            }
+            if (bunch.template.indexOf(".PAR")>0) {
+                return true;
+            }
+            if (bunch.template.indexOf(".nzb")>0) {
+                return true;
+            }
+            if (bunch.template.indexOf(".sfv")>0) {
+                return true;
+            }
+            return false;
         }
         $scope.changeState = function(bunch, newState) {
             var newBunch = {};
@@ -731,6 +774,7 @@ Filter: <input ng-model="photoSettings.filter">
          <img ng-click="toggleTrim()" ng-show="photoSettings.colTrim!=120" src="addicon.gif" width="12">
          <img ng-hide="photoSettings.sort=='digest'" ng-click="sortDigest()" src="glyphicons-407-sort-by-order.png" width="12">
          <img ng-show="photoSettings.sort=='digest'" ng-click="sortDigest()" src="glyphicons-407-sort-active.png" width="12"></td>
+     <td></td>
      <td><img ng-hide="photoSettings.sort=='size'" ng-click="sortSize()" src="glyphicons-407-sort-by-order.png"
          width="12"><img ng-show="photoSettings.sort=='size'" ng-click="sortSize()" src="glyphicons-407-sort-active.png"
          width="12"></td>
@@ -773,6 +817,9 @@ Filter: <input ng-model="photoSettings.filter">
                 {{rec.digest|limitTo:photoSettings.colTrim}}
              </a></td>
          </div>
+     <td>
+         <button ng-click="changeState(rec, rec.specialOp)">{{rec.special}}</button>
+     </td>
      <td style="text-align: right;">{{rec.count}}</td>
      <td>
          <img ng-src="{{rec.folderStyle}}" title="{{rec.folderLoc}}">

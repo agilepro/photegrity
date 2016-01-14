@@ -336,7 +336,7 @@ public class MVSFTPEntryParser extends ConfigurableFTPFileEntryParserImpl {
             } catch (ParseException e) {
                 e.printStackTrace();
                 // just ignore parsing errors.
-                // TODO check this is ok
+                // ?? check this is ok
                 return false; // this is a parsing failure too.
             }
             return true;

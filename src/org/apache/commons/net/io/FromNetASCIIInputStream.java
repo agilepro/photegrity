@@ -195,7 +195,6 @@ public final class FromNetASCIIInputStream extends PushbackInputStream
 
 
     // PushbackInputStream in JDK 1.1.3 returns the wrong thing
-    // TODO - can we delete this override now?
     /***
      * Returns the number of bytes that can be read without blocking EXCEPT
      * when newline conversions have to be made somewhere within the

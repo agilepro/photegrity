@@ -27,7 +27,7 @@ package org.apache.commons.net.ftp;
  * <p>
  * <p>
  */
-// TODO - replace with an enum?
+
 public final class FTPCommand
 {
 

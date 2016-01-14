@@ -110,7 +110,7 @@ public class FTPTimestampParserImpl implements
             // to cope with short-date leap year strings.
             // Since Feb 29 is more that 6 months from the end of the year, this should be OK for
             // all instances of short dates which are +- 6 months from current date.
-            // TODO this won't always work for systems that use short dates +0/-12months
+            // ?? this won't always work for systems that use short dates +0/-12months
             // e.g. if today is Jan 1 2001 and the short date is Feb 29
             String year = Integer.toString(now.get(Calendar.YEAR));
             String timeStampStrPlusYear = timestampStr + " " + year;

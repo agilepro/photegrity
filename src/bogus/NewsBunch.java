@@ -126,9 +126,7 @@ public class NewsBunch {
         // initialize to *something*
         disk = ng.defaultDiskMgr;
         String fakePath = cleanPunct(_bunch);
-        if (!fakePath.endsWith("/")) {
-            fakePath = fakePath + "/";
-        }
+        fakePath = makeReasonableFakePath(fakePath);
         setRelativePath(fakePath);
 
         //check to see if there is a YEnc indicator in the subject line
@@ -136,7 +134,39 @@ public class NewsBunch {
     }
 
 
-
+    private String makeReasonableFakePath(String fakePath) {
+        boolean loop = true;
+        while (loop) {
+        	loop = false;
+        	int dotPos = fakePath.lastIndexOf(".");
+        	if (dotPos>fakePath.length()-4 && fakePath.length()>5) {
+        		//trim off small tiny zero, one or two letter entries between dots at the end
+        		fakePath = fakePath.substring(0,dotPos);
+	        	loop = true;
+        	}
+	        int jpgIdx = fakePath.indexOf("jpg");
+	        if (jpgIdx>15) {
+	        	//get rid of jpg if it exists
+	        	fakePath = fakePath.substring(0,jpgIdx);
+	        	loop = true;
+	        }
+	        jpgIdx = fakePath.indexOf("zip");
+	        if (jpgIdx>15) {
+	        	fakePath = fakePath.substring(0,jpgIdx);
+	        	loop = true;
+	        }
+	        jpgIdx = fakePath.indexOf("rar");
+	        if (jpgIdx>15) {
+	        	fakePath = fakePath.substring(0,jpgIdx);
+	        	loop = true;
+	        }
+        }
+        if (!fakePath.endsWith("/")) {
+            fakePath = fakePath + "/";
+        }
+        
+        return fakePath;
+    }
     public DiskMgr getDiskMgr() {
         return disk;
     }

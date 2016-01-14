@@ -78,7 +78,7 @@ public final class IMAPReply
         return line.startsWith(IMAP_CONTINUATION_PREFIX);
     }
 
-    private static final String TAGGED_RESPONSE = "^\\w+ (\\S+).*"; // TODO perhaps be less strict on tag match?
+    private static final String TAGGED_RESPONSE = "^\\w+ (\\S+).*"; // ?? perhaps be less strict on tag match?
     // tag cannot contain: + ( ) { SP CTL % * " \ ]
     private static final Pattern TAGGED_PATTERN = Pattern.compile(TAGGED_RESPONSE);
 
@@ -128,7 +128,7 @@ public final class IMAPReply
             return CONT;
         }
         Matcher m = pattern.matcher(line);
-        if (m.matches()) { // TODO would lookingAt() be more efficient? If so, then drop trailing .* from patterns
+        if (m.matches()) { // ?? would lookingAt() be more efficient? If so, then drop trailing .* from patterns
             String code = m.group(1);
             if (code.equals(IMAP_OK)) {
                 return OK;

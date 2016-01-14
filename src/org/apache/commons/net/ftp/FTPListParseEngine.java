@@ -224,7 +224,7 @@ public class FTPListParseEngine {
      * @exception IOException - not ever thrown, may be removed in a later release
      */
     public FTPFile[] getFiles()
-    throws IOException // TODO remove; not actually thrown
+    throws IOException // ?? remove; not actually thrown
     {
         return getFiles(FTPFileFilters.NON_NULL);
     }
@@ -248,7 +248,7 @@ public class FTPListParseEngine {
      * @exception IOException - not ever thrown, may be removed in a later release
      */
     public FTPFile[] getFiles(FTPFileFilter filter)
-    throws IOException // TODO remove; not actually thrown
+    throws IOException // ?? remove; not actually thrown
     {
         List<FTPFile> tmpResults = new ArrayList<FTPFile>();
         Iterator<String> iter = this.entries.iterator();

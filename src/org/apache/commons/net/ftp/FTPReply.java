@@ -23,7 +23,7 @@ package org.apache.commons.net.ftp;
  * The mnemonic constant names are transcriptions from the code descriptions
  * of RFC 959.
  * <p>
- * TODO replace with an enum
+ * ?? replace with an enum
  ***/
 
 public final class FTPReply

@@ -61,7 +61,6 @@ public class VMSFTPEntryParser extends ConfigurableFTPFileEntryParserImpl
         +"(\\S+)\\s+(\\S+)\\s+"                                             //3+4 date and time
         + "\\[(([0-9$A-Za-z_]+)|([0-9$A-Za-z_]+),([0-9$a-zA-Z_]+))\\]?\\s*" //5(6,7,8) owner
         + "\\([a-zA-Z]*,([a-zA-Z]*),([a-zA-Z]*),([a-zA-Z]*)\\)";            //9,10,11 Permissions (O,G,W)
-    // TODO - perhaps restrict permissions to [RWED]* ?
 
 
 

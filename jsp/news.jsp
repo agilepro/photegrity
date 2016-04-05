@@ -28,7 +28,9 @@
 %><%@page import="org.workcast.streams.JavaScriptWriter"
 %><%@page import="org.workcast.json.JSONObject"
 %><%@page import="org.workcast.json.JSONArray"
-%><%request.setCharacterEncoding("UTF-8");
+%><%
+
+    request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();
 
@@ -215,22 +217,28 @@
     var bunchApp = angular.module('bunchApp', ['ui.bootstrap']);
     bunchApp.factory('bunchFactory', function($http) {
         return {
-            listBunches: function(filter, window, callback) {
+            listBunch: function(filter, window) {
                 var url = 'listBunches.jsp?filter='+encodeURIComponent(filter)+'&window='+window;
                 console.log("FETCHING: "+url);
-                $http.get(url)
-                .success(callback)
-                .error(function(msg){
+                var promise = $http.get(url);
+                promise.error(function(msg){
                     alert("error: "+msg);
                 });
+                return promise;
+            },
+            listBunches: function(filter, window, callback) {
+                var promise = this.listBunch(filter, window);
+                promise.success(callback);
+                return promise;
             },
             updateSession: function(sessionRec, callback) {
-                $http.post("api/session/foo/boo", sessionRec)
-                .success( callback )
-                .error( function(data, status, headers, config) {
+                var promise = $http.post("api/session/foo/boo", sessionRec);
+                promise.success( callback );
+                promise.error( function(data, status, headers, config) {
                     console.log("the POST failed: "+JSON.stringify(data));
                     alert("session update failed: "+JSON.stringify(data));
                 });
+                return promise;
             }
         }
     });
@@ -250,7 +258,7 @@
                 $scope.storeSessionInfo();
             }
             else {
-                $scope.photoSettings = {loadCount: 1, window: 50000};
+                $scope.photoSettings = {loadCount: 1, window: 50000, sort: "ID"};
                 $scope.storeSessionInfo();
             }
         };
@@ -280,13 +288,14 @@
             $scope.photoSettings.showState[9] = true;
             $scope.photoSettings.colTrim = 40;
             $scope.photoSettings.filter = "";
-            $scope.photoSettings.sort = "digest";
+            $scope.photoSettings.sort = "ID";
             $scope.photoSettings.window = 100000;
             $scope.storeSessionInfo();
         }
+        $scope.newsInfo = <% newsInfo.write(out,2,0); %>;
+        $scope.discardBefore = $scope.newsInfo.lowestFetched + 10000;
 
 
-        $scope.news = <% newsInfo.write(out,2,0); %>;
 
 
         $scope.nextPage = function() {
@@ -384,8 +393,12 @@
             $scope.storeSessionInfo();
             $scope.findSearchValueOffset();
         }
+        $scope.sortID = function() {
+            $scope.photoSettings.sort = "ID";
+            $scope.storeSessionInfo();
+            $scope.findSearchValueOffset();
+        }
         $scope.findSearchValueOffset = function() {
-            console.log("findSearchValueOffset");
             $scope.calcFiltered();
             var dispArray = $scope.filteredRecs;
             var length = dispArray.length;
@@ -417,7 +430,7 @@
             }
         }
         $scope.calcFiltered = function() {
-            console.log("calcFiltered");
+            console.log("calcFiltered "+$scope.photoSettings.sort);
             if ($scope.photoSettings.sort == "digest") {
                 $scope.recs.sort( function(a, b){
                     return ( a.digest > b.digest )? 1 : -1;
@@ -425,13 +438,21 @@
             }
             else if ($scope.photoSettings.sort == "size") {
                 $scope.recs.sort( function(a, b){
-                    return ( a.count < b.count )? 1 : -1;
+                    return ( b.count - a.count );
                 });
             }
             else if ($scope.photoSettings.sort == "recent") {
                 $scope.recs.sort( function(a, b){
-                    return ( a.lastTouch < b.lastTouch )? 1 : -1 ;
+                    return ( b.lastTouch - a.lastTouch );
                 });
+            }
+            else if ($scope.photoSettings.sort == "ID") {
+                $scope.recs.sort( function(a, b){
+                    return (a.minId > b.minId)? 1 : -1;
+                });
+            }
+            else {
+                console.log("DONT recognize sort: ", $scope.recs.sort)
             }
             var dispArray = new Array();
             var length = $scope.recs.length;
@@ -457,20 +478,11 @@
             if ($scope.recs.length==0) {
                 return [];
             }
-            //$scope.calcFiltered();
             var dispArray = $scope.filteredRecs;
             length = dispArray.length;
             for(var j = 0; j < length; j++) {
                 var rec = dispArray[j];
                 $scope.annotateSpecial(rec);
-                if (rec.digest == $scope.search) {
-                    if (j<4) {
-                        //$scope.offset = 0;
-                    }
-                    else {
-                        //$scope.offset = j - 4;
-                    }
-                }
             }
             dispArray = dispArray.slice($scope.offset);
             return dispArray;
@@ -493,9 +505,12 @@
             });
         }
         $scope.setPath = function(bunch) {
+            bunch.folderLoc = $scope.session.destVec[0];
+            $scope.fixTemplate(bunch);
             var newBunch = {};
             newBunch.key = bunch.key;
-            newBunch.folderLoc = $scope.session.destVec[0];
+            newBunch.folderLoc = bunch.folderLoc;
+            newBunch.template = bunch.template;
             $scope.saveBunch(newBunch);
         }
         $scope.fixTemplate = function(bunch) {
@@ -509,11 +524,11 @@
                 }
             }
             var tail = template.substring(pos+4);
-            if (tail.length==4) {
+            if (tail.length==4 && tail[0]==='$' ) {
                 //this is the $3$4 case
                 template = template.substring(0,pos+4);
             }
-            if (tail.length==6) {
+            if (tail.length==6  && tail[1]==='$' ) {
                 //this is the 1$31$4 case
                 template = template.substring(0,pos+4) + "." + tail.substring(0,3);
             }
@@ -530,6 +545,10 @@
                 bunch.special = "Seek";
                 bunch.specialOp = 2;
             }
+            else if (!bunch.hasTemplate) {
+                bunch.special = "SET";
+                bunch.specialOp = 100;
+            }
             else if (bunch.state==3) {
                 bunch.special = "Down";
                 bunch.specialOp = 4;
@@ -543,9 +562,12 @@
 
         $scope.showKiller = function(bunch) {
             var template = bunch.template;
-            if (bunch.template.startsWith("Re: ")) {
+            if (bunch.digest.startsWith("Re: ")) {
                 return true;
             }
+			if (bunch.state<3) {
+				return false;
+			}
             if (bunch.template.indexOf(".par")>0) {
                 return true;
             }
@@ -566,6 +588,17 @@
             newBunch.state = newState;
             $scope.saveBunch(newBunch);
         }
+		$scope.changeSpecial = function(bunch) {
+			if (bunch.specialOp<100) {
+				$scope.changeState(bunch, bunch.specialOp);
+			}
+			else if (bunch.specialOp==100) {
+				$scope.setPath(bunch);
+			}
+			else if (bunch.specialOp==200) {
+				$scope.fixTemplate(bunch);
+			}
+		}
         $scope.saveBunch = function(bunch) {
             postURL = "api/b="+bunch.key;
             postdata = JSON.stringify(bunch);
@@ -670,8 +703,8 @@
 </head>
 <body ng-controller="bunchCtrl">
 <h3>News Browser <a href="main.jsp">
-    <img src="home.gif" border="0"></a> ({{news.actionCount}} <a href="tasks.jsp" target="_blank">tasks</a> {{session.actionCount}}) -
-    {{news.diskName}}
+    <img src="home.gif" border="0"></a> ({{newsInfo.actionCount}} <a href="tasks.jsp" target="_blank">tasks</a> {{session.actionCount}}) -
+    {{newsInfo.diskName}}
     <% if (!NewsGroup.connect) {%>
        (-- NOT CONNECTED --)
     <% } %> </h3>
@@ -699,23 +732,23 @@ Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
 <button ng-click="fetchMoreNews()">Fetch More News</button> &nbsp;
 <button ng-click="recalcStats()">Recalc Stats</button>
 <ul>
-  <li>News Group: <b>{{news.groupName}}</b></li>
-  <li>Disk Name:  {{news.diskName}} </li>
+  <li>News Group: <b>{{newsInfo.groupName}}</b></li>
+  <li>Disk Name:  {{newsInfo.diskName}} </li>
   <li>Zing:  {{session.zingFolder}}/{{session.zingPat}}</li>
-  <li>Server Range: {{news.firstArticle|number}} - {{news.lastArticle|number}}</li>
-  <li>Server Count: {{news.articleCount|number}}</li>
-  <li>Fetched Range: {{news.lowestFetched|number}} - {{news.highestFetched|number}}</li>
-  <li>Fetch Count: {{news.fetched|number}}</li>
-  <li>Display Range: {{news.lowestFetched|number}} - {{news.highestToDisplay|number}}</li>
-  <li>Display Window: {{news.windowSize|number}} is {{photoSettings.window|number}} </li>
-  <li>Total Raw Bytes: {{news.totalRawBytes|number}}</li>
-  <li>Total Finished Bytes:{{news.totalFinishedBytes|number}}</li>
-  <li>Total Files: {{news.totalFiles|number}}</li>
-  <li>Download Rate: {{news.downloadRate|number}} bytes/second</li>
+  <li>Server Range: {{newsInfo.firstArticle|number}} - {{newsInfo.lastArticle|number}}</li>
+  <li>Server Count: {{newsInfo.articleCount|number}}</li>
+  <li>Fetched Range: {{newsInfo.lowestFetched|number}} - {{newsInfo.highestFetched|number}}</li>
+  <li>Fetch Count: {{newsInfo.fetched|number}}</li>
+  <li>Display Range: {{newsInfo.lowestFetched|number}} - {{newsInfo.highestToDisplay|number}}</li>
+  <li>Display Window: {{newsInfo.windowSize|number}} is {{photoSettings.window|number}} </li>
+  <li>Total Raw Bytes: {{newsInfo.totalRawBytes|number}}</li>
+  <li>Total Finished Bytes:{{newsInfo.totalFinishedBytes|number}}</li>
+  <li>Total Files: {{newsInfo.totalFiles|number}}</li>
+  <li>Download Rate: {{newsInfo.downloadRate|number}} bytes/second</li>
 
 </ul>
 <button ng-click="scheduledSave()">Scheduled Save</button>
-    <a href="newsGaps.jsp?limit=100&step=23&thresh=96&begin={{news.lowestFetched}}&highest={{news.lowestFetched+photoSettings.window}}">
+    <a href="newsGaps.jsp?limit=100&step=23&thresh=96&begin={{newsInfo.lowestFetched}}&highest={{newsInfo.lowestFetched+photoSettings.window}}">
     <button>Find-Gaps in {{photoSettings.window}}</button></a>
 
 <form action="newsFetch.jsp">
@@ -725,7 +758,8 @@ Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
 <br/>
 <br/>
 <input type="submit" name="command" value="Discard Articles"> Older Than:
-<input type="text" name="earlyLimit" value="{{news.highestToDisplay}}">
+<input type="text" name="earlyLimit" ng-model="discardBefore"> 
+    about {{discardBefore-newsInfo.lowestFetched | number}} records
 </form>
 
 <form action="newsBatch.jsp">
@@ -782,7 +816,10 @@ Filter: <input ng-model="photoSettings.filter">
          width="12"><img ng-show="photoSettings.sort=='recent'" ng-click="sortRecent()" src="glyphicons-407-sort-active.png"
          width="12"></td>
      <td></td>
-     <td ng-show="photoSettings.showId"><img src="removeicon.gif" ng-click="toggleId()" width="12"> ID</td>
+     <td ng-show="photoSettings.showId"><img src="removeicon.gif" ng-click="toggleId()" width="12"> ID
+         <img ng-hide="photoSettings.sort=='ID'" ng-click="sortID()" src="glyphicons-407-sort-by-order.png" width="12">
+         <img ng-show="photoSettings.sort=='ID'" ng-click="sortID()" src="glyphicons-407-sort-active.png" width="12">
+     </td>
      <td ng-hide="photoSettings.showId"><img src="addicon.gif" ng-click="toggleId()" width="12"></td>
      <td ng-show="photoSettings.showSender"><img src="removeicon.gif" ng-click="toggleSender()" width="12"> Sender</td>
      <td ng-hide="photoSettings.showSender"><img src="addicon.gif" ng-click="toggleSender()" width="12"></td>
@@ -818,7 +855,7 @@ Filter: <input ng-model="photoSettings.filter">
              </a></td>
          </div>
      <td>
-         <button ng-click="changeState(rec, rec.specialOp)">{{rec.special}}</button>
+         <button ng-click="changeSpecial(rec)">{{rec.special}}</button>
      </td>
      <td style="text-align: right;">{{rec.count}}</td>
      <td>

@@ -288,8 +288,12 @@ public class DiskMgr {
             for (int j = 0; j < allPaths.length; j++) {
                 archiveBase = allPaths[j];
                 File mainDir = new File(archiveBase);
+                File[] children = mainDir.listFiles();
+                if (children==null) {
+                    throw new Exception("there is apparently no folder named: "+mainDir);
+                }
 
-                for (File cfile : mainDir.listFiles()) {
+                for (File cfile : children) {
                     String diskName = cfile.getName();
                     if (!cfile.isDirectory()) {
                         continue;

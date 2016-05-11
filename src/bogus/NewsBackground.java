@@ -16,6 +16,7 @@ public class NewsBackground extends Thread {
                 + ".log");
         FileOutputStream fos = new FileOutputStream(destFile);
         out = new OutputStreamWriter(fos, "UTF-8");
+        out.write("Start Background Processing "+new Date()+"\n");
     }
 
     public static void startNewsThread(File containingFolder) throws Exception {
@@ -73,7 +74,7 @@ public class NewsBackground extends Thread {
                 act.performTimed(out, newsSession);
                 sequentialErrorCount = 0;
             }
-            catch (Exception e) {
+            catch (Throwable e) {
                 sequentialErrorCount++;
                 newsSession = null;
                 if (lastActive != null) {
@@ -85,7 +86,7 @@ public class NewsBackground extends Thread {
                     out.write(msg);
                     out.write("\n==========");
                     if (msg.contains("Unable to authenticate")) {
-                        out.write("\nSleeping 60 seconds...<br/>");
+                        out.write("\nSleeping 20 seconds...<br/>");
                         out.flush();
                         // sleep for 20 seconds when getting the unauthenticate
                         // problem

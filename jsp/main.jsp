@@ -20,7 +20,7 @@
         return;
     }
 
-    if (DiskMgr.archivePaths == null) {
+    if (!DiskMgr.isInitialized()) {
         %><jsp:include page="PasswordPanel.jsp" flush="true"/><%
         return;
     }

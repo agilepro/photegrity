@@ -498,24 +498,54 @@
             }
             return false;
         }
+        $scope.isMarkFolder = function(rec) {
+            return ($scope.session.zingFolder == rec.folderLoc);
+        }
         $scope.markThis = function(rec) {
             var postData = {zingFolder: rec.folderLoc, zingPat: rec.patts[0]};
             bunchFactory.updateSession(postData, function(data) {
                 $scope.session = data;
             });
         }
+        $scope.markFolder = function(rec) {
+            var postData = {zingFolder: rec.folderLoc};
+            bunchFactory.updateSession(postData, function(data) {
+                $scope.session = data;
+            });
+        }
+        $scope.stripChars = function(strval) {
+            var resVal = "";
+            var needsDot = false;
+            for (var i=0; i<strval.length; i++) {
+                var ch = strval.charAt(i);
+                if ( (ch>='a' && ch<='z') || (ch>='A' && ch<='Z') 
+                    || (ch>='0' && ch<='9') || ch=='_' || ch=='$') {
+                        if (needsDot) {
+                            resVal = resVal + '.';
+                            needsDot = false;
+                        }
+                        resVal = resVal + ch;
+                    }
+                else if (ch!=' ') {
+                    needsDot = true;
+                }
+            }
+            return resVal;
+        }
         $scope.setPath = function(bunch) {
-            bunch.folderLoc = $scope.session.destVec[0];
-            $scope.fixTemplate(bunch);
             var newBunch = {};
             newBunch.key = bunch.key;
-            newBunch.folderLoc = bunch.folderLoc;
             newBunch.template = bunch.template;
+            
+            newBunch.folderLoc = $scope.session.destVec[0];
+            console.log("Before fix: ", newBunch.template)
+            $scope.fixTemplateWithoutSave(newBunch);
+            console.log("After fix: ", newBunch.template)
             $scope.saveBunch(newBunch);
         }
-        $scope.fixTemplate = function(bunch) {
-            var newBunch = {};
-            var template = bunch.template;
+        $scope.fixTemplateWithoutSave = function(newBunch) {
+            var template = $scope.stripChars(newBunch.template);
+            console.log("Working On: ", template)
             var pos = template.indexOf(".zip");
             if (pos<=0) {
                 pos = template.indexOf(".rar");
@@ -524,16 +554,30 @@
                 }
             }
             var tail = template.substring(pos+4);
-            if (tail.length==4 && tail[0]==='$' ) {
+            if (tail.length==4 && tail[0]==='$' && tail[2]==='$') {
                 //this is the $3$4 case
                 template = template.substring(0,pos+4);
             }
-            if (tail.length==6  && tail[1]==='$' ) {
+            else if (tail.length==6 && tail[0]==='.' && tail[1]==='$' 
+                     && tail[3]==='.' && tail[4]==='$') {
+                //this is the .$3.$4 case
+                template = template.substring(0,pos+4);
+            }
+            else if (tail.length==6  && tail[1]==='$' && tail[4]==='$' ) {
                 //this is the 1$31$4 case
                 template = template.substring(0,pos+4) + "." + tail.substring(0,3);
             }
-            newBunch.key = bunch.key;
+            else if (tail.length==8  && tail[2]==='$' && tail[6]==='$' ) {
+                //this is the .1$3.1$4 case
+                template = template.substring(0,pos+4) + "." + tail.substring(1,4);
+            }
             newBunch.template = template;
+        }
+        $scope.fixTemplate = function(bunch) {
+            var newBunch = {};
+            newBunch.key = bunch.key;
+            newBunch.template = bunch.template;
+            $scope.fixTemplateWithoutSave(newBunch);
             $scope.saveBunch(newBunch);
         }
         $scope.annotateSpecial = function(bunch) {
@@ -730,7 +774,7 @@ Start: <input name="start" type="text" value="<%=newsGroup.lowestToDisplay%>" si
 End: <input name="count" type="text" size="10" ng-model="fetch.end">
 Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
 <button ng-click="fetchMoreNews()">Fetch More News</button> &nbsp;
-<button ng-click="recalcStats()">Recalc Stats</button>
+<button ng-click="recalcStats()">Recalc Stats</button> {{(fetch.end-fetch.start)/fetch.step}}
 <ul>
   <li>News Group: <b>{{newsInfo.groupName}}</b></li>
   <li>Disk Name:  {{newsInfo.diskName}} </li>
@@ -858,8 +902,8 @@ Filter: <input ng-model="photoSettings.filter">
          <button ng-click="changeSpecial(rec)">{{rec.special}}</button>
      </td>
      <td style="text-align: right;">{{rec.count}}</td>
-     <td>
-         <img ng-src="{{rec.folderStyle}}" title="{{rec.folderLoc}}">
+     <td class="{{isMarkFolder(rec) ? 'cellPicked' :  ''}}">
+         <img ng-src="{{rec.folderStyle}}" title="{{rec.folderLoc}}" ng-click="markFolder(rec)">
      </td>
      <td style="{{rec.cTotal>0 && rec.cTotal-rec.cDown==0 ? 'text-align: right;background-color: lightgreen;' : 'text-align: right;'}}">
      {{rec.cDown}}+{{rec.cComplete-rec.cDown}}+{{rec.cTotal-rec.cComplete}} </td>
@@ -877,6 +921,18 @@ Filter: <input ng-model="photoSettings.filter">
 </table>
 
 <hr/>
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
 
 </body>
 </html>

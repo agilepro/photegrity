@@ -50,7 +50,8 @@
     // here is a case where tomcat has magically preserved our session
     // but of course not the internal object state, so we need to log
     // in in order to set things up correctly.
-    if (DiskMgr.archivePaths == null) {%><jsp:include page="PasswordPanel.jsp" flush="true"/><%return;
+    if (!DiskMgr.isInitialized()) {
+        %><jsp:include page="PasswordPanel.jsp" flush="true"/><%return;
     }
 
 

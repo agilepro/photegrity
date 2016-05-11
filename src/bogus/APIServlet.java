@@ -71,9 +71,7 @@ public class APIServlet extends javax.servlet.http.HttpServlet {
 	            return;
 	        }
 	        
-            if (DiskMgr.archivePaths == null) {
-                throw new Exception("Server is not ready to handle requests.");
-            }
+            DiskMgr.assertInitialized();
 
             APIHandler hand = new APIHandler(req, resp, userName);
             JSONObject data = hand.handleRequest();

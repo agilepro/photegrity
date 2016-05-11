@@ -13,7 +13,10 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
+
+import javax.servlet.ServletContext;
 
 public class DiskMgr {
     public String diskName;
@@ -50,6 +53,44 @@ public class DiskMgr {
 
     public static Vector<String> masterGroups = new Vector<String>();
 
+    
+    public static void initPhotoServer(ServletContext sc) throws Exception {
+        
+        String configPath = sc.getRealPath("/config.txt");
+
+        File f = new File(configPath);
+        if (!f.exists()) {
+            throw new Exception("Did not find file '"+f.getAbsolutePath()+"'");
+        }
+        FileInputStream fis = new FileInputStream(f);
+        Properties props = new Properties();
+        props.load(fis);
+
+        String dbdir = (String) props.get("DBDir");
+        String localdir = (String) props.get("LocalDir");
+        if (dbdir != null) {
+            DiskMgr.archivePaths = dbdir.toLowerCase();
+            String[] allDirs = dbdir.split(",");
+            File rootFolder = new File(allDirs[0]);
+            File defaultFolder = new File(rootFolder, "news");
+            NewsBackground.startNewsThread(defaultFolder);
+        }
+        if (localdir != null) {
+            DiskMgr.archiveView = localdir.toLowerCase();
+        }
+    }
+    
+    public static boolean isInitialized() {
+        return (archivePaths != null && archiveView != null);
+    }
+    public static void assertInitialized() throws Exception {
+        if (!isInitialized()) {
+            throw new Exception("Program Logic Error: DiskMgr class is not initialized at this time.");
+        }
+    }
+
+    
+    
     public DiskMgr(File archiveBase, String name, String viewBase) throws Exception {
         try {
             if (archivePaths == null) {

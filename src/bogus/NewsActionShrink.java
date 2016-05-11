@@ -1,7 +1,10 @@
 package bogus;
 
+import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.Vector;
 
 import org.workcast.streams.HTMLWriter;
 
@@ -18,7 +21,14 @@ public class NewsActionShrink extends NewsAction {
     public NewsActionShrink(String _query) throws Exception {
     	query = _query;
     	groupImages = new ArrayList<ImageInfo>();
-    	groupImages.addAll(ImageInfo.imageQuery(query));
+    	Vector<ImageInfo> origOrder = ImageInfo.imageQuery(query);
+    	
+    	//now scramble them so that they are not done in the same order every time
+    	Random r = new Random();
+    	while (origOrder.size()>0) {
+    	    int randomIndex = r.nextInt(origOrder.size());
+    	    groupImages.add( origOrder.remove(randomIndex) );
+    	}
     }
 
     /**
@@ -39,13 +49,14 @@ public class NewsActionShrink extends NewsAction {
 		        out.write("   ");
 		
 		        //skip the file if it is small enough (190K)
-		        if (ii.fileSize<190000) {
-		            out.write( " - already small enough." );
+		        File realFile = ii.getFilePath();
+		        long sizeBefore = realFile.length();
+		        if (sizeBefore<250000) {
+		            out.write( " - already small enough: "+sizeBefore);
 		            continue;
 		        }
 		
-		        out.write(Integer.toString(ii.fileSize));
-		        int sizeBefore = ii.fileSize;
+		        out.write(Long.toString(sizeBefore));
 		        out.flush();
 		        Thumb.shrinkFile(ii);
 		        long percentShrink = (((long)ii.fileSize)*100)/sizeBefore;

@@ -24,7 +24,7 @@
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();
 
-    if (DiskMgr.archivePaths == null) {
+    if (!DiskMgr.isInitialized()) {
         %><jsp:include page="PasswordPanel.jsp" flush="true"/><%
         return;
     }

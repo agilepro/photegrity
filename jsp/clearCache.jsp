@@ -26,25 +26,7 @@
 
     ImageInfo.garbageCollect();
 
-    ServletContext sc = session.getServletContext();
-    String configPath = sc.getRealPath("/config.txt");
-
-    File f = new File(configPath);
-    if (!f.exists()) {
-        throw new Exception("Did not find file '"+f.getAbsolutePath()+"'");
-    }
-    FileInputStream fis = new FileInputStream(f);
-    Properties props = new Properties();
-    props.load(fis);
-
-    String dbdir = (String) props.get("DBDir");
-    String localdir = (String) props.get("LocalDir");
-    if (dbdir != null) {
-        DiskMgr.archivePaths = dbdir.toLowerCase();
-    }
-    if (localdir != null) {
-        DiskMgr.archiveView = localdir.toLowerCase();
-    }
+    DiskMgr.initPhotoServer(session.getServletContext());
 
     ImageInfo.garbageCollect();
 

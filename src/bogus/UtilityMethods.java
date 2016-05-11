@@ -196,7 +196,7 @@ public class UtilityMethods {
         }
     }
     
-    public static String getErrorString(Exception e) {
+    public static String getErrorString(Throwable e) {
     	Throwable t = e.getCause();
     	if (t==null) {
     		return e.toString();

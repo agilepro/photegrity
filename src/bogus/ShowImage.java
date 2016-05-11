@@ -18,9 +18,7 @@ public class ShowImage extends javax.servlet.http.HttpServlet {
         try {
 
             // not initialized, so abort
-            if (DiskMgr.archivePaths == null) {
-                throw new Exception("Not Initialized");
-            }
+            DiskMgr.assertInitialized();
             HttpSession session = req.getSession();
             if (session.getAttribute("userName") == null) {
                 throw new Exception("Not logged in");

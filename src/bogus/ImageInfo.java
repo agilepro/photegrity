@@ -284,7 +284,7 @@ public class ImageInfo
     private String initializeInternals(String relPath) throws Exception
     {
         if (tail != null) {
-            throw new Exception("Hmmm, realSplitIntoPatterns method is being called twice?");
+            throw new Exception("Hmmm, initializeInternals method is being called twice?");
         }
         try {
             if (diskMgr == null) {
@@ -358,7 +358,7 @@ public class ImageInfo
             tagVec.addElement(tag);
         }
     }
-    
+
     private void wipeAllConnections() {
     	pp.decrementImageCount();
     	for (TagInfo tag : tagVec) {

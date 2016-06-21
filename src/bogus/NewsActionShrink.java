@@ -43,27 +43,33 @@ public class NewsActionShrink extends NewsAction {
 		        if (ii == null) {
 		            throw new Exception ("null image file where lastnum="+position);
 		        }
-		        out.write("\nShrinking: ");
+                out.write("\nShrinking: ");
 		        HTMLWriter.writeHtml(out, ii.getRelativePath());
 		        HTMLWriter.writeHtml(out, ii.fileName);
 		        out.write("   ");
-		
-		        //skip the file if it is small enough (190K)
-		        File realFile = ii.getFilePath();
-		        long sizeBefore = realFile.length();
-		        if (sizeBefore<250000) {
-		            out.write( " - already small enough: "+sizeBefore);
+		        File filePath = ii.getFilePath();
+		        if (!filePath.exists()) {
+		            //file has been moved in the meantime, so ignore this request
+		            out.write(" - MISSING!  Has this been moved?  Ignoring.");
 		            continue;
 		        }
-		
+
+		        //skip the file if it is small enough (190K)
+		        if (filePath.length()<190000) {
+		            out.write( " - already small enough. Skipping." );
+		            continue;
+		        }
+
+		        long sizeBefore = filePath.length();
 		        out.write(Long.toString(sizeBefore));
 		        out.flush();
 		        Thumb.shrinkFile(ii);
-		        long percentShrink = (((long)ii.fileSize)*100)/sizeBefore;
+		        long sizeAfter = filePath.length();
+		        long percentShrink = (sizeAfter*100)/sizeBefore;
 		        out.write(" -- ");
 		        out.write(Long.toString(percentShrink));
 		        out.write("% --> ");
-		        out.write(Integer.toString(ii.fileSize));
+		        out.write(Long.toString(sizeAfter));
 			}
 		    if (position<groupImages.size()) {
 		    	addToEndOfQueue();

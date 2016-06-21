@@ -202,7 +202,7 @@
                     npatt.pState != NewsBunch.STATE_SEEK  &&
                     npatt.pState != NewsBunch.STATE_DOWNLOAD) {
                     npatt.pState = NewsBunch.STATE_SEEK;
-                    NewsActionSeekBunch nasp = new NewsActionSeekBunch(npatt, 0);
+                    NewsActionSeekBunch nasp = new NewsActionSeekBunch(npatt);
                     nasp.addToFrontOfMid();
                     out.write(" SEEK ");
                 }

@@ -187,7 +187,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <head><TITLE>Show <%= r %> / <%= recordCount %></TITLE>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
+    <script src="lib/angular.js"></script>
 
     <script>
 

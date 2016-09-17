@@ -18,16 +18,18 @@
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();
 
+    /*
     if (session.getAttribute("userName") == null) {
-        %><jsp:include page="PasswordPanel.jsp" flush="true"/><%
+        %><!--jsp:include page="PasswordPanel.jsp" flush="true"/--><%
         return;
     }
-
+    
     if (!DiskMgr.isInitialized()) {
-        %><jsp:include page="PasswordPanel.jsp" flush="true"/><%
+        %><!--jsp:include page="PasswordPanel.jsp" flush="true"/--><%
         return;
     }
-
+    */
+    
     String localPath = UtilityMethods.getSessionString(session, "localPath", "../pict/");
     int thumbsize = UtilityMethods.getSessionInt(session, "thumbsize", 100);
     int colInt = UtilityMethods.getSessionInt(session, "columns", 3);

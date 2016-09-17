@@ -38,7 +38,7 @@ public class NewsSession {
 	public boolean isConnected() {
 		return isConnected;
 	}
-	
+
 	public void connect() throws Exception {
 		if (!NewsGroup.connect) {
 			//not in connected mode, so don't connect
@@ -46,7 +46,12 @@ public class NewsSession {
 		}
 		currentGroup = "";
 		client = new NNTPClient();
-		client.connect(server);
+		try {
+		    client.connect(server);
+		}
+		catch (Exception e) {
+		    throw new Exception("Attempt to connect to server: "+server, e);
+		}
 		if (!client.authenticate(user, pass)) {
 			throw new Exception("Unable to authenticate the new named '" + user
 					+ "' on the server '" + server + "'.  Do you have the correct password?");

@@ -95,9 +95,9 @@
 %>
 <html ng-app="fileApp">
 <head>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
-    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.12.0.js"></script>
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <script src="lib/angular.js"></script>
+    <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
     <style>
     body {
         padding: 5;
@@ -281,7 +281,8 @@
     HTMLWriter.writeHtml(out, bunch.digest);
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?dig={{digest|encode}}" name="moveForm" method="post">
+    <form action="newsDetailAction.jsp?" name="moveForm" method="post">
+    <input type="hidden" name="dig" value="{{digest}}">
     <li>Current: <font color="brown"><%
         HTMLWriter.writeHtml(out, folder);
         HTMLWriter.writeHtml(out, bunch.getTemplate());

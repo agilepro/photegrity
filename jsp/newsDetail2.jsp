@@ -110,8 +110,8 @@
 %>
 <html ng-app="photoApp">
 <head>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <script src="lib/angular.js"></script>
 
     <script>
     var photoApp = angular.module('photoApp', []);

@@ -27,7 +27,7 @@ set PHOTO_CP=%SERVLET_API_LOC%servlet-api.jar;%SERVLET_API_LOC%jsp-api.jar;%TARG
 set NETCLASSES=%SOURCE_DIR%\src\org\apache\commons\net\bsd\*.java %SOURCE_DIR%\src\org\apache\commons\net\chargen\*.java %SOURCE_DIR%\src\org\apache\commons\net\daytime\*.java %SOURCE_DIR%\src\org\apache\commons\net\discard\*.java %SOURCE_DIR%\src\org\apache\commons\net\echo\*.java %SOURCE_DIR%\src\org\apache\commons\net\finger\*.java %SOURCE_DIR%\src\org\apache\commons\net\ftp\*.java %SOURCE_DIR%\src\org\apache\commons\net\imap\*.java %SOURCE_DIR%\src\org\apache\commons\net\io\*.java %SOURCE_DIR%\src\org\apache\commons\net\nntp\*.java %SOURCE_DIR%\src\org\apache\commons\net\ntp\*.java %SOURCE_DIR%\src\org\apache\commons\net\pop3\*.java %SOURCE_DIR%\src\org\apache\commons\net\smtp\*.java %SOURCE_DIR%\src\org\apache\commons\net\telnet\*.java %SOURCE_DIR%\src\org\apache\commons\net\tftp\*.java %SOURCE_DIR%\src\org\apache\commons\net\time\*.java %SOURCE_DIR%\src\org\apache\commons\net\util\*.java %SOURCE_DIR%\src\org\apache\commons\net\whois\*.java %SOURCE_DIR%\src\org\apache\commons\net\*.java %SOURCE_DIR%\src\org\apache\commons\net\ftp\parser\*.java
 
 :### compile java classes
-"%JAVA_HOME%/bin/javac" -classpath "%PHOTO_CP%" -d "%TARGET_DIR%\photo_war\WEB-INF\classes" %SOURCE_DIR%\src\bogus\*.java %SOURCE_DIR%\src\bandaid\*.java %NETCLASSES%
+"%JAVA_HOME%/bin/javac" -classpath "%PHOTO_CP%" -d "%TARGET_DIR%\photo_war\WEB-INF\classes" -target 1.6 -source 1.6 %SOURCE_DIR%\src\bogus\*.java %SOURCE_DIR%\src\bandaid\*.java %NETCLASSES%
 
 
 

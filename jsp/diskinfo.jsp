@@ -45,7 +45,8 @@
 
 <%
     if (mgr.isLoaded) {
-        %> (loaded) <%
+        %> (loaded) <a href="diskES.jsp?n=<%=diskName%>&dest=<%=URLEncoder.encode(thisUrl,"UTF8")%>"
+              title="Store into elastic search">StoreES</a> <%
     }
     else {
         %> <a href="loaddisk.jsp?n=<%=diskName%>&dest=<%=URLEncoder.encode(thisUrl,"UTF8")%>"

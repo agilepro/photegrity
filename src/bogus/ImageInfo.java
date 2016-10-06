@@ -1,6 +1,8 @@
 package bogus;
 
 import java.io.File;
+import java.io.Writer;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,6 +11,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
+
+import org.workcast.json.JSONArray;
+import org.workcast.json.JSONObject;
 
 public class ImageInfo
 {
@@ -1718,5 +1723,32 @@ public class ImageInfo
     }
 
 
-
+    public void storeInElasticSearch(Writer out) throws Exception {
+        
+        JSONObject wholeDoc = new JSONObject();
+        wholeDoc.put("disk", pp.getDiskMgr().diskName);
+        wholeDoc.put("path", pp.getLocalPath());
+        wholeDoc.put("pattern", pp.getPattern());
+        wholeDoc.put("fileName", fileName);
+        wholeDoc.put("value", value);
+        wholeDoc.put("fileSize", fileSize);
+        
+        JSONArray tags = new JSONArray();
+        for (TagInfo ti : tagVec) {
+            tags.put(ti.tagName);
+        }
+        wholeDoc.put("tags", tags);
+        
+        URL url = new URL("http://localhost:9200/photos/images/");
+        JSONObject response = RemoteJSON.postToRemote(url, wholeDoc);
+        
+        if (response.has("error")) {
+            out.write("ERROR: ");
+            response.write(out, 2, 2);
+        }
+        else {
+            out.write("SAVED: "+response.getString("_id")+" ==> "+this.getFilePath().toString()+"\n");
+        }
+        out.flush();
+    }
 }

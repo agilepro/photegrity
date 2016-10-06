@@ -816,10 +816,14 @@ public class NewsBunch {
             // skip this trouble if setting to the same disk/path/name/plus it already at.
             return;
         }
+        out.write("\n<li>Digest is ");
+        HTMLWriter.writeHtml(out, digest);
+        out.write("</li>");
+        out.write("\n<li>hasFolder() is "+hasFolder()+"</li>");
+        out.write("\n<li>renameFiles is "+renameFiles+"</li>");
+        out.write("\n<li>hasTemplate() is "+hasTemplate()+"</li>");
 
         if (hasFolder() && renameFiles && hasTemplate()) {
-
-
 
             String oldTemplate = fileTemplate;
             if (newTemplate.equals(fileTemplate) && newPlusOne != plusOneNumber) {
@@ -831,7 +835,7 @@ public class NewsBunch {
                 String nonClashTemplate = "~tmp~" + fileTemplate;
                 for (NewsFile nf : getFiles()) {
                     if (nf.isDownloaded()) {
-                        out.write("<li>renaming file ");
+                        out.write("\n<li>renaming file ");
                         HTMLWriter.writeHtml(out, nf.getFileName());
                         out.write("</li>");
                         out.flush();
@@ -847,7 +851,7 @@ public class NewsBunch {
             samplePattern = null;
             for (NewsFile nf : getFiles()) {
                 if (nf.isDownloaded()) {
-                    out.write("<li>moving file ");
+                    out.write("\n<li>moving file ");
                     HTMLWriter.writeHtml(out, nf.getFileName());
                     out.write("</li>");
                     out.flush();
@@ -859,16 +863,18 @@ public class NewsBunch {
         }
         disk = dm2;
         setRelativePath(destPath);
+        out.write("\n<li>relative path now set to "+destPath+"</li>");
         fileTemplate = newTemplate;
         plusOneNumber = newPlusOne;
         // forces it to recalculate if needed
         specialTokenIndex = -2;
 
-        out.write("<li>refreshing disk folder into memory</li>");
+        out.write("\n<li>refreshing disk to memory "+oldFolderPath+"</li>");
         //update the disk representation in memory
         oldDM.refreshDiskFolder(oldFolderPath);
+        out.write("\n<li>refreshing disk to memory "+newFolderPath+"</li>");
         dm2.refreshDiskFolder(newFolderPath);
-        out.write("<li>DONE refreshing disk folder</li>");
+        out.write("\n<li>DONE refreshing disk folder</li>");
 
     }
 
@@ -1025,9 +1031,10 @@ public class NewsBunch {
             return fileTemplate;
         }
         String quotedSpan = getLastQuotedSpan(tokPattern);
-        if (quotedSpan!=null) {
+        if (quotedSpan!=null && quotedSpan.length()>4) {
+            String lastFour = quotedSpan.substring(quotedSpan.length()-4);
             //All yenc cases should be handled by this since yenc requires a quoted span.
-            if (quotedSpan.endsWith(".jpg") || quotedSpan.endsWith(".JPG") || quotedSpan.endsWith(".jpeg")) {
+            if (lastFour.equalsIgnoreCase(".jpg") || lastFour.equalsIgnoreCase(".zip")  || lastFour.equalsIgnoreCase(".jpeg")) {
                 return quotedSpan;
             }
         }

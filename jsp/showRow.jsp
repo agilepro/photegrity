@@ -323,7 +323,7 @@
             <font size="-4" color="#99CC99"><%=rowQuant%></font>
             <img src="radio_on.png" ng-show="rec.isMarked" ng-click="rec.isMarked=false">
             <img src="radio_off.png" ng-hide="rec.isMarked" ng-click="rec.isMarked=true">
-            <a href="show.jsp?q={{query+'e('+rec.patt+')'|encode}}">S</a> &nbsp;
+            <a href="show.jsp?q={{query+'e('+rec.patt+')'|encode}}"  target="_blank">S</a> &nbsp;
             <a href="manage.jsp?q={{query+'e('+rec.patt+')'|encode}}"><img border=0 src="searchicon.gif"></a> &nbsp;
             <img src="trash.gif" ng-hide="rec.isTrashed" ng-click="rec.isTrashed=true">
             <img src="delicon.gif" ng-show="rec.isTrashed" ng-click="rec.isTrashed=false">
@@ -416,7 +416,7 @@
             </td>
             <td<%if(isMarked){%> bgcolor="yellow"<%}%> width="20" valign="top">
             <font size="-4" color="#99CC99"><%=rowQuant%></font><br/>
-            <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>"
+            <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>" target="_blank"
                title="<%HTMLWriter.writeHtml(out,thisPattern);%>">S</a><br/>
             <a href="toggleColumn.jsp?r=<%=r%>&cval=<%=URLEncoder.encode(colLoc,"UTF8")%>&go=<%=URLEncoder.encode(thisPage,"UTF8")%>">&gt;&lt;</a><br/>
     <%

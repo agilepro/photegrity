@@ -856,5 +856,12 @@ public class DiskMgr {
         }
     }
 
+    public void storeInElasticSearch(Writer out) throws Exception {
+        for (ImageInfo ii : ImageInfo.getImagesByPath()) {
+            if (this.equals(ii.pp.getDiskMgr())) {
+                ii.storeInElasticSearch(out);
+            }
+        }
+    }
 
 }

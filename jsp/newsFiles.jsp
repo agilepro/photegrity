@@ -95,6 +95,7 @@
 %>
 <html ng-app="fileApp">
 <head>
+    <meta charset="UTF-8">
     <link href="lib/bootstrap.min.css" rel="stylesheet">
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
@@ -281,8 +282,7 @@
     HTMLWriter.writeHtml(out, bunch.digest);
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?" name="moveForm" method="post">
-    <input type="hidden" name="dig" value="{{digest}}">
+    <form action="newsDetailAction.jsp?dig=<%= URLEncoder.encode(dig, "UTF-8") %>" name="moveForm" method="post">
     <li>Current: <font color="brown"><%
         HTMLWriter.writeHtml(out, folder);
         HTMLWriter.writeHtml(out, bunch.getTemplate());

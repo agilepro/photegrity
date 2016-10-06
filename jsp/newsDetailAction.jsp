@@ -2,20 +2,20 @@
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="bogus.DiskMgr"
 %><%@page import="bogus.ImageInfo"
+%><%@page import="bogus.LocalMapping"
 %><%@page import="bogus.NewsAction"
-%><%@page import="bogus.NewsActionDownloadPattern"
 %><%@page import="bogus.NewsActionDownloadAll"
 %><%@page import="bogus.NewsActionDownloadFile"
-%><%@page import="bogus.NewsActionSeekBunch"
+%><%@page import="bogus.NewsActionDownloadPattern"
+%><%@page import="bogus.NewsActionFixDisk"
 %><%@page import="bogus.NewsActionSeekABit"
+%><%@page import="bogus.NewsActionSeekBunch"
 %><%@page import="bogus.NewsArticle"
-%><%@page import="bogus.PosPat"
-%><%@page import="bogus.LocalMapping"
+%><%@page import="bogus.NewsBunch"
 %><%@page import="bogus.NewsFile"
 %><%@page import="bogus.NewsGroup"
-%><%@page import="bogus.NewsBunch"
 %><%@page import="bogus.NewsSession"
-%><%@page import="bogus.NewsActionFixDisk"
+%><%@page import="bogus.PosPat"
 %><%@page import="bogus.UtilityMethods"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileOutputStream"
@@ -29,6 +29,7 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
+%><%@page import="org.workcast.streams.HTMLWriter"
 %><%request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();
@@ -283,8 +284,23 @@
         }
     }%>
 
-<html><body>
-<h3>Updating ...</h3>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head> 
+<body>
+<h3>Updating ... <% HTMLWriter.writeHtml(out, dig); %></h3>
+<%
+    int count = 0;
+    int startPos = 0;
+    int posp = dig.indexOf("?", startPos);
+    while (posp>0) {
+        ++count;
+        startPos = posp + 1;
+        posp = dig.indexOf("?", startPos);
+    }
+%>
+<p>Found <%=count%> occurrences of question mark</p>
 <p>Uncheck this box: <input type="checkbox" name="autoReturn" checked="checked">
    to disable the auto return after processing.</p>
 <hr/>
@@ -297,32 +313,38 @@
     }
     else if ("Set Without Files".equals(cmd) || "Set And Move Files".equals(cmd)) {
         String dest = UtilityMethods.reqParam(request, "News Detail Action", "folder");
+        System.out.println("OK=== Got request for "+cmd);
         if (!dest.endsWith("/")) {
             dest = dest + "/";
         }
         if (dest.endsWith("./")) {
             dest = dest.substring(0,dest.length()-2)+"/";
         }
+        System.out.println("OK=== dest is "+dest);
         int colonpos = dest.indexOf(':');
         if (colonpos <= 0) {
             throw new Exception("Parameter 'dest' must have a disk name, colon, and path on that disk, instead received '"+dest+"'.");
         }
         String disk2 = dest.substring(0, colonpos);
+        System.out.println("OK=== disk2 is "+disk2);
         String destPath = dest.substring(colonpos+1);
+        System.out.println("OK=== destPath is "+destPath);
         DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
         boolean createIt = ("yes".equals(UtilityMethods.defParam(request, "createIt", "no")));
         boolean copyFiles = ("Set And Move Files".equals(cmd));
         boolean plusOne = UtilityMethods.defParam(request, "plusOne", null)!=null;
+        String newTemplate =  UtilityMethods.defParam(request, "template", "");
+        System.out.println("OK=== newTemplate is "+newTemplate);
         if (createIt) {
-            out.write("\n<li>creating folder</li>");
+            out.write("\n<li>creating folder"+destPath+"</li>");
             File ref = dm2.getFilePath(destPath);
             if (!ref.exists()) {
                 ref.mkdirs();
             }
         }
-        out.write("\n<li>changing the bunch location</li>");
+        out.write("\n<li>changing the bunch location"+dest+"</li>");
         out.flush();
-        bunch.changeLocAndTemplate(dest, UtilityMethods.defParam(request, "template", ""), copyFiles, out, plusOne);
+        bunch.changeLocAndTemplate(dest, newTemplate, copyFiles, out, plusOne);
 
         rememberDestination(session, dest);
     }

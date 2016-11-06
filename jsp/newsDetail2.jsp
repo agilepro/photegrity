@@ -181,9 +181,9 @@
     <input type="hidden" name="start" value="<%=start%>">
     <input type="submit" name="cmd" value="Hide">
     <input type="checkbox" name="delAll" value="delAll"> Delete All
+    <input type="submit" name="cmd" value="Get A Bit">
     <%
         if (bunch.pState == NewsBunch.STATE_INITIAL) {
-    %><input type="submit" name="cmd" value="Get A Bit"><%
 
     %><input type="submit" name="cmd" value="Mark Interested"><%
 
@@ -194,8 +194,6 @@
     %><input type="submit" name="cmd" value="Mark Complete"><%
         }
         else if (bunch.pState == NewsBunch.STATE_INTEREST || bunch.pState == NewsBunch.STATE_GETABIT) {
-    %><input type="submit" name="cmd" value="Get A Bit"><%
-
     %><input type="submit" name="cmd" value="Cancel Interest"><%
 
     %><input type="submit" name="cmd" value="Seek Bunch"><%
@@ -248,7 +246,6 @@
     %><input type="submit" name="cmd" value="Mark Interested"><%
         }
         else if (bunch.pState == NewsBunch.STATE_HIDDEN) {
-    %><input type="submit" name="cmd" value="Get A Bit"><%
     %><input type="submit" name="cmd" value="Mark Interested"> (cancel hidden state) <%
     }
     if (bunch.appearsToNeedSeek(newsGroup)) {

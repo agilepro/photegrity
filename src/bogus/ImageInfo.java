@@ -1739,7 +1739,7 @@ public class ImageInfo
         }
         wholeDoc.put("tags", tags);
         
-        URL url = new URL("http://localhost:9200/photos/images/");
+        URL url = new URL("http://bobcat:9200/photos/images/");
         JSONObject response = RemoteJSON.postToRemote(url, wholeDoc);
         
         if (response.has("error")) {

@@ -9,6 +9,7 @@
 %><%@page import="java.io.Reader"
 %><%@page import="java.io.Writer"
 %><%@page import="java.net.URLEncoder"
+%><%@page import="java.text.DecimalFormat"
 %><%@page import="java.util.ArrayList"
 %><%@page import="java.util.Collections"
 %><%@page import="java.util.Enumeration"
@@ -80,7 +81,9 @@
             out.write("<li>");
             HTMLWriter.writeHtml(out, ngi.getNewsgroup());
             out.write(" - ");
-            out.write(Integer.toString(ngi.getArticleCount()));
+            DecimalFormat myFormatter = new DecimalFormat("###,###,###.");
+            String output = myFormatter.format(ngi.getArticleCount());
+            out.write(output);
             out.write(" - ");
             out.write(" - ");
             out.write(" - ");

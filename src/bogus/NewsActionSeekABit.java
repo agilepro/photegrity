@@ -21,12 +21,22 @@ public class NewsActionSeekABit extends NewsAction {
 
     public NewsActionSeekABit(NewsBunch _seeker) throws Exception {
         seeker = _seeker;
+        /*
         if (!seeker.hasTemplate()) {
-            throw new Exception("NewsPattern must have a template before you can Get a Bit");
+            String temp = seeker.getTemplate();
+            if (!temp.endsWith(".jpg")) {
+                throw new Exception("file template must end with .jpg: got ("+temp+")");
+            }
+            seeker.changeTemplate(temp, false);
         }
         if (!seeker.hasFolder()) {
-            throw new Exception("NewsPattern must have a folder before you can Get a Bit");
+            seeker.changeFolder(seeker.getFolderLoc(), false);
+            File storeFile = seeker.getFolderPath();
+            if (!storeFile.exists()) {
+                storeFile.mkdirs();
+            }
         }
+        */
         String template = seeker.getTemplate();
         if (!template.endsWith(".jpg")) {
             throw new Exception("template needs to end with jpg");

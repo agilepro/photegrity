@@ -56,7 +56,9 @@ public class APIServlet extends javax.servlet.http.HttpServlet {
     @Override
     public void service(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("API: ("+req.getMethod()+") "+req.getRequestURL());
+        Writer w = null;
         try {
+            w = resp.getWriter();
         	setHeaders(req,resp);
         	
 	    	//first establish whether there is a login session in force
@@ -76,7 +78,6 @@ public class APIServlet extends javax.servlet.http.HttpServlet {
             APIHandler hand = new APIHandler(req, resp, userName);
             JSONObject data = hand.handleRequest();
             
-            Writer w = resp.getWriter();
             data.write(w, 2, 0);
             w.flush();
             w.close();
@@ -84,7 +85,9 @@ public class APIServlet extends javax.servlet.http.HttpServlet {
         }
         catch (Exception e) {
             System.out.println("     ("+req.getMethod()+") ERROR "+req.getRequestURL());
-            streamException(e, req, resp);
+            if (w!=null) {
+                WebRequest.streamException(e, req, resp, w);
+            }
         }
         finally {
             //cleanup if needed

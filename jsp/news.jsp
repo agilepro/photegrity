@@ -662,6 +662,7 @@
                 $scope.filteredRecs = swap;
             })
             .error( function(data, status, headers, config) {
+                console.log("saveBunch ERROR", data);
                 alert("ERROR: "+JSON.stringify(data));
             });
         }
@@ -879,7 +880,7 @@ Filter: <input ng-model="photoSettings.filter">
                   <li role="presentation"><a role="menuitem" ng-click="markThis(rec)">Mark Row</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="setPath(rec)">Set PATH</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="fixTemplate(rec)">Fix ZIP Template</a></li>
-                  <li role="presentation"><a role="menuitem" ng-click="changeState(rec,9)">Get A Bit</a></li>
+                  <li role="presentation"><a role="menuitem" ng-click="setPath(rec);changeState(rec,9)">Get A Bit</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,2)">Seek All</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,4)">Download All</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,6)">Mark Complete</a></li>

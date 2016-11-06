@@ -158,6 +158,7 @@
 
 <ul>
 <li> Article number: <%= art.getNumber()  %> </li>
+<li> Date: <%= art.getHeaderDate()  %> </li>
 <li> SampleFileName: <%  HTMLWriter.writeHtml(out, npatt.getSampleFileName() ); %></li>
 <li> Subject: <% HTMLWriter.writeHtml(out, art.getHeaderSubject()); %> </li>
 <li> From: <% HTMLWriter.writeHtml(out, art.getHeaderFrom()); %> <% HTMLWriter.writeHtml(out, art.getHeaderDate()); %> </li>

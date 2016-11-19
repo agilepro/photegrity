@@ -44,7 +44,7 @@ public class NewsBunch {
 
     //This is a unique key JUST for this session!
     public long bunchKey;
-    
+
     public int count = -1;   //don't know how many
     public long maxId = 0;
     public long minId = 0;
@@ -164,7 +164,7 @@ public class NewsBunch {
         if (!fakePath.endsWith("/")) {
             fakePath = fakePath + "/";
         }
-        
+
         return fakePath;
     }
     public DiskMgr getDiskMgr() {
@@ -246,7 +246,7 @@ public class NewsBunch {
     		//nothing to do.
     		return;
     	}
-    	
+
     	if (newState==NewsBunch.STATE_GETABIT) {
     		NewsActionSeekABit nasp = new NewsActionSeekABit(this);
     		nasp.addToFrontOfHigh();
@@ -261,11 +261,11 @@ public class NewsBunch {
             NewsActionDownloadAll nada = new NewsActionDownloadAll(this);
             nada.addToFrontOfMid();
         }
-    	
+
     	pState = newState;
     }
-    
-    
+
+
     public void writeCacheLine(Writer fw) throws Exception {
         Vector<String> values = new Vector<String>();
         values.add(digest);
@@ -981,43 +981,57 @@ public class NewsBunch {
     }
 
     public void changeFolder(String newFolder, boolean moveFiles, Writer out) throws Exception {
-        sites = null;  //will force recalc
-        if (!newFolder.endsWith("/")) {
-            newFolder = newFolder + "/";
-        }
-        int colonPos = newFolder.indexOf(":");
-        if (colonPos <= 0) {
-            throw new Exception("changeFolder requires a disk manager name followed by colon");
-        }
-        String disk2 = newFolder.substring(0, colonPos);
-        String destPath = newFolder.substring(colonPos + 1);
-        DiskMgr dm2 = DiskMgr.getDiskMgr(disk2); // throws exception if not found
+        try {
+            out.write("\n<li>Change folder, and movefiles="+moveFiles+"</li>");
+            out.write("\n<li>old folder: "+pathInDisk+"</li>");
+            out.write("\n<li>new folder: "+newFolder+"</li>");
 
-        if (dm2 == disk && destPath.equals(pathInDisk)) {
-            // skip this trouble if setting to the same folder it already is at.
-            return;
-        }
+            sites = null;  //will force recalc
+            if (!newFolder.endsWith("/")) {
+                newFolder = newFolder + "/";
+            }
+            int colonPos = newFolder.indexOf(":");
+            if (colonPos <= 0) {
+                throw new Exception("changeFolder requires a disk manager name followed by colon");
+            }
+            String disk2 = newFolder.substring(0, colonPos);
+            String destPath = newFolder.substring(colonPos + 1);
+            DiskMgr dm2 = DiskMgr.getDiskMgr(disk2); // throws exception if not found
 
-        if (moveFiles && hasTemplate()) {
-            for (NewsFile nf : getFiles()) {
-                if (nf.isDownloaded()) {
-                    out.write("<li>moving file ");
-                    HTMLWriter.writeHtml(out, nf.getFileName());
-                    out.write("</li>");
-                    out.flush();
-                    System.out.println("before move file: "+destPath+" - "+System.currentTimeMillis());
-                    nf.moveFile(dm2, destPath, true);
-                    System.out.println("after move file: "+destPath+" - "+System.currentTimeMillis());
+            if (dm2 == disk && destPath.equals(pathInDisk)) {
+                // skip this trouble if setting to the same folder it already is at.
+                out.write("\n<li>Skipping the move because it appears to already be there.</li>");
+                return;
+            }
+
+            if (moveFiles && hasTemplate()) {
+                List<NewsFile> fileList = getFiles();
+                out.write("\n<li>Found "+fileList.size()+" files to move.</li>");
+                for (NewsFile nf : fileList) {
+                    if (nf.isDownloaded()) {
+                        out.write("<li>moving file ");
+                        HTMLWriter.writeHtml(out, nf.getFileName());
+                        out.write("</li>");
+                        out.flush();
+                        System.out.println("before move file: "+destPath+" - "+System.currentTimeMillis());
+                        nf.moveFile(dm2, destPath, true);
+                        System.out.println("after move file: "+destPath+" - "+System.currentTimeMillis());
+                    }
                 }
             }
-        }
-        DiskMgr dm1 = disk;
-        String sourcePath = pathInDisk;
-        disk = dm2;
-        setRelativePath(destPath);
+            DiskMgr dm1 = disk;
+            String sourcePath = pathInDisk;
+            disk = dm2;
+            setRelativePath(destPath);
 
-        dm1.refreshDiskFolder(dm1.getFilePath(sourcePath));
-        dm2.refreshDiskFolder(dm2.getFilePath(destPath));
+            dm1.refreshDiskFolder(dm1.getFilePath(sourcePath));
+            dm2.refreshDiskFolder(dm2.getFilePath(destPath));
+            out.write("\n<li>final folder: "+pathInDisk+"</li>");
+        }
+        catch (Exception e) {
+            out.write("Exception encountered - "+e.toString());
+            throw e;
+        }
     }
 
     // This is where we keep all the ideas about how to automatically guess the
@@ -1426,6 +1440,6 @@ public class NewsBunch {
     	}
     	if (objIn.has("state")) {
 	    	changeState(objIn.getInt("state"));
-    	}    	
+    	}
     }
 }

@@ -62,6 +62,27 @@
     if (template==null || template.length()==0) {
         template = tokenFill(bunch.digest);
     }
+    if (template.equals("$0.jpg")) {
+        String xy = bunch.getFolderLoc().toLowerCase();
+        StringBuffer sb = new StringBuffer();
+        boolean skipping = false;
+        for (int i=0; i<xy.length(); i++) {
+            char ch = xy.charAt(i);
+            if (skipping) {
+                if (ch < 'a' || ch > 'z') {
+                    skipping = false;
+                }
+            }
+            else {
+                if (ch >= 'a' && ch <= 'z') {
+                    sb.append(ch);
+                    skipping = true;
+                }
+            }                
+        }
+        sb.append("$a.jpg");
+        template = sb.toString();
+    }
     String folder = bunch.getFolderLoc();
     boolean folderExists = bunch.hasFolder();
 
@@ -159,7 +180,7 @@
                     <input type="submit" name="cmd" value="Set Without Files">
 
     </li>
-    <li>Template: <input type="text" name="template" value="<%HTMLWriter.writeHtml(out, bunch.getTemplate());%>" size="110">
+    <li>Template: <input type="text" name="template" value="<%HTMLWriter.writeHtml(out, template);%>" size="110">
 
                 <input type="checkbox" name="plusOne" value="true" <% if (bunch.plusOneNumber) {%>checked="checked"<%}%>> Plus One
                 </li>

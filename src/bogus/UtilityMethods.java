@@ -102,8 +102,8 @@ public class UtilityMethods {
 		// this next line should not be needed, but I have seen this hack
 		// recommended
 		// in many forums.
-		String modVal = new String(val.getBytes("iso-8859-1"), "UTF-8");
-		return modVal;
+		//String modVal = new String(val.getBytes("iso-8859-1"), "UTF-8");
+		return val;
 	}
 
 	public static int defParamInt(HttpServletRequest request, String paramName, int defaultValue)

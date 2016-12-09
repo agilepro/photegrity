@@ -171,7 +171,12 @@
         $scope.refetchData();
         $scope.thisPath = "newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>";
         $scope.getFiltered = function() {
-            return $scope.fileSet;
+			if (!$scope.showDownloaded) {
+				return $scope.fileSet;
+			}
+            return $scope.fileSet.filter(function(item) {
+				return item.fileExists;
+			});
         }
         $scope.bunchActionPath = "bunchAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>";
         $scope.opResult = "";
@@ -346,6 +351,7 @@
         <button ng-click="toggleState('Seek')">Seek: {{qSeek}}</button>
         <button ng-click="toggleState('Down')">Download: {{qDown}}</button>
         <button ng-click="toggleState('Comp')">Complete: {{qComp}}</button>
+        <input type="checkbox" ng-model="showDownloaded"> Show Down
     <li>
     Pattern:  <%
     Vector<PosPat> bunchPosPats = bunch.getPosPatList();

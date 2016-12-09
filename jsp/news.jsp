@@ -543,6 +543,17 @@
             console.log("After fix: ", newBunch.template)
             $scope.saveBunch(newBunch);
         }
+        $scope.defaultPath = function(bunch) {
+            var newBunch = {};
+            newBunch.key = bunch.key;
+            newBunch.template = bunch.template;
+            
+            newBunch.folderLoc = bunch.folderLoc;
+            console.log("Before fix: ", bunch.folderLoc)
+            $scope.fixTemplateWithoutSave(newBunch);
+            console.log("Before fix: ", bunch.folderLoc)
+            $scope.saveBunch(newBunch);
+        }
         $scope.fixTemplateWithoutSave = function(newBunch) {
             var template = $scope.stripChars(newBunch.template);
             console.log("Working On: ", template)
@@ -585,13 +596,13 @@
                 bunch.special = "HIDE";
                 bunch.specialOp = 7;
             }
+            else if (!bunch.hasTemplate) {
+                bunch.special = "BIT";
+                bunch.specialOp = 9;
+            }
             else if (bunch.state<=1) {
                 bunch.special = "Seek";
                 bunch.specialOp = 2;
-            }
-            else if (!bunch.hasTemplate) {
-                bunch.special = "SET";
-                bunch.specialOp = 100;
             }
             else if (bunch.state==3) {
                 bunch.special = "Down";
@@ -628,6 +639,10 @@
         }
         $scope.changeState = function(bunch, newState) {
             var newBunch = {};
+			if (newState==9 && !bunch.hasTemplate) {
+				$scope.fixTemplate(bunch);
+				$scope.defaultPath(bunch);
+			}
             newBunch.key = bunch.key;
             newBunch.state = newState;
             $scope.saveBunch(newBunch);
@@ -880,7 +895,7 @@ Filter: <input ng-model="photoSettings.filter">
                   <li role="presentation"><a role="menuitem" ng-click="markThis(rec)">Mark Row</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="setPath(rec)">Set PATH</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="fixTemplate(rec)">Fix ZIP Template</a></li>
-                  <li role="presentation"><a role="menuitem" ng-click="setPath(rec);changeState(rec,9)">Get A Bit</a></li>
+                  <li role="presentation"><a role="menuitem" ng-click="changeState(rec,9)">Get A Bit</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,2)">Seek All</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,4)">Download All</a></li>
                   <li role="presentation"><a role="menuitem" ng-click="changeState(rec,6)">Mark Complete</a></li>

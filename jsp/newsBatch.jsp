@@ -6,6 +6,7 @@
 %><%@page import="bogus.NewsAction"
 %><%@page import="bogus.NewsActionSave"
 %><%@page import="bogus.NewsActionSeekBunch"
+%><%@page import="bogus.NewsActionSeekABit"
 %><%@page import="bogus.NewsActionSpectrum"
 %><%@page import="bogus.NewsArticle"
 %><%@page import="bogus.NewsBackground"
@@ -27,6 +28,9 @@
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
 %><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="org.workcast.json.JSONObject"
+%><%@page import="org.workcast.json.JSONArray"
+%><%@page import="org.workcast.json.JSONException"
 %><%request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();
@@ -41,133 +45,118 @@
     NewsGroup newsGroup = NewsGroup.getCurrentGroup();
     NewsSession newsSession = newsGroup.session;
 
-    String command   = UtilityMethods.reqParam(request, "Batch Operations Page", "command");
-    String go        = UtilityMethods.defParam(request, "go", "news.jsp");
-    String filter    = UtilityMethods.defParam(request, "filter", "");
-
-    String sort = UtilityMethods.defParam(request, "sort", "patt");
-
-    if (!command.startsWith("Batch Operation")) {
-        throw new Exception("ONLY WORKS ON BATCH operations");
-    }
-
-    String batchop = UtilityMethods.reqParam(request, "Batch Operations Page", "batchop");
-    boolean isHide = ("hide".equals(batchop));
-    boolean isComplete = ("complete".equals(batchop));
-    boolean isSeek = ("seek".equals(batchop));
-    boolean isDownload = ("download".equals(batchop));
-    boolean isStore = ("store".equals(batchop));
-    boolean isNothing = ("nothing".equals(batchop));
-    boolean isError = false;
-
-    if (filter.length()==0) {
-        throw new Exception("You have to have a filter value ste ... for safety");
-    }
-    String filePath = UtilityMethods.reqParam(request, "Batch Operations Page", "filePath");
-    String checkSize = UtilityMethods.reqParam(request, "Batch Operations Page", "checkSize");
-    List<NewsBunch> filteredBunches = filterTheseNoSort(newsGroup, filter);
-    if (filteredBunches.size() != Integer.parseInt(checkSize)) {
-        isError = true;
-    }
-%>
-
-<html>
-<body>
-    <h3>Batch Operation <%=filteredBunches.size()%> records</h3>
-    <p><a href="news.jsp">News</a></p>
-<%
+    JSONObject results = new JSONObject();
+    JSONArray rows = new JSONArray();
+    results.put("rows", rows);
     try {
-        for (NewsBunch npatt : filteredBunches) {
+        String filter    = UtilityMethods.reqParam(request, "Batch Operations Page", "filter");
 
-            out.write("\n<br/>");
-            out.flush();
-            String tokPattern = npatt.tokenFill();
-            HTMLWriter.writeHtml(out,tokPattern);
-            out.write(" - ");
-            if (isError) {
-                out.write(" ERROR "+checkSize+" does not equal "+filteredBunches.size());
+        String sort = UtilityMethods.defParam(request, "sort", "patt");
+
+        String batchop = UtilityMethods.reqParam(request, "Batch Operations Page", "batchop");
+
+        String filePath = UtilityMethods.reqParam(request, "Batch Operations Page", "filePath");
+        List<NewsBunch> filteredBunches = newsGroup.getFilteredBunches(filter);
+        
+        for (NewsBunch oneBunch : filteredBunches) {
+
+            String tokPattern = oneBunch.tokenFill();
+            if ("nothing".equals(batchop)) {
+                rows.put(tokPattern+" NOTHING");
             }
-            else if (isNothing) {
-                out.write(" NOTHING ");
+            else if ("hide".equals(batchop)) {
+                oneBunch.pState = NewsBunch.STATE_HIDDEN;
+                rows.put(tokPattern+" hidden");
             }
-            else if (isHide) {
-                npatt.pState = NewsBunch.STATE_HIDDEN;
-                out.write(" HIDE ");
+            else if ("complete".equals(batchop)) {
+                oneBunch.pState = NewsBunch.STATE_COMPLETE;
+                rows.put(tokPattern+" completed");
             }
-            else if (isComplete) {
-                npatt.pState = NewsBunch.STATE_COMPLETE;
-                out.write(" COMPLETE ");
+            else if ("clear".equals(batchop)) {
+                oneBunch.pState = NewsBunch.STATE_INITIAL;
+                rows.put(tokPattern+" cleared");
             }
-            else if (isSeek) {
-                if (npatt.pState != NewsBunch.STATE_SEEK_DONE &&
-                    npatt.pState != NewsBunch.STATE_SEEK  &&
-                    npatt.pState != NewsBunch.STATE_DOWNLOAD) {
-                    npatt.pState = NewsBunch.STATE_SEEK;
-                    NewsActionSeekBunch nasp = new NewsActionSeekBunch(npatt);
+            else if ("bit".equals(batchop)) {
+                if (oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE  &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
+                    oneBunch.pState = NewsBunch.STATE_GETABIT;
+                    NewsActionSeekABit nasp = new NewsActionSeekABit(oneBunch);
                     nasp.addToFrontOfMid();
-                    out.write(" SEEK ");
+                    rows.put(tokPattern+" get a bit");
                 }
                 else {
-                    out.write(" already seeked ");
+                    rows.put(tokPattern+" skipped");
                 }
             }
-            else if (isDownload) {
-                if (npatt.pState != NewsBunch.STATE_DOWNLOAD_DONE &&
-                    npatt.pState != NewsBunch.STATE_DOWNLOAD) {
-                    npatt.pState = NewsBunch.STATE_DOWNLOAD;
-                    NewsActionDownloadAll nasp = new NewsActionDownloadAll(npatt);
+            else if ("seek".equals(batchop)) {
+                if (oneBunch.pState != NewsBunch.STATE_SEEK_DONE &&
+                    oneBunch.pState != NewsBunch.STATE_SEEK  &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE  &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
+                    oneBunch.pState = NewsBunch.STATE_SEEK;
+                    NewsActionSeekBunch nasp = new NewsActionSeekBunch(oneBunch);
+                    nasp.addToFrontOfMid();
+                    rows.put(tokPattern+" seeking");
+                }
+                else {
+                    rows.put(tokPattern+" skipped");
+                }
+            }
+            else if ("download".equals(batchop)) {
+                if (oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
+                    oneBunch.pState = NewsBunch.STATE_DOWNLOAD;
+                    NewsActionDownloadAll nasp = new NewsActionDownloadAll(oneBunch);
                     nasp.addToFrontOfLow();
-                    out.write(" DOWNLOAD ");
+                    rows.put(tokPattern+" downloading");
                 }
                 else {
-                    out.write(" already downloading ");
+                    rows.put(tokPattern+" skipped");
                 }
             }
-            else if (isStore) {
-                if (filePath.equals(npatt.getFolderLoc())) {
-                    out.write(" skipped (already there) ");
+            else if ("default".equals(batchop)) {
+                if (oneBunch.hasFolder()) {
+                    rows.put(tokPattern+" skipped");
                 }
                 else {
-                    npatt.changeFolder(filePath, true);
-                    out.write(" path saved: "+filePath);
+                    oneBunch.changeFolder(filePath, true);
+                    rows.put(tokPattern+" set path");
                 }
-                String temp = npatt.getTemplate();
-                npatt.changeTemplate(temp,false);
+                String temp = oneBunch.getTemplate();
+                oneBunch.changeTemplate(temp,false);
                 if (true) {
-                    out.write(" NAME SET ");
+                    rows.put(tokPattern+" set name");
                 }
                 else {
-                    out.write(" can't find name");
+                    rows.put(tokPattern+" could not find name");
                 }
+            }
+            else if ("store".equals(batchop)) {
+                if (filePath.equals(oneBunch.getFolderLoc())) {
+                    rows.put(tokPattern+" skipped");
+                }
+                else {
+                    oneBunch.changeFolder(filePath, true);
+                    rows.put(tokPattern+" set path");
+                }
+                String temp = oneBunch.getTemplate();
+                oneBunch.changeTemplate(temp,false);
+                if (true) {
+                    rows.put(tokPattern+" set name");
+                }
+                else {
+                    rows.put(tokPattern+" could not find name");
+                }
+            }
+            else {
+                throw new Exception("Don't understand the operation: "+batchop);
             }
         }
     }
     catch (Exception e) {
-%>
-<H1>Error</H1>
-<h2>
-Exception: <% HTMLWriter.writeHtml(out,e.toString()); %>
-</h2>
-<hr>
-<a href="main.jsp"><img src="home.gif"></a>
-<a href="config.jsp">Config</a>
-<pre>
-<% out.flush(); %>
-<% e.printStackTrace(new PrintWriter(out)); %>
-</pre>
-<%
-
+        response.setStatus(500);
+        results.put("error", JSONException.convertToJSON(e, "batch processing"));
     }
-%>
-<hr/>
-<p><a href="news.jsp">News</a></p>
-</body>
-</html>
-<%!//replace with NewsFilter.filterThese when compiled
-    public List<NewsBunch> filterTheseNoSort(NewsGroup newsGroup, String filter) throws Exception{
-        List<NewsBunch> filteredPatterns = newsGroup.getFilteredBunches(filter);
-        return filteredPatterns;
-    }
-
+    results.write(out, 2, 0);
 %>
 

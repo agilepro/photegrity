@@ -222,7 +222,7 @@
                 console.log("FETCHING: "+url);
                 var promise = $http.get(url);
                 promise.error(function(msg){
-                    alert("error: "+msg);
+                    alert("error: "+JSON.stringify(msg,null,2));
                 });
                 return promise;
             },
@@ -235,8 +235,19 @@
                 var promise = $http.post("api/session/foo/boo", sessionRec);
                 promise.success( callback );
                 promise.error( function(data, status, headers, config) {
-                    console.log("the POST failed: "+JSON.stringify(data));
-                    alert("session update failed: "+JSON.stringify(data));
+                    console.log("the POST failed: "+JSON.stringify(data,null,2));
+                    alert("session update failed: "+JSON.stringify(data,null,2));
+                });
+                return promise;
+            },
+            batchOperation: function(command, filter, filePath) {
+                var url = 'newsBatch.jsp?filter='+encodeURIComponent(filter)
+                                       +'&filePath='+encodeURIComponent(filePath)
+                                       +'&batchop='+command;
+                console.log("BATCH: "+url);
+                var promise = $http.get(url);
+                promise.error(function(msg){
+                    alert("error: "+JSON.stringify(msg,null,2));
                 });
                 return promise;
             }
@@ -328,6 +339,7 @@
             $scope.rereadData();
         }
         $scope.toggleShow = function (opt) {
+            $scope.photoSettings.showState[opt] = !$scope.photoSettings.showState[opt];
             $scope.storeSessionInfo();
             $scope.findSearchValueOffset();
         }
@@ -735,6 +747,28 @@
         $event.stopPropagation();
         $scope.status.isopen = !$scope.status.isopen;
       };
+      
+      $scope.batchOpList = [
+          {val:"nothing",disp:"Do Nothing"},
+          {val:"bit",disp:"Download a few of the files"},
+          {val:"seek",disp:"Seek those that need it."},
+          {val:"default",disp:"Set path for those that do not have path"},
+          {val:"store",disp:"Set path for all in Selection"},
+          {val:"download",disp:"Download those that need it."},
+          {val:"complete",disp:"Mark All Completed"},
+          {val:"hide",disp:"Hide All in Selection"},
+          {val:"clear",disp:"Reset All to initial state"}
+          ];
+      $scope.batchOp = "nothing";
+      $scope.batchPath = "";
+      $scope.doBatch = function() {
+          bunchFactory.batchOperation($scope.batchOp, $scope.photoSettings.filter, $scope.session.zingFolder)
+          .success( function(data) {
+              alert("batch operation successful "+JSON.stringify(data,null,2));
+              $scope.rereadData();
+          });
+      }
+      
     });
 
     bunchApp.filter('encode', function() {
@@ -822,33 +856,38 @@ Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
     about {{discardBefore-newsInfo.lowestFetched | number}} records
 </form>
 
-<form action="newsBatch.jsp">
 <input type="text" name="filter" ng-model="photoSettings.filter">
-<input type="text" name="checkSize" ng-model="filteredRecs.length">
-(<input type="radio" name="batchop" value="hide"> Hide all)
-(<input type="radio" name="batchop" value="complete"> Complete all)
-(<input type="radio" name="batchop" value="seek"> Seek all)
-(<input type="radio" name="batchop" value="download"> Download all)
-(<input type="radio" name="batchop" value="store"> Set Path:
-<input type="text" name="filePath" value="{{session.zingFolder}}">)
-(<input type="radio" name="batchop" value="nothing"> Nothing)
-<input type="submit" name="command" value="Batch Operation {{filteredRecs.length}}">
-<input type="hidden" name="go" value="news.jsp?start=<%=start%>">
-</form>
+<input type="text" name="checkSize" ng-model="filteredRecs.length"><br/>
+<button ng-click="doBatch()">Batch Op {{filteredRecs.length}}</button>
+<select ng-model="batchOp" ng-options="op.val as op.disp for op in batchOpList"></select>
+{{session.zingFolder}}
+
 
 
 </div>
 
-<input type="checkbox" ng-model="photoSettings.showState[0]" ng-click="toggleShow(0)"> New
-<input type="checkbox" ng-model="photoSettings.showState[1]" ng-click="toggleShow(1)"> Interested
-<input type="checkbox" ng-model="photoSettings.showState[2]" ng-click="toggleShow(2)"> Active-Seek
-<input type="checkbox" ng-model="photoSettings.showState[3]" ng-click="toggleShow(3)"> Seeked
-<input type="checkbox" ng-model="photoSettings.showState[4]" ng-click="toggleShow(4)"> Active-Down
-<input type="checkbox" ng-model="photoSettings.showState[5]" ng-click="toggleShow(5)"> Down
-<input type="checkbox" ng-model="photoSettings.showState[6]" ng-click="toggleShow(6)"> Completed
-<input type="checkbox" ng-model="photoSettings.showState[7]" ng-click="toggleShow(7)"> Hidden
-<input type="checkbox" ng-model="photoSettings.showState[8]" ng-click="toggleShow(8)"> ???
-<input type="checkbox" ng-model="photoSettings.showState[9]" ng-click="toggleShow(9)"> Bit
+<button ng-click="toggleShow(0)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[0]"> New </button>
+<button ng-click="toggleShow(1)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[1]"> Interested </button>
+<button ng-click="toggleShow(2)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[2]"> Active-Seek </button>
+<button ng-click="toggleShow(3)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[3]"> Seeked </button>
+<button ng-click="toggleShow(4)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[4]"> Active-Down </button>
+<button ng-click="toggleShow(5)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[5]"> Down </button>
+<button ng-click="toggleShow(6)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[6]"> Completed </button>
+<button ng-click="toggleShow(7)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[7]"> Hidden </button>
+<button ng-click="toggleShow(8)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[8]"> ??? </button>
+<button ng-click="toggleShow(9)" class="btn btn-sm">
+    <input type="checkbox" ng-model="photoSettings.showState[9]"> Bit </button>
+    
+    
 <br/>
 
 <br/>

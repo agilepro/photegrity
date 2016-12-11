@@ -26,8 +26,7 @@ public class NewsActionDownloadAll extends NewsAction {
             throw new Exception("unable to create the folder: "+storeFile);
         }
         if (!seeker.hasTemplate()) {
-            throw new Exception(
-                    "must set the file name template on the NewsPattern in order to retrieve all message bodies.");
+            seeker.createFolderIfReasonable();
         }
         seeker.isDownloading = true;
         seeker.pState = NewsBunch.STATE_DOWNLOAD;

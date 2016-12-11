@@ -54,9 +54,7 @@ public class NewsActionDownloadFile extends NewsAction {
             HTMLWriter.writeHtml(out, newsFile.getFileName());
             out.flush();
             if (!bunch.hasFolder()) {
-                throw new Exception(
-                        "Can not retrieve file. NewsPattern does not have a file path to store to.  Pattern = ("
-                                + bunch.digest + ")");
+                bunch.createFolderIfReasonable();
             }
             File folder = bunch.getFolderPath();
             if (!folder.exists()) {

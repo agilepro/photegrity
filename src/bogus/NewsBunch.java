@@ -125,41 +125,36 @@ public class NewsBunch {
 
         // initialize to *something*
         disk = ng.defaultDiskMgr;
-        String fakePath = cleanPunct(_bunch);
-        fakePath = makeReasonableFakePath(fakePath);
-        setRelativePath(fakePath);
+        setRelativePath(makeReasonablePath(_bunch));
 
         //check to see if there is a YEnc indicator in the subject line
         isYEnc =  (_bunch.toLowerCase().indexOf("yenc")>0);
     }
 
 
-    private String makeReasonableFakePath(String fakePath) {
+    private String makeReasonablePath(String _bunch) {
         boolean loop = true;
+        String fakePath = cleanPunct(_bunch);
         while (loop) {
         	loop = false;
-        	int dotPos = fakePath.lastIndexOf(".");
-        	if (dotPos>fakePath.length()-4 && fakePath.length()>5) {
-        		//trim off small tiny zero, one or two letter entries between dots at the end
-        		fakePath = fakePath.substring(0,dotPos);
-	        	loop = true;
+        	//get rid of jpg if it exists
+        	fakePath = fakePath.replaceAll("jpg", "");
+            //get rid of zip if it exists
+            fakePath = fakePath.replaceAll("zip", "");
+            //get rid of rar if it exists
+            fakePath = fakePath.replaceAll("rar", "");
+         	if (fakePath.length()>5) {
+            	int dotPos = fakePath.lastIndexOf(".");
+            	if (dotPos>fakePath.length()-4) {
+            		//trim off small tiny zero, one or two letter entries between dots at the end
+            		fakePath = fakePath.substring(0,dotPos);
+    	        	loop = true;
+            	}
         	}
-	        int jpgIdx = fakePath.indexOf("jpg");
-	        if (jpgIdx>15) {
-	        	//get rid of jpg if it exists
-	        	fakePath = fakePath.substring(0,jpgIdx);
-	        	loop = true;
-	        }
-	        jpgIdx = fakePath.indexOf("zip");
-	        if (jpgIdx>15) {
-	        	fakePath = fakePath.substring(0,jpgIdx);
-	        	loop = true;
-	        }
-	        jpgIdx = fakePath.indexOf("rar");
-	        if (jpgIdx>15) {
-	        	fakePath = fakePath.substring(0,jpgIdx);
-	        	loop = true;
-	        }
+       }
+        if (fakePath.length()<10) {
+            //add a completely arbitrary thing to make it more unique
+            fakePath = fakePath + Long.toString( System.currentTimeMillis() );
         }
         if (!fakePath.endsWith("/")) {
             fakePath = fakePath + "/";
@@ -947,6 +942,18 @@ public class NewsBunch {
     public boolean hasFolder() {
         File proposed = getFolderPath();
         return (proposed.exists());
+    }
+    
+    public void createFolderIfReasonable() {
+        if (pathInDisk==null) {
+            pathInDisk = Long.toString( System.currentTimeMillis() ).substring(4);
+        }
+        if (pathInDisk.length()<4) {
+            //add an arbitrary thing to make this more unique if the path is short or not there
+            pathInDisk = pathInDisk + Long.toString( System.currentTimeMillis() ).substring(7);
+        }
+        File proposed = getFolderPath();
+        proposed.mkdirs();
     }
 
     public File getFolderPath() {

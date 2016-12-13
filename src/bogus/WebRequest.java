@@ -5,18 +5,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.workcast.json.JSONArray;
+import org.workcast.json.JSONException;
 import org.workcast.json.JSONObject;
 import org.workcast.json.JSONTokener;
 import org.workcast.streams.StreamHelper;
@@ -169,7 +166,7 @@ public class WebRequest {
                 throw new Exception("a null writer object was passed into streamException");
             }
 
-            JSONObject responseBody = convertExceptionToJSON(e);
+            JSONObject responseBody = JSONException.convertToJSON(e, request.getRequestURI());
             response.setContentType("application/json");
             response.setStatus(400);
             responseBody.write(w, 2, 0);
@@ -179,119 +176,6 @@ public class WebRequest {
             System.out.println("EXCEPTION_WITHIN_EXCEPTION: "+eeeee);
             eeeee.printStackTrace();
         }
-    }
-
-
-
-
-
-    public static JSONObject convertExceptionToJSON(Exception e) throws Exception {
-        JSONObject responseBody = new JSONObject();
-        JSONObject errorTag = new JSONObject();
-        responseBody.put("error", errorTag);
-
-        errorTag.put("code", 400);
-
-        JSONArray detailList = new JSONArray();
-        errorTag.put("details", detailList);
-
-        String lastMessage = "";
-        Throwable runner = e;
-        while (runner!=null) {
-            String className =  runner.getClass().getName();
-            String msg =  runner.toString();
-
-            //iflow has this annoying habit of including all the later causes in the response
-            //surrounded by braces.  This strips them off because we are going to iterate down
-            //to those causes anyway.
-            boolean isIFlow = className.indexOf("iflow")>0;
-            if (isIFlow) {
-                int bracePos = msg.indexOf('{');
-                if (bracePos>0) {
-                    msg = msg.substring(0,bracePos);
-                }
-            }
-
-            if (msg.startsWith(className)) {
-                int skipTo = className.length();
-                while (skipTo<msg.length()) {
-                    char ch = msg.charAt(skipTo);
-                    if (ch != ':' && ch != ' ') {
-                        break;
-                    }
-                    skipTo++;
-                }
-                msg = msg.substring(skipTo);
-            }
-
-            runner = runner.getCause();
-            if (lastMessage.equals(msg)) {
-                //model api has an incredibly stupid pattern of catching an exception, and then throwing a
-                //new exception with the exact same message.  This ends up in three or four duplicate messages.
-                //Check here for that problem, and eliminate duplicate messages by skipping rest of loop.
-                continue;
-            }
-            lastMessage = msg;
-
-            JSONObject detailObj = new JSONObject();
-            detailObj.put("message",msg);
-            int dotPos = className.lastIndexOf(".");
-            if (dotPos>0) {
-                className = className.substring(dotPos+1);
-            }
-            detailObj.put("code",className);
-            System.out.println("          ERR: "+msg);
-            detailList.put(detailObj);
-        }
-
-        JSONObject innerError = new JSONObject();
-        errorTag.put("innerError", innerError);
-
-        JSONArray stackList = new JSONArray();
-        runner = e;
-        while (runner != null) {
-            for (StackTraceElement ste : runner.getStackTrace()) {
-                String line = ste.getFileName() + ":" + ste.getMethodName() + ":" + ste.getLineNumber();
-                stackList.put(line);
-            }
-            stackList.put("----------------");
-            runner = runner.getCause();
-        }
-        errorTag.put("stack", stackList);
-
-        StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
-        List<String> nicerStack = prettifyStack(sw.toString());
-        for (String onePart : nicerStack) {
-            stackList.put(onePart);
-        }
-        return responseBody;
-    }
-
-    private static List<String> prettifyStack(String input) {
-        ArrayList<String> res = new ArrayList<String>();
-        int start = 0;
-        int pos = input.indexOf('\r');
-        while (pos>0) {
-            String line = input.substring(start, pos).trim();
-            int parenPos = line.indexOf('(');
-            if (parenPos>0 && parenPos<line.length()) {
-                String fullMethod = line.substring(0,parenPos);
-                int methodPoint = fullMethod.lastIndexOf('.');
-                if (methodPoint>0 && methodPoint<fullMethod.length()) {
-                    res.add(fullMethod.substring(methodPoint+1)+line.substring(parenPos));
-                }
-                else {
-                    res.add(line);
-                }
-            }
-            else {
-                res.add(line);
-            }
-            start = pos+1;
-            pos = input.indexOf('\r', start);
-        }
-        return res;
     }
 
 }

@@ -16,8 +16,6 @@
 
 package bogus;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 
 import javax.servlet.ServletConfig;
@@ -26,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.workcast.json.JSONArray;
 import org.workcast.json.JSONObject;
 
 /**
@@ -122,46 +119,6 @@ public class APIServlet extends javax.servlet.http.HttpServlet {
         resp.setHeader("Vary",                             "*");
     	
     }
-    
-    private void streamException(Exception e, HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            //all exceptions are delayed by 3 seconds to avoid attempts to
-            //mine for valid license numbers
-            Thread.sleep(3000);
 
-            System.out.println("API_ERROR: "+req.getRequestURL());
-
-            e.printStackTrace();
-
-            JSONObject errorResponse = new JSONObject();
-            errorResponse.put("responseCode", 500);
-            JSONObject exception = new JSONObject();
-            errorResponse.put("exception", exception);
-
-            JSONArray msgs = new JSONArray();
-            Throwable runner = e;
-            while (runner!=null) {
-                System.out.println("    ERROR: "+runner.toString());
-                msgs.put(runner.toString());
-                runner = runner.getCause();
-            }
-            exception.put("msgs", msgs);
-
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            exception.put("stack", sw.toString());
-
-            resp.setContentType("application/json");
-            resp.setStatus(500);
-            Writer w = resp.getWriter();
-            errorResponse.write(w, 2, 0);
-            w.flush();
-            w.close();
-        } catch (Exception eeeee) {
-            // nothing we can do here...
-        	System.out.print("\nCRITIAL ERROR WHILE HANDLING AN EXCEPTION - stack trace below\n");
-        	eeeee.printStackTrace();
-        }
-    }
 
 }

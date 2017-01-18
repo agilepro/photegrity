@@ -61,8 +61,15 @@
         for (NewsBunch oneBunch : filteredBunches) {
 
             String tokPattern = oneBunch.tokenFill();
-            if ("nothing".equals(batchop)) {
-                rows.put(tokPattern+" NOTHING");
+            if ("clear".equals(batchop)) {
+                oneBunch.pState = NewsBunch.STATE_INITIAL;
+                rows.put(tokPattern+" cleared");
+            }
+            else if (oneBunch.pState == NewsBunch.STATE_HIDDEN) {
+                rows.put(tokPattern+" is HIDDEN - can not do "+batchop);
+            }
+            else if ("nothing".equals(batchop)) {
+                rows.put(tokPattern+" NOTHING ");
             }
             else if ("hide".equals(batchop)) {
                 oneBunch.pState = NewsBunch.STATE_HIDDEN;
@@ -72,47 +79,8 @@
                 oneBunch.pState = NewsBunch.STATE_COMPLETE;
                 rows.put(tokPattern+" completed");
             }
-            else if ("clear".equals(batchop)) {
-                oneBunch.pState = NewsBunch.STATE_INITIAL;
-                rows.put(tokPattern+" cleared");
-            }
-            else if ("bit".equals(batchop)) {
-                if (oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE  &&
-                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
-                    oneBunch.pState = NewsBunch.STATE_GETABIT;
-                    NewsActionSeekABit nasp = new NewsActionSeekABit(oneBunch);
-                    nasp.addToFrontOfMid();
-                    rows.put(tokPattern+" get a bit");
-                }
-                else {
-                    rows.put(tokPattern+" skipped");
-                }
-            }
-            else if ("seek".equals(batchop)) {
-                if (oneBunch.pState != NewsBunch.STATE_SEEK_DONE &&
-                    oneBunch.pState != NewsBunch.STATE_SEEK  &&
-                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE  &&
-                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
-                    oneBunch.pState = NewsBunch.STATE_SEEK;
-                    NewsActionSeekBunch nasp = new NewsActionSeekBunch(oneBunch);
-                    nasp.addToFrontOfMid();
-                    rows.put(tokPattern+" seeking");
-                }
-                else {
-                    rows.put(tokPattern+" skipped");
-                }
-            }
-            else if ("download".equals(batchop)) {
-                if (oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE &&
-                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
-                    oneBunch.pState = NewsBunch.STATE_DOWNLOAD;
-                    NewsActionDownloadAll nasp = new NewsActionDownloadAll(oneBunch);
-                    nasp.addToFrontOfLow();
-                    rows.put(tokPattern+" downloading");
-                }
-                else {
-                    rows.put(tokPattern+" skipped");
-                }
+            else if (oneBunch.pState == NewsBunch.STATE_COMPLETE) {
+                rows.put(tokPattern+" is COMPLETED - can not do "+batchop);
             }
             else if ("default".equals(batchop)) {
                 if (oneBunch.hasFolder()) {
@@ -146,6 +114,44 @@
                 }
                 else {
                     rows.put(tokPattern+" could not find name");
+                }
+            }
+            else if (oneBunch.pState == NewsBunch.STATE_DOWNLOAD_DONE) {
+                rows.put(tokPattern+" is DOWNLOADED - can not do "+batchop);
+            }
+            else if (oneBunch.pState == NewsBunch.STATE_DOWNLOAD) {
+                rows.put(tokPattern+" is DOWNLOADING - can not do "+batchop);
+            }
+            else if ("download".equals(batchop)) {
+                oneBunch.pState = NewsBunch.STATE_DOWNLOAD;
+                NewsActionDownloadAll nasp = new NewsActionDownloadAll(oneBunch);
+                nasp.addToFrontOfLow();
+                rows.put(tokPattern+" downloading");
+            }
+            else if ("seek".equals(batchop)) {
+                if (oneBunch.pState != NewsBunch.STATE_SEEK_DONE &&
+                    oneBunch.pState != NewsBunch.STATE_SEEK  &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE  &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
+                    oneBunch.pState = NewsBunch.STATE_SEEK;
+                    NewsActionSeekBunch nasp = new NewsActionSeekBunch(oneBunch);
+                    nasp.addToFrontOfMid();
+                    rows.put(tokPattern+" seeking");
+                }
+                else {
+                    rows.put(tokPattern+" skipped");
+                }
+            }
+            else if ("bit".equals(batchop)) {
+                if (oneBunch.pState != NewsBunch.STATE_DOWNLOAD_DONE  &&
+                    oneBunch.pState != NewsBunch.STATE_DOWNLOAD) {
+                    oneBunch.pState = NewsBunch.STATE_GETABIT;
+                    NewsActionSeekABit nasp = new NewsActionSeekABit(oneBunch);
+                    nasp.addToFrontOfMid();
+                    rows.put(tokPattern+" get a bit");
+                }
+                else {
+                    rows.put(tokPattern+" skipped");
                 }
             }
             else {

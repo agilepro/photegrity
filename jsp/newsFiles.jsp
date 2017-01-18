@@ -140,14 +140,14 @@
                 $http.get('listFiles.jsp?d=<%=URLEncoder.encode(dig,"UTF-8")%>')
                 .success(callback)
                 .error( function(data) {
-                    alert(data);
+                    alert(JSON.stringify(data,null,2));
                 });
             },
             getBunch: function(callback) {
                 $http.get('getBunch.jsp?dig=<%=URLEncoder.encode(dig,"UTF-8")%>')
                 .success(callback)
                 .error( function(data) {
-                    alert(data);
+                    alert(JSON.stringify(data,null,2));
                 });
             }
         }
@@ -263,7 +263,7 @@
                 $scope.refetchData();
             }).error(function(data){
                 $scope.opResult = "error: "+data;
-                alert("error: "+data);
+                alert("NF Error: "+JSON.stringify(data,null,2));
             });
         }
 

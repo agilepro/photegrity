@@ -189,7 +189,7 @@
         if (!bunch.hasTemplate()) {
             String temp = UtilityMethods.defParam(request, "template", null);
             if (temp==null) {
-                throw new Exception("Need to have a template specified!");
+                temp = bunch.getTemplate();
             }
             String templc = temp.toLowerCase();
             if (!templc.endsWith(".jpg")) {
@@ -198,18 +198,7 @@
             bunch.changeTemplate(temp, false);
         }
         if (!bunch.hasFolder()) {
-            String dest = UtilityMethods.defParam(request, "folder", null);
-            if (dest==null) {
-                throw new Exception("Need to have a folder specified!");
-            }
-            while (dest.endsWith(".")) {
-                dest = dest.substring(0,dest.length()-1);
-            }
-            bunch.changeFolder(dest, false);
-            File storeFile = bunch.getFolderPath();
-            if (!storeFile.exists()) {
-                storeFile.mkdirs();
-            }
+            bunch.createFolderIfReasonable();
         }
     }
 %>

@@ -62,7 +62,7 @@
     LocalMapping map = LocalMapping.getMapping(tempPP);
 
 
-    String url = "newsDetail.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8");
+    String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8");
     String thisUrl = "newsMatch.jsp?artno="+artnoInt;
 
     String  fileName = art.fillTemplate(npatt.getTemplate());
@@ -139,7 +139,7 @@
 <h3>News Article PATTERN Match</h3>
 <table><tr><td><a href="news.jsp?<%=startPart%>">News</a></td>
            <td><a href="newsFiles.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>">Files</a></td>
-           <td><a href="newsDetail.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>">Articles</a></td></tr></table>
+           <td><a href="newsDetail2.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>">Articles</a></td></tr></table>
 <hr/>
 
 <ul>

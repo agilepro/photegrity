@@ -277,7 +277,13 @@
     } %>
     </form>
 </ul>
-<table>
+<style>
+.clevertable tr td {
+    padding-left:5px;
+    padding-right:5px
+}
+</style>
+<table class="clevertable">
   <tr ng-repeat="rec in recs">
      <td><a href="newsOne.jsp?artno={{rec.num}}">{{rec.num}}</a> &nbsp; </td>
      <td>{{rec.subject}}</td>
@@ -286,7 +292,8 @@
                target="photo"><img src="fileExists.png"></a></span>
          <span ng-hide="rec.viz"><a href="newsOneAction.jsp?artno={{rec.num}}&action=Read%20Article"
                target="photo"><img src="downicon.gif"></a></span></td>
-     <td>{{rec.fileName}}</td>
+     <td> {{rec.fileName}} </td>
+     <td style="background-color:grey"> {{rec.from}} </td>
   </tr>
 </table>
 <table>

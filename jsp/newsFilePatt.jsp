@@ -143,7 +143,7 @@
 <h3>News Files Listing  <%=queueMsg%></h3>
 <p><a href="news.jsp?<%=startPart%>">News</a>
  | <a href="newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Files</a>
- | <a href="newsDetail.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Articles</a>
+ | <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Articles</a>
  | <a href="newsPatterns.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Patterns</a></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="<%=bunch.getStateColor()%>"><%

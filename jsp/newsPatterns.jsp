@@ -98,7 +98,7 @@
 <body>
 <h3>News Files Patterns <%=queueMsg%></h3>
 <p><a href="news.jsp?<%=startPart%>">News</a>
- | <a href="newsDetail.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Articles</a>
+ | <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Articles</a>
  | <a href="newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Files</a>
  | <font color="red">Patterns</font></p>
 

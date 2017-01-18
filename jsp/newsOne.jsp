@@ -53,7 +53,7 @@
     if (art!=null)
     {
         NewsBunch npatt = newsGroup.getBunch(art.getDigest());
-        String url = "newsDetail.jsp?f="+URLEncoder.encode(art.getHeaderFrom(), "UTF-8")
+        String url = "newsDetail2.jsp?f="+URLEncoder.encode(art.getHeaderFrom(), "UTF-8")
              +"&d="+URLEncoder.encode(art.getDigest(), "UTF-8");
 %>
 

@@ -962,10 +962,10 @@ Filter: <input ng-model="photoSettings.filter">
      </td>
      <td style="{{rec.cTotal>0 && rec.cTotal-rec.cDown==0 ? 'text-align: right;background-color: lightgreen;' : 'text-align: right;'}}">
      {{rec.cDown}}+{{rec.cComplete-rec.cDown}}+{{rec.cTotal-rec.cComplete}} </td>
-     <td ng-show="photoSettings.showId">|{{rec.minId|number}} - {{rec.maxId|number}}|</td>
+     <td ng-show="photoSettings.showId">{{rec.minId|number}} - {{rec.maxId|number}}</td>
      <td ng-hide="photoSettings.showId"></td>
-     <td ng-show="photoSettings.showSender">{{rec.sender}}</td>
-     <td ng-hide="photoSettings.showSender"><a href="newsPatterns.jsp?d={{rec.digest|encode}}">P</a>
+     <td ng-show="photoSettings.showSender" style="background-color:gray;color:white"> {{rec.sender}} </td>
+     <td ng-hide="photoSettings.showSender" style="border:solid 2px lightgray;"><a href="newsPatterns.jsp?d={{rec.digest|encode}}">P</a>
          <a href="api/b={{rec.key}}">X</a></td>
      <td ng-show="rec.hasTemplate">
          <a href="newsFiles.jsp?start={{offset}}&d={{rec.digest|encode}}">

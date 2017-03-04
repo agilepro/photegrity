@@ -1,9 +1,13 @@
 package bogus;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Vector;
-import bogus.ImageInfo;
+
+import org.workcast.json.JSONArray;
+import org.workcast.json.JSONObject;
 
 public class GridData {
 
@@ -248,6 +252,49 @@ public class GridData {
         for (String testCol : removable) {
             selectedColumns.remove(testCol);
         }
+    }
+    
+    public JSONObject getJSON() throws Exception {
+        JSONObject total = new JSONObject();
+        JSONObject gridjo = new JSONObject();
+        Set<String> valueSet = new HashSet<String>();
+        Set<String> colSet = new HashSet<String>();
+        
+        for (Vector<ImageInfo> rowVec : grid) {
+            for (ImageInfo ii : rowVec) {
+                String thisValue = Integer.toString(1000+ii.value).substring(1);
+                valueSet.add(thisValue);
+                String thisCol = ii.getPatternSymbol();
+                colSet.add(thisCol);
+                
+                if (!gridjo.has(thisCol)) {
+                    gridjo.put(thisCol, new JSONObject());
+                }
+                
+                JSONObject colObj = gridjo.getJSONObject(thisCol);
+                colObj.put(thisValue, ii.getJSON());
+            }
+        }
+        total.put("grid",  gridjo);
+
+        JSONArray valuesjo = new JSONArray();
+        for (String value : valueSet) {
+            valuesjo.put(value);
+        }
+        total.put("rows",  valuesjo);
+
+        JSONArray colsjo = new JSONArray();
+        JSONObject defs = new JSONObject();
+        for (String col : colSet) {
+            colsjo.put(col);
+            ImageInfo defImg = this.defaultImage(col);
+            defs.put(col, defImg.getJSON());
+        }
+        total.put("cols",  colsjo);
+        total.put("defs",  defs);
+        
+        
+        return total;
     }
 
 }

@@ -29,11 +29,6 @@
     }
 
     String pageName = "showGrid.jsp";
-    String unneededQuery = request.getParameter("q");
-    if (unneededQuery!=null)
-    {
-        throw new Exception("got a query but we don't need one");
-    }
 
     GridData gData = (GridData) session.getAttribute("gData");
     if (gData==null)
@@ -151,7 +146,7 @@
 <HTML>
 <HEAD><TITLE>Show <%= r %> / <%= recordCount %></TITLE></HEAD>
 <BODY BGCOLOR="#FDF5FF">
-<table><tr><td>
+
 
 <table><tr>
    <td bgcolor="#FF0000">
@@ -170,6 +165,8 @@
       <a href="compare.jsp">Compare</a>
    </td><td>
       <a href="showRow.jsp?r=<%=r%>">Row</a>
+   </td><td>
+      <a href="showGrid2.jsp?r=<%=r%>">Grid2</a>
    </td></tr>
 </table>
 <table>

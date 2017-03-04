@@ -368,6 +368,12 @@ public class NewsArticle {
                 else if (ch=='b') {
                     res.append(optionValue[1]);
                 }
+                else if (ch=='c') {
+                    res.append(Long.toString(articleNo/1000));
+                }
+                else if (ch=='d') {
+                    res.append(sanitize(optionValue[1]));
+                }
                 else if (idx >= 0 && idx < fPrint.size()) {
                     if (idx!=specialIndex) {
                         res.append(fPrint.get(idx));
@@ -395,6 +401,19 @@ public class NewsArticle {
             }
         }
         return res.toString();
+    }
+    
+    public String sanitize(String src) {
+        StringBuilder sb = new StringBuilder();
+        for (int i=src.length()-1; i>=0; i--) {
+            char ch = src.charAt(i);
+            if ( (ch>='0' && ch<='9')
+               || (ch>='a' && ch<='z')
+               || (ch>='A' && ch<='Z')) {
+                sb.append(ch);
+            }
+        }
+        return sb.toString().toLowerCase();
     }
 
     public String getFileNameOrFail() throws Exception {

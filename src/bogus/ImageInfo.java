@@ -1722,9 +1722,7 @@ public class ImageInfo
         }
     }
 
-
-    public void storeInElasticSearch(Writer out) throws Exception {
-        
+    public JSONObject getJSON() throws Exception {
         JSONObject wholeDoc = new JSONObject();
         wholeDoc.put("disk", pp.getDiskMgr().diskName);
         wholeDoc.put("path", pp.getLocalPath());
@@ -1738,7 +1736,11 @@ public class ImageInfo
             tags.put(ti.tagName);
         }
         wholeDoc.put("tags", tags);
-        
+        return wholeDoc;
+    }
+
+    public void storeInElasticSearch(Writer out) throws Exception {
+        JSONObject wholeDoc = getJSON();
         URL url = new URL("http://bobcat:9200/photos/images/");
         JSONObject response = RemoteJSON.postToRemote(url, wholeDoc);
         

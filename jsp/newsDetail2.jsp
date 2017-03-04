@@ -64,7 +64,7 @@
     }
     if (template.equals("$0.jpg")) {
         String xy = bunch.getFolderLoc().toLowerCase();
-        StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer("$d-");
         boolean skipping = false;
         for (int i=0; i<xy.length(); i++) {
             char ch = xy.charAt(i);
@@ -80,7 +80,7 @@
                 }
             }                
         }
-        sb.append("$a.jpg");
+        sb.append("$0.jpg");
         template = sb.toString();
     }
     String folder = bunch.getFolderLoc();
@@ -300,7 +300,9 @@
 <p>Displayed {{recs.length}} subject lines, ((pCount)) of them partially complete.</p>
 </body>
 
-<%!public String tokenFill(String digest) {
+<%!
+
+    public String tokenFill(String digest) {
 
         StringBuffer res = new StringBuffer();
         int count = 0;
@@ -319,7 +321,31 @@
 
         }
         return res.toString();
-    }%>
+    }
+    public String cleanString(String digest) {
+
+        StringBuffer res = new StringBuffer();
+        int count = 0;
+        for (int i=0; i<digest.length(); i++) {
+
+            char ch = digest.charAt(i);
+
+            if (ch>'a'&&ch<'z') {
+                res.append(ch);
+            }
+            else if (ch>'A'&&ch<'Z') {
+                res.append(ch);
+            }
+            else {
+                //ignore it
+            }
+
+        }
+        return res.toString();
+    }
+    
+    
+%>
 
 
 <script>

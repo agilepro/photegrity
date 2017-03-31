@@ -40,13 +40,14 @@
 
 
     String dig = UtilityMethods.reqParam(request, "News Files Listing", "d");
+    String f = UtilityMethods.reqParam(request, "News Files Listing", "f");
     String sort= UtilityMethods.defParam(request, "sort", "dig");
     String selPatt = UtilityMethods.reqParam(request, "News Files Listing", "selPatt");
-    String thisPage = "newsFilePatt.jsp?d="+URLEncoder.encode(dig,"UTF-8")+"&selPatt="+URLEncoder.encode(selPatt,"UTF-8");
+    String thisPage = "newsFilePatt.jsp?d="+URLEncoder.encode(dig,"UTF-8")+"&f="+URLEncoder.encode(f,"UTF-8")+"&selPatt="+URLEncoder.encode(selPatt,"UTF-8");
 
     String startPart = "search="+URLEncoder.encode(dig,"UTF-8");
 
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
 
     boolean hasData = bunch.hasTemplate();
 
@@ -142,15 +143,15 @@
 <body>
 <h3>News Files Listing  <%=queueMsg%></h3>
 <p><a href="news.jsp?<%=startPart%>">News</a>
- | <a href="newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Files</a>
- | <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Articles</a>
- | <a href="newsPatterns.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Patterns</a></p>
+ | <a href="newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Files</a>
+ | <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Articles</a>
+ | <a href="newsPatterns.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Patterns</a></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="<%=bunch.getStateColor()%>"><%
     HTMLWriter.writeHtml(out, bunch.digest);
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>" name="moveForm" method="post">
+    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>" name="moveForm" method="post">
     <input type="hidden" name="selPatt" value="<%HTMLWriter.writeHtml(out, selPatt);%>">
     <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPage);%>">
     <li>Current: <font color="brown"><%
@@ -269,7 +270,7 @@
         }
 %>
 <tr>
-<td><a href="newsFileDelete.jsp?fn=<%=URLEncoder.encode(tempFileName,"UTF-8")%>&go=<%=URLEncoder.encode(thisPage,"UTF-8")%>&dig=<%=URLEncoder.encode(dig, "UTF-8")%>"><img src="trash.gif"></a> </td>
+<td><a href="newsFileDelete.jsp?fn=<%=URLEncoder.encode(tempFileName,"UTF-8")%>&go=<%=URLEncoder.encode(thisPage,"UTF-8")%>&dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>"><img src="trash.gif"></a> </td>
 <td><% HTMLWriter.writeHtml(out, tempFileName); %> &nbsp; </td>
 <td><% if (tempActualFile!=null) {
         %><a href="/photo/photo/<%HTMLWriter.writeHtml(out,tempDiskMgr.diskName);%>/<%HTMLWriter.writeHtml(out,tempRelPath);%><%HTMLWriter.writeHtml(out,tempFileName);%>"
@@ -331,7 +332,7 @@
 <tr>
 <td>Displayed <%=count%> files, <%=pCount%> of them partially complete.   Seek extent = <%=bunch.seekExtent%></td>
 <td>
-    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>" name="moveForm2" method="post">
+    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>" name="moveForm2" method="post">
         <input type="hidden" name="go" value="<%=thisPage%>">
         <input type="submit" name="cmd" value="DoubleExtent">
     </form>

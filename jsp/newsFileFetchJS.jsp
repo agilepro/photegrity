@@ -46,9 +46,14 @@
         %>Need a digest passed as a parameter named 'dig'<%
         return;
     }
+    String f      = UtilityMethods.defParam(request, "f", null);
+    if (f==null) {
+        %>Need a from address passed as a parameter named 'f'<%
+        return;
+    }
 
     NewsGroup newsGroup = NewsGroup.getCurrentGroup();
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
     if (bunch==null) {
         %>Unable to find a bunch with that digest value<%
         return;

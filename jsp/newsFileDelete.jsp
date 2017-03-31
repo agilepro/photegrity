@@ -38,10 +38,11 @@
 
     String fn       = UtilityMethods.reqParam(request, "News File Delete", "fn");
     String dig      = UtilityMethods.reqParam(request, "News File Delete", "dig");
+    String f        = UtilityMethods.reqParam(request, "News File Delete", "f");
     String go       = UtilityMethods.reqParam(request, "News File Delete", "go");
 
     NewsGroup newsGroup = NewsGroup.getCurrentGroup();
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
     String folder = bunch.getFolderLoc();
     boolean folderExists = bunch.hasFolder();
     File   folderPath = bunch.getFolderPath();

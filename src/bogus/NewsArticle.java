@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.net.nntp.ArticleInfo;
+import org.workcast.json.JSONObject;
 import org.workcast.streams.CSVHelper;
 import org.workcast.streams.MemFile;
 import org.workcast.streams.StreamHelper;
@@ -87,11 +88,12 @@ public class NewsArticle {
     public NewsBunch getBunch() throws Exception {
         if (nBunch == null) {
             String d = getDigest();
-            nBunch = group.getBunch(d);
+            String f = getFrom();
+            nBunch = group.getBunch(d,f);
             if (nBunch == null) {
                 throw new Exception(
                         "For unknown reason, can not get a NewsBunch object for digest (" + d
-                                + ")");
+                                + "," + f + ")");
             }
         }
         return nBunch;
@@ -211,6 +213,13 @@ public class NewsArticle {
 
     public static char special = '\u25A3';
 
+
+    public String getFrom() {
+        return optionValue[1];
+    }
+
+    
+    
     /**
      * Get a compressed version of the subject with the numbers removed.
      */
@@ -682,6 +691,25 @@ public class NewsArticle {
             }
             return 0;
         }
+    }
+    
+    
+    public JSONObject getJSON() throws Exception {
+        JSONObject jo = new JSONObject();
+        jo.put("articleNo", this.articleNo);
+        jo.put("from", this.getHeaderFrom());
+        jo.put("date", this.getHeaderDate());
+        jo.put("subject", this.getHeaderSubject());
+        jo.put("dig", this.getHeaderSubject());
+        jo.put("fileName", this.getFileName());
+        jo.put("viz", this.isOnDisk());
+        File filePathX = this.getFilePath();
+        if (filePathX!=null) {
+            DiskMgr dm = DiskMgr.findDiskMgrFromPath(filePathX);
+            String localPath = dm.diskName + "/" + dm.getOldRelativePathWithoutSlash(filePathX);
+            jo.put("localPath", localPath);
+        }
+        return jo;
     }
 
 }

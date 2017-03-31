@@ -38,13 +38,14 @@
 
 
     String dig = UtilityMethods.reqParam(request, "News Details Page", "d");
+    String f = UtilityMethods.reqParam(request, "News Details Page", "f");
     String sort= UtilityMethods.defParam(request, "sort", "dig");
     String start= UtilityMethods.defParam(request, "start", "0");
     String startPart = "search="+URLEncoder.encode(dig,"UTF-8");
 
-    String thisPage = "newsDetail2.jsp?"+startPart+"&d="+URLEncoder.encode(dig,"UTF-8");
+    String thisPage = "newsDetail2.jsp?"+startPart+"&d="+URLEncoder.encode(dig,"UTF-8")+"&f="+URLEncoder.encode(f,"UTF-8");
 
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
     List<NewsArticle> articles = bunch.getArticles();
 
     if (articles.size() == 0) {

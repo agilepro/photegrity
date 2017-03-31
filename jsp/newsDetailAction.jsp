@@ -40,6 +40,7 @@
     }
 
     String dig       = UtilityMethods.reqParam(request, "News Detail Action", "dig");
+    String f         = UtilityMethods.reqParam(request, "News Detail Action", "f");
     String cmd       = UtilityMethods.reqParam(request, "News Detail Action", "cmd");
     String go        = UtilityMethods.reqParam(request, "News Detail Action", "go");
     String prefFolder= UtilityMethods.defParam(request, "prefFolder", null);
@@ -57,7 +58,7 @@
 
 
     NewsGroup newsGroup = NewsGroup.getCurrentGroup();
-    NewsBunch bunch = newsGroup.getBunch(dig.trim());
+    NewsBunch bunch = newsGroup.getBunch(dig.trim(),f);
     String zingpat = (String) session.getAttribute("zingpat");
     if (zingpat==null) {
         zingpat="";
@@ -72,12 +73,12 @@
     {
 
         if ("Delete All & Hide".equals(cmd)) {
-            newsGroup.clearOutBunch(dig);
+            newsGroup.clearOutBunch(dig,f);
             response.sendRedirect(newsPage);
             return;
         }
         if ("Hide".equals(cmd)) {
-            newsGroup.clearOutBunch(dig);
+            newsGroup.clearOutBunch(dig,f);
             if (delAll) {
                 for (NewsFile nfc : bunch.getFiles()) {
                     nfc.deleteFile();

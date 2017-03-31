@@ -40,12 +40,13 @@
 
 
     String dig = UtilityMethods.reqParam(request, "News Files Listing", "d");
+    String f = UtilityMethods.reqParam(request, "News Files Listing", "f");
     String sort= UtilityMethods.defParam(request, "sort", "dig");
-    String thisPage = "newsPatterns.jsp?d="+URLEncoder.encode(dig,"UTF-8");
+    String thisPage = "newsPatterns.jsp?d="+URLEncoder.encode(dig,"UTF-8")+"&f="+URLEncoder.encode(f,"UTF-8");
 
     String startPart = "search="+URLEncoder.encode(dig,"UTF-8");
 
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
 
     boolean hasData = bunch.hasTemplate();
 
@@ -98,15 +99,15 @@
 <body>
 <h3>News Files Patterns <%=queueMsg%></h3>
 <p><a href="news.jsp?<%=startPart%>">News</a>
- | <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Articles</a>
- | <a href="newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Files</a>
+ | <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Articles</a>
+ | <a href="newsFiles.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Files</a>
  | <font color="red">Patterns</font></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="<%=bunch.getStateColor()%>"><%
     HTMLWriter.writeHtml(out, bunch.digest);
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>" name="moveForm" method="post">
+    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>" name="moveForm" method="post">
     <li>Current: <font color="brown"><%
         HTMLWriter.writeHtml(out, folder);
         HTMLWriter.writeHtml(out, bunch.getTemplate());
@@ -249,13 +250,13 @@
         boolean jaMap = (map!=null && map.enabled);
         if (jaMap) {
             %><a href="newsFilePatt.jsp?d=<%=UtilityMethods.URLEncode(dig)
-            %>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
+            %>&f=<%=UtilityMethods.URLEncode(f)%>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
             %>"><img src="fileMapped.png"></a></td>
             <td><%
             HTMLWriter.writeHtml(out, map.dest.getSymbol());
         } else {
             %><a href="newsFilePatt.jsp?d=<%=UtilityMethods.URLEncode(dig)
-            %>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
+            %>&f=<%=UtilityMethods.URLEncode(f)%>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
             %>"><img src="fileUnmapped.png"></a><%
         }
         out.write("</td></tr>");

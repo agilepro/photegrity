@@ -46,6 +46,9 @@ public class NewsGroup {
     public static NewsSession session;
     public static boolean connect = true;
     private static NewsGroup selectedGroup;
+    private static Hashtable<String, NewsBunch> bunchIndex = new Hashtable<String, NewsBunch>();
+    private static Hashtable<Long, NewsBunch> fastIndex = new Hashtable<Long, NewsBunch>();
+    
 
     public boolean isReady = false;  //flag says whether the contents are OK
 
@@ -269,7 +272,7 @@ public class NewsGroup {
         registerArticle(lval, art);
         String patt = art.getDigest();
         if (patt != null) {
-            NewsBunch npatt = getBunch(art.getDigest());
+            NewsBunch npatt = getBunch(art.getDigest(), art.getFrom());
             npatt.addCount(articleNo);
             npatt.registerNewArticle();
         }
@@ -317,10 +320,10 @@ public class NewsGroup {
         return ret;
     }
 
-    public synchronized List<NewsArticle> getArticlesDigest(String dig) {
+    public synchronized List<NewsArticle> getArticlesDigest(String dig, String from) {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
         for (NewsArticle art : articles) {
-            if (dig.equals(art.getDigest())) {
+            if (dig.equals(art.getDigest()) && art.getFrom().equals(from)) {
                 ret.add(art);
             }
         }
@@ -357,15 +360,15 @@ public class NewsGroup {
             if (artNo < lowestFetched) {
                 lowestFetched = artNo;
             }
-            NewsBunch npatt = getBunch(art.getDigest());
+            NewsBunch npatt = getBunch(art.getDigest(), art.getFrom());
             npatt.addCount(artNo);
         }
     }
 
-    public void clearOutBunch(String bunch) throws Exception {
-        NewsBunch npatt = getBunch(bunch);
+    public void clearOutBunch(String bunch, String from) throws Exception {
+        NewsBunch npatt = getBunch(bunch, from);
         npatt.pState = NewsBunch.STATE_HIDDEN;
-        for (NewsArticle art : getArticlesDigest(bunch)) {
+        for (NewsArticle art : getArticlesDigest(bunch, from)) {
             art.clearMsgBody();
         }
     }
@@ -547,27 +550,37 @@ public class NewsGroup {
     }
 
     
-    private static Hashtable<String, NewsBunch> bunchIndex = new Hashtable<String, NewsBunch>();
-    private static Hashtable<Long, NewsBunch> fastIndex = new Hashtable<Long, NewsBunch>();
-    
     /**
      * Find a NewsBunch with a specific pattern
      * @param digest
      * @return
      * @throws Exception
      */
-    public NewsBunch getBunch(String digest) throws Exception {
+    public NewsBunch getBunch(String digest, String from) throws Exception {
         if (digest == null) {
             throw new Exception("null value passed for patter in getPattern");
         }
-        NewsBunch foundBunch = bunchIndex.get(digest);
+        String seed = digest;
+        if (from!=null) {
+            seed = digest + "|" + from;
+        }
+        NewsBunch foundBunch = bunchIndex.get(seed);
         if (foundBunch != null) {
             return foundBunch;
         }
-        foundBunch = new NewsBunch(this, digest);
-        bunchIndex.put(digest, foundBunch);
-        fastIndex.put(new Long(foundBunch.bunchKey), foundBunch);
-        return foundBunch;
+        foundBunch = bunchIndex.get(digest);
+        
+        NewsBunch newBunch; 
+        if (foundBunch==null) {
+            //copy everything from the found one
+            newBunch = new NewsBunch(this, digest, from);
+        }
+        else {
+            newBunch = NewsBunch.copyCreate(foundBunch, from);
+        }
+        bunchIndex.put(seed, newBunch);
+        fastIndex.put(new Long(newBunch.bunchKey), newBunch);
+        return newBunch;
     }
     
     public NewsBunch findBunchByKey(long key) throws Exception {

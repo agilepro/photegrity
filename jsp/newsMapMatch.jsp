@@ -56,13 +56,13 @@
         throw new Exception("The page newsMatch.jsp requires an article number with header that have been downloaded.");
     }
     NewsArticle art = (NewsArticle) newsGroup.getArticleOrNull(artnoInt);
-    NewsBunch npatt = newsGroup.getBunch(art.getDigest());
+    NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getFrom());
     NewsFile nf = npatt.getFileForArticle(art);
     PosPat tempPP = npatt.getPosPat(nf.getPattern());
     LocalMapping map = LocalMapping.getMapping(tempPP);
 
 
-    String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8");
+    String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8")+"&f="+URLEncoder.encode(art.getFrom(), "UTF-8");
     String thisUrl = "newsMatch.jsp?artno="+artnoInt;
 
     String  fileName = art.fillTemplate(npatt.getTemplate());
@@ -138,8 +138,8 @@
     %>
 <h3>News Article PATTERN Match</h3>
 <table><tr><td><a href="news.jsp?<%=startPart%>">News</a></td>
-           <td><a href="newsFiles.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>">Files</a></td>
-           <td><a href="newsDetail2.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>">Articles</a></td></tr></table>
+           <td><a href="newsFiles.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>&f=<%=URLEncoder.encode(art.getFrom(),"UTF-8")%>">Files</a></td>
+           <td><a href="newsDetail2.jsp?d=<%=URLEncoder.encode(art.getDigest(),"UTF-8")%>&f=<%=URLEncoder.encode(art.getFrom(),"UTF-8")%>">Articles</a></td></tr></table>
 <hr/>
 
 <ul>

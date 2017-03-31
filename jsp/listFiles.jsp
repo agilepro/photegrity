@@ -43,12 +43,13 @@
 
 
     String dig = UtilityMethods.reqParam(request, "News Files Listing", "d");
+    String f   = UtilityMethods.reqParam(request, "News Files Listing", "f");
     String sort= UtilityMethods.defParam(request, "sort", "dig");
-    String thisPage = "newsFiles.jsp?d="+URLEncoder.encode(dig,"UTF-8");
+    String thisPage = "newsFiles.jsp?d="+URLEncoder.encode(dig,"UTF-8")+"&f="+URLEncoder.encode(f,"UTF-8");
 
     String startPart = "search="+URLEncoder.encode(dig,"UTF-8");
 
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
 
     boolean hasData = bunch.hasTemplate();
 

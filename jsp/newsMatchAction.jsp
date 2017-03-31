@@ -36,7 +36,7 @@
         throw new Exception("newsOneAction can't find the article ("+artno+")?  Or somthing else is wrong.");
     }
 
-    NewsBunch npatt = newsGroup.getBunch(art.getDigest());
+    NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getFrom());
 
     Vector<String> destVec = (Vector<String>) session.getAttribute("destVec");
     if (destVec == null) {

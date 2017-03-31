@@ -23,6 +23,7 @@ import org.workcast.streams.HTMLWriter;
 
 public class NewsBunch {
     public String digest;
+    public String from;
     public String extraTags;
     public int pState = 0;
     public boolean plusOneNumber = false; // make file with number 1 larger than
@@ -104,9 +105,10 @@ public class NewsBunch {
 
     static long nextKeyValue = System.currentTimeMillis();
 
-    public NewsBunch(NewsGroup ng, String _bunch) throws Exception {
+    public NewsBunch(NewsGroup ng, String _bunch, String _from) throws Exception {
     	bunchKey = nextKeyValue++;
         digest = _bunch;
+        from = _from;
         newsGroup = ng;
 
         // now figure out if this pattern has provision for multipart files, and
@@ -129,6 +131,16 @@ public class NewsBunch {
 
         //check to see if there is a YEnc indicator in the subject line
         isYEnc =  (_bunch.toLowerCase().indexOf("yenc")>0);
+    }
+    
+    public static NewsBunch copyCreate(NewsBunch oldOne, String from) throws Exception  {
+        String digest = oldOne.digest;
+        NewsBunch nb = new NewsBunch(oldOne.newsGroup, digest, from);
+        nb.extraTags = oldOne.extraTags;
+        nb.pState = oldOne.pState;
+        nb.pathInDisk = oldOne.pathInDisk;
+        nb.fileTemplate = oldOne.fileTemplate;
+        return nb;
     }
 
 
@@ -306,6 +318,7 @@ public class NewsBunch {
         values.add(Integer.toString(fileComplete));
         values.add(Integer.toString(fileDown));
         values.add(Long.toString(lastTouch));
+        values.add(from);
         CSVHelper.writeLine(fw, values);
     }
 
@@ -327,13 +340,17 @@ public class NewsBunch {
     public static void parseFromLine(NewsGroup ng, List<String> values) throws Exception {
 
         String subjectLine = values.get(0);
+        String fromLine = null;
+        if (values.size() > 10) {
+            fromLine = values.get(10);
+        }
 
         // schema migration ... eliminate tails in certain cases
         subjectLine = removeOffEndIfPresent(subjectLine, "[\u25A3K]");
         subjectLine = removeOffEndIfPresent(subjectLine, "[1\u25A3K]");
         subjectLine = removeBytesOffEndIfPresent(subjectLine);
 
-        NewsBunch newBunch = ng.getBunch(subjectLine);
+        NewsBunch newBunch = ng.getBunch(subjectLine, fromLine);
 
         String store = values.get(1);
         store = store.replace('\\', '/');
@@ -399,6 +416,9 @@ public class NewsBunch {
         if (values.size() > 9) {
             newBunch.lastTouch = UtilityMethods.safeConvertLong(values.get(9));
         }
+        if (values.size() > 10) {
+            newBunch.from = values.get(10);
+        }
 
     }
 
@@ -458,12 +478,12 @@ public class NewsBunch {
     }
 
     public List<NewsArticle> getArticles() throws Exception {
-        List<NewsArticle> res = newsGroup.getArticlesDigest(digest);
+        List<NewsArticle> res = newsGroup.getArticlesDigest(digest, from);
         return res;
     }
 
     public NewsArticle getSampleArticle() throws Exception {
-        List<NewsArticle> res = newsGroup.getArticlesDigest(digest);
+        List<NewsArticle> res = newsGroup.getArticlesDigest(digest, from);
         if (res.size()>0) {
             return res.get(0);
         }
@@ -1377,6 +1397,7 @@ public class NewsBunch {
         JSONObject rec = new JSONObject();
         rec.put("key", bunchKey);
         rec.put("digest", digest);
+        rec.put("digestB", tokenFill());
         rec.put("count", count);
         rec.put("cTotal", fileTotal);
         rec.put("cComplete", fileComplete);

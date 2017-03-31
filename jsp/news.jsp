@@ -949,7 +949,7 @@ Filter: <input ng-model="photoSettings.filter">
      </td>
      <td style="{{'background-color: '+ (rec.color ? rec.color : 'white')}};">
          <div>
-             <a href="newsDetail2.jsp?start={{offset}}&d={{rec.digest|encode}}">
+             <a href="newsDetail2.jsp?start={{offset}}&d={{rec.digest|encode}}&f={{rec.sender|encode}}">
                 {{rec.digest|limitTo:photoSettings.colTrim}}
              </a></td>
          </div>
@@ -968,7 +968,7 @@ Filter: <input ng-model="photoSettings.filter">
      <td ng-hide="photoSettings.showSender" style="border:solid 2px lightgray;"><a href="newsPatterns.jsp?d={{rec.digest|encode}}">P</a>
          <a href="api/b={{rec.key}}">X</a></td>
      <td ng-show="rec.hasTemplate">
-         <a href="newsFiles.jsp?start={{offset}}&d={{rec.digest|encode}}">
+         <a href="newsFiles.jsp?start={{offset}}&d={{rec.digest|encode}}&f={{rec.sender|encode}}">
             {{rec.template}}
          </a>
      </td>

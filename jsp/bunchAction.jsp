@@ -48,7 +48,8 @@
             throw new Exception("newsgroup is not loaded");
         }
         String dig       = UtilityMethods.reqParam(request, "News Detail Action", "dig");
-        NewsBunch bunch = newsGroup.getBunch(dig.trim());
+        String f         = UtilityMethods.reqParam(request, "News Detail Action", "f");
+        NewsBunch bunch = newsGroup.getBunch(dig.trim(), f);
         if (bunch==null) {
             throw new Exception("Can't find a bunch for digest ("+dig+")");
         }
@@ -111,7 +112,7 @@
             return;
         }
         if ("DeleteAllHide".equals(cmd)) {
-            newsGroup.clearOutBunch(dig);
+            newsGroup.clearOutBunch(dig,f);
             for (NewsFile nfc : bunch.getFiles()) {
                 nfc.deleteFile();
             }

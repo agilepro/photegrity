@@ -45,7 +45,8 @@
         }
 
         String dig  = UtilityMethods.reqParam(request, "News Detail Action", "dig");
-        NewsBunch bunch = newsGroup.getBunch(dig.trim());
+        String f  = UtilityMethods.reqParam(request, "News Detail Action", "f");
+        NewsBunch bunch = newsGroup.getBunch(dig.trim(), f);
         if (bunch==null) {
             throw new Exception("Can't find a bunch for digest ("+dig+")");
         }

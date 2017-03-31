@@ -44,12 +44,13 @@
 
 
     String dig = UtilityMethods.reqParam(request, "News Files Listing", "d");
+    String f = UtilityMethods.reqParam(request, "News Files Listing", "f");
     String sort= UtilityMethods.defParam(request, "sort", "dig");
-    String thisPage = "newsFiles.jsp?d="+URLEncoder.encode(dig,"UTF-8");
+    String thisPage = "newsFiles.jsp?d="+URLEncoder.encode(dig,"UTF-8")+"&f="+URLEncoder.encode(f,"UTF-8");
 
     String startPart = "search="+URLEncoder.encode(dig,"UTF-8");
 
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
 
     boolean hasData = bunch.hasTemplate();
 
@@ -137,14 +138,14 @@
     fileApp.factory('fileFactory', function($http) {
         return {
             listFiles: function(callback) {
-                $http.get('listFiles.jsp?d=<%=URLEncoder.encode(dig,"UTF-8")%>')
+                $http.get('listFiles.jsp?d=<%=URLEncoder.encode(dig,"UTF-8")%>&f=<%=URLEncoder.encode(f,"UTF-8")%>')
                 .success(callback)
                 .error( function(data) {
                     alert(JSON.stringify(data,null,2));
                 });
             },
             getBunch: function(callback) {
-                $http.get('getBunch.jsp?dig=<%=URLEncoder.encode(dig,"UTF-8")%>')
+                $http.get('getBunch.jsp?dig=<%=URLEncoder.encode(dig,"UTF-8")%>&f=<%=URLEncoder.encode(f,"UTF-8")%>')
                 .success(callback)
                 .error( function(data) {
                     alert(JSON.stringify(data,null,2));
@@ -154,6 +155,7 @@
     });
     fileApp.controller('fileCtrl', function ($scope, $http,  $timeout, fileFactory) {
         $scope.digest = "<%JavaScriptWriter.encode(out, dig);%>";
+        $scope.f = "<%JavaScriptWriter.encode(out, f);%>";
         $scope.bunch = <% bunch.getJSON().write(out,2,0); %>;
         $scope.refetchData = function() {
             $scope.opResult = $scope.opResult + " *refresh"+$scope.counter++;
@@ -178,7 +180,7 @@
 				return item.fileExists;
 			});
         }
-        $scope.bunchActionPath = "bunchAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>";
+        $scope.bunchActionPath = "bunchAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>";
         $scope.opResult = "";
 
         $scope.divideStates = function() {
@@ -241,7 +243,8 @@
                 var rec = $scope.fileSet[j];
                 if (rec.fileName == searchName) {
                     rec.isDownloading = true;
-                    $http.get("newsFileFetchJS.jsp?fn="+encodeURIComponent(rec.bestName)+"&dig="+encodeURIComponent($scope.digest))
+                    $http.get("newsFileFetchJS.jsp?fn="+encodeURIComponent(rec.bestName)+"&dig="+encodeURIComponent($scope.digest)
+                               +"&f="+encodeURIComponent($scope.f))
                     .success( function(data) {
                         $scope.opResult = "Fetch ("+searchName+"): "+data;
                     });
@@ -278,16 +281,16 @@
 <body ng-controller="fileCtrl">
 <h3>News Files Listing  <%=queueMsg%></h3>
 <p><a href="news.jsp?<%=startPart%>">News</a>
- | <a href="newsDetail2.jsp?d={{digest|encode}}">Articles</a>
+ | <a href="newsDetail2.jsp?d={{digest|encode}}&f={{f|encode}}">Articles</a>
  | <font color="red">Files</font>
- | <a href="newsPatterns.jsp?d={{digest|encode}}">Patterns</a>
+ | <a href="newsPatterns.jsp?d={{digest|encode}}&f={{f|encode}}">Patterns</a>
  <span style="background-color: yellow;">{{opResult}}</span></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="{{bunch.color}}"><%
     HTMLWriter.writeHtml(out, bunch.digest);
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?dig=<%= URLEncoder.encode(dig, "UTF-8") %>" name="moveForm" method="post">
+    <form action="newsDetailAction.jsp?dig=<%= URLEncoder.encode(dig, "UTF-8") %>&f=<%= URLEncoder.encode(f, "UTF-8") %>" name="moveForm" method="post">
     <li>Current: <font color="brown"><%
         HTMLWriter.writeHtml(out, folder);
         HTMLWriter.writeHtml(out, bunch.getTemplate());
@@ -366,11 +369,11 @@
         boolean jaMap = (map!=null && map.enabled);
         if (jaMap) {
             %><a href="newsFilePatt.jsp?d=<%=UtilityMethods.URLEncode(dig)
-            %>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
+            %>&f=<%=URLEncoder.encode(f,"UTF-8")%>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
             %>"><img src="fileMapped.png"></a>
         <% } else {
             %><a href="newsFilePatt.jsp?d=<%=UtilityMethods.URLEncode(dig)
-            %>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
+            %>&f=<%=URLEncoder.encode(f,"UTF-8")%>&selPatt=<%=UtilityMethods.URLEncode(ppp_patt)
             %>"><img src="fileUnmapped.png"></a>
         <% }
         out.write("</a>, ");

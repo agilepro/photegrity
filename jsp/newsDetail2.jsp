@@ -38,13 +38,14 @@
 
 
     String dig = UtilityMethods.reqParam(request, "News Details Page", "d");
+    String f = UtilityMethods.reqParam(request, "News Details Page", "f");
     String sort= UtilityMethods.defParam(request, "sort", "dig");
     String start= UtilityMethods.defParam(request, "start", "0");
     String startPart = "search="+URLEncoder.encode(dig,"UTF-8");
 
-    String thisPage = "newsDetail2.jsp?"+startPart+"&d="+URLEncoder.encode(dig,"UTF-8");
+    String thisPage = "newsDetail2.jsp?"+startPart+"&d="+URLEncoder.encode(dig,"UTF-8")+"&f="+URLEncoder.encode(f,"UTF-8");
 
-    NewsBunch bunch = newsGroup.getBunch(dig);
+    NewsBunch bunch = newsGroup.getBunch(dig, f);
     List<NewsArticle> articles = bunch.getArticles();
 
     if (articles.size() == 0) {
@@ -143,19 +144,19 @@
 </script>
 </head>
 <body ng-controller="photoCtrl">
-<h3>News Articles Details  <%=queueMsg%> <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">#1</a></h3>
+<h3>News Articles Details  <%=queueMsg%> <a href="newsDetail2.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">#1</a></h3>
 <p><a href="news.jsp?<%=startPart%>">News</a>
    | <font color="red">Articles</font>
-   | <a href="newsFiles.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>">Files</a>
-   | <a href="newsPatterns.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>">Patterns</a>
-   | <a href="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&sort=num">Sort_by_Number</a>
-   | <a href="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&sort=dig">Sort_by_Subject</a></p>
+   | <a href="newsFiles.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Files</a>
+   | <a href="newsPatterns.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Patterns</a>
+   | <a href="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>&sort=num">Sort_by_Number</a>
+   | <a href="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>&sort=dig">Sort_by_Subject</a></p>
 
 <table><tr><td>Pattern: </td><td bgcolor="<%=bunch.getStateColor()%>"><%
     HTMLWriter.writeHtml(out, tokenFill(bunch.digest));
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>"  name="moveForm" method="post">
+    <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>"  name="moveForm" method="post">
     <li>From: <%
         HTMLWriter.writeHtml(out, fromUser);
     %></li>
@@ -197,7 +198,7 @@
                 AutoPath: <input type="checkbox" name="autopath" value="true" checked="checked">
                 Zing: <%HTMLWriter.writeHtml(out, zingpat);%></li>
     <hr/>
-    <input type="hidden" name="go" value="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>">
+    <input type="hidden" name="go" value="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">
 
     <input type="hidden" name="start" value="<%=start%>">
     <input type="submit" name="cmd" value="Hide">

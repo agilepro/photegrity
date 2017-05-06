@@ -234,6 +234,7 @@ public class NewsArticle {
 
         //strip out whatever exists between yEnc and that parentheses
         //which is usually the size in bytes.  Ignore that
+        /*
         int yEncPos = subj.indexOf("yEnc");
         if (yEncPos>30) {
             int lastParen = subj.lastIndexOf("(");
@@ -241,6 +242,7 @@ public class NewsArticle {
                 subj = subj.substring(0,yEncPos+5) + subj.substring(lastParen);
             }
         }
+        */
 
         //look for a 'pure' file size on the end
         int digitOnEnd = subj.length()-1;

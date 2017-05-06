@@ -8,6 +8,7 @@
 %><%@page import="bogus.NewsActionSeekBunch"
 %><%@page import="bogus.NewsActionDiscard"
 %><%@page import="bogus.NewsActionSpectrum"
+%><%@page import="bogus.NewsActionFillGaps"
 %><%@page import="bogus.NewsArticle"
 %><%@page import="bogus.NewsBackground"
 %><%@page import="bogus.NewsBunch"
@@ -132,6 +133,17 @@
         NewsActionLoadHeaders nadh = new NewsActionLoadHeaders(startInt, countInt, stepInt);
         nadh.addToFrontOfMid();
         out.write("OK, got a request to fetch "+countInt+" more records starting at "+startInt+" and stepping by "+stepInt);
+        out.flush();
+        //response.sendRedirect(go);
+        return;
+    }
+    else if ("FillGaps".equals(command)) {
+        long start = UtilityMethods.defParamLong(request, "start", -1000);
+        long end = UtilityMethods.defParamLong(request,  "end", 100);
+        int gap = UtilityMethods.defParamInt(request,  "gap", 1);
+        NewsActionFillGaps nadh = new NewsActionFillGaps(start, end, gap);
+        nadh.addToFrontOfMid();
+        out.write("OK, got a request to fill gaps larger than "+gap+" starting at "+start+" and endind by "+end);
         out.flush();
         //response.sendRedirect(go);
         return;

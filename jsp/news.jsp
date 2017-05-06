@@ -716,6 +716,12 @@
                 +"&count="+count+"&step="+$scope.fetch.step;
             $scope.opCommand(url);
         }
+        $scope.fillGaps = function() {
+            var url = "newsFetch.jsp?command=FillGaps&start="+$scope.fetch.start
+                +"&end="+$scope.fetch.end+"&gap="+$scope.fetch.step;
+            $scope.opCommand(url);
+        }
+        
         $scope.opCommand =  function(url) {
             console.log("REQUESTING: "+url);
             $http.get(url).success(function(data) {
@@ -842,8 +848,10 @@ Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
 
 </ul>
 <button ng-click="scheduledSave()">Scheduled Save</button>
-    <a href="newsGaps.jsp?limit=100&step=23&thresh=96&begin={{newsInfo.lowestFetched}}&highest={{newsInfo.lowestFetched+photoSettings.window}}">
-    <button>Find-Gaps in {{photoSettings.window}}</button></a>
+    <a href="newsGaps.jsp?limit=100&step=23&thresh={{fetch.step}}&begin={{newsInfo.lowestFetched}}&highest={{newsInfo.lowestFetched+photoSettings.window}}">
+    <button>Find-Gaps in {{photoSettings.window}}</button></a> 
+    <input name="step" type="text" size="5"  ng-model="fetch.step">
+    <button ng-click="fillGaps()">Fill-Gaps</button>
 
 <form action="newsFetch.jsp">
 <input type="hidden" name="go" value="news.jsp?start=<%=start%>">

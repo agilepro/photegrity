@@ -55,6 +55,7 @@
 <table><tr><form action="newsGaps.jsp">
 <td>begin: <input type="text" name="begin" value="<%=begin%>"></td>
 <td>highest: <input type="text" name="highest" value="<%=highest%>"></td>
+<td><%=highest-begin%></td>
 </tr><tr>
 <td>limit: <input type="text" name="limit" value="<%=limit%>"></td>
 <td>thresh: <input type="text" name="thresh" value="<%=thresh%>"></td>
@@ -129,7 +130,7 @@
 <hr/>
 
 <hr/>
-Total Fetched <%=totalFetched%> - Total Gap <%=totalGap%>  - Percent read <%= (totalFetched*10)/(totalFetched+totalGap) %>%
+Total Fetched <%=totalFetched%> - Total Gap <%=totalGap%>  - Percent read <%= (totalFetched*10)/(totalFetched+totalGap+1) %>%
 </body>
 </html>
 

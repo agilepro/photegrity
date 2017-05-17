@@ -82,7 +82,6 @@
     while (limit>0 && pos<highest) {
 
         boolean avail = newsGroup.hasArticle(pos);
-
         if (avail && inGap) {
 
             long gapSize = pos-gapStart;
@@ -109,19 +108,44 @@
             gapStart = pos;
 
         }
+        if (avail) {
+            %><li><%=pos%></li><%
+        }
 
         if (pos>= newsGroup.lastArticle) {
-
+            %><li>Last article in NewsGroup object: <%=newsGroup.lastArticle%></li><%
             break;
-
         }
 
         pos++;
 
     }
+    if (limit>0 && inGap) {
 
+        long gapSize = highest-gapStart;
+        totalGap += gapSize;
+        if (gapSize > thresh) { 
+
+            long steps = gapSize/stepSize - 1;
+            long remainder = gapSize - (steps*stepSize);
+            long start = gapStart + remainder/2;
+
+            %><li>Gap <%= (gapSize) %>
+            <a href="newsFetch.jsp?start=<%=start%>&step=<%=stepSize%>&count=<%=steps%>&command=Refetch">
+            Refetch from <%=gapStart%> to <%=highest%>  in <%=steps%> steps</a></li><%
+            limit--;
+        }
+    }
+
+    if (limit>0) {
+        %><li>That is all up to <%=pos%></li><%
+    }
+    else {
+        %><li>STOPPED SHORT by limit at <%=pos%></li><%
+    }
 %>
-    <li>That is all up to <%=pos%></li>
+
+<hr/>
 
     <li>ENTIRE RANGE at <%= (stepSize) %>
     <a href="newsFetch.jsp?start=<%=begin%>&step=<%=stepSize%>&count=<%=entireRange%>&command=Refetch">

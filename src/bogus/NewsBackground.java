@@ -10,6 +10,7 @@ public class NewsBackground extends Thread {
     private Writer out;
     public static NewsBackground singleton;
     public static NewsAction lastActive;
+    long lastSaveTime = System.currentTimeMillis();
 
     public NewsBackground(File containingFolder) throws Exception {
         File destFile = new File(containingFolder, "NewsProcessing" + System.currentTimeMillis()
@@ -43,6 +44,7 @@ public class NewsBackground extends Thread {
                     if (newsSession != null) {
                         if (newsGroup.isReady) {
                             newsGroup.saveCache();
+                            lastSaveTime = System.currentTimeMillis();
                             out.write("\n----------Completed SAVED "+(new Date()).toString()+"\n\n");
                         }
                         else {
@@ -69,10 +71,18 @@ public class NewsBackground extends Thread {
                     out.write("\n==========" + (new Date()).toString());
                     newsSession = NewsGroup.session;
                     newsSession.connect();
+                    lastSaveTime = System.currentTimeMillis();
                 }
                 NewsAction.active = true;
                 act.performTimed(out, newsSession);
                 sequentialErrorCount = 0;
+                
+                //every 5 minutes save everything after successful perform of action
+                if (System.currentTimeMillis()-lastSaveTime > 300000) {
+                    newsGroup.saveCache();
+                    lastSaveTime = System.currentTimeMillis();
+                    out.write("\n----------Automaticalley SAVED "+(new Date()).toString()+"\n\n");
+                }
             }
             catch (Throwable e) {
                 sequentialErrorCount++;

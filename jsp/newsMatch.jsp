@@ -191,26 +191,31 @@
         HTMLWriter.writeHtml(out, tag);
         out.write("</a>, ");
     }
-                %><br/><%
+
+%></li>
+</ul>
+
+<table>
+<%
     for (String tag : allTags) {
+        %><tr><td><b><%HTMLWriter.writeHtml(out, tag);%>:</b></td><td><%
         for (String tag2 : allTags) {
-            if (tag.compareTo(tag2)>=0) {
-                continue;
-            }
+            %><td><%
             out.write("<a href=\"startGrid.jsp?q=g(");
             UtilityMethods.writeURLEncoded(out, tag);
             out.write(")g(");
             UtilityMethods.writeURLEncoded(out, tag2);
             out.write(")&min="+value);
             out.write("\">");
-            HTMLWriter.writeHtml(out, tag);
             out.write("+");
             HTMLWriter.writeHtml(out, tag2);
             out.write("</a>, ");
+            %></td><%
         }
+        %></tr><%
     }
-%> </li>
-</ul>
+%> 
+</table>
 <hr/>
     <ul>
     <%

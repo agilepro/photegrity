@@ -273,6 +273,8 @@
       <a href="compare.jsp">Compare</a>
    </td><td>
       <a href="showGrid.jsp?r=<%=r%>">Grid</a>
+   </td><td>
+      <a href="showGrid2.jsp?r=<%=r%>">Grid2</a>
    </td></tr>
 </table>
 <table>

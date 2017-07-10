@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -731,5 +732,32 @@ public class NewsGroup {
         for (Long gonner : errorsToForget) {
             errorIndex.remove(gonner);
         }
+    }
+    
+    public List<GapRecord> getGaps(long start, long end) {
+        boolean inGap = false;
+        long lastGapStart = start;
+        List<GapRecord> gapList = new ArrayList<GapRecord>();
+        for (long i=start; i<end; i++) {
+            boolean avail = this.hasArticle(i);
+            if (avail) {
+                if (inGap) {
+                    inGap = false;
+                    int gapSize = (int)(i - lastGapStart);
+                    GapRecord.recordGap(gapList, gapSize, lastGapStart);
+                }
+            }
+            else {
+                if (!inGap) {
+                    inGap = true;
+                    lastGapStart = i;
+                }
+            }
+        }
+        if (inGap) {
+            int gapSize = (int)(end - lastGapStart);
+            GapRecord.recordGap(gapList, gapSize, lastGapStart);
+        }
+        return gapList;
     }
 }

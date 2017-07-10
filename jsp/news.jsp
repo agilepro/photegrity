@@ -568,14 +568,14 @@
         }
         $scope.fixTemplateWithoutSave = function(newBunch) {
             var template = $scope.stripChars(newBunch.template);
-            console.log("Working On: ", template)
-            var pos = template.indexOf(".zip");
-            if (pos<=0) {
-                pos = template.indexOf(".rar");
-                if (pos<=0) {
-                    return;
-                }
-            }
+            console.log("Working On XXX: ", template);
+            var pos = template.indexOf(".jpg");
+            //if (pos<=0) {
+            //    pos = template.indexOf(".rar");
+            //    if (pos<=0) {
+            //        return;
+            //    }
+            //}
             var tail = template.substring(pos+4);
             if (tail.length==4 && tail[0]==='$' && tail[2]==='$') {
                 //this is the $3$4 case
@@ -593,6 +593,15 @@
             else if (tail.length==8  && tail[2]==='$' && tail[6]==='$' ) {
                 //this is the .1$3.1$4 case
                 template = template.substring(0,pos+4) + "." + tail.substring(1,4);
+            }
+            console.log("POLISHED: "+template);
+            if (template=="$0.jpg" || template=="$1.jpg" || template=="$2.jpg") {
+                
+                var timestamp = new Date().getTime();
+                var ch1 = String.fromCharCode(97 + (timestamp%26));
+                var ch2 = String.fromCharCode(97 + ((timestamp/26)%26));
+                template = "$d" + ch1 + ch2 + "-" + template;
+                console.log("CONVERTED: "+ template);
             }
             newBunch.template = template;
         }

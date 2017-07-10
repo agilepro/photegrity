@@ -1,9 +1,10 @@
 <%@page errorPage="error.jsp"
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
+%><%@page import="bogus.GapRecord"
 %><%@page import="bogus.NewsArticle"
+%><%@page import="bogus.NewsBunch"
 %><%@page import="bogus.NewsFile"
 %><%@page import="bogus.NewsGroup"
-%><%@page import="bogus.NewsBunch"
 %><%@page import="bogus.NewsSession"
 %><%@page import="bogus.UtilityMethods"
 %><%@page import="java.io.Reader"
@@ -40,121 +41,73 @@
 
     long entireRange = (highest-begin) / step;
 
+    List<GapRecord> gapList = newsGroup.getGaps(begin, highest);
+    GapRecord.sortBySize(gapList);
+    
 
 %>
-<html>
+<html ng-app="bunchApp">
 <head>
     <link href="lib/bootstrap.min.css" rel="stylesheet">
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls.min.js"></script>
     <link href="photoStyle.css" rel="stylesheet">
+    
+<script>
+var bunchApp = angular.module('bunchApp', ['ui.bootstrap']);
+bunchApp.controller('bunchCtrl', function ($scope, $http, $timeout) {
+    $scope.begin = <%=begin%>;
+    $scope.highest = <%=highest%>;
+    $scope.thresh = <%=thresh%>;
+    
+    $scope.fillGaps = function() {
+        var url = "newsFetch.jsp?command=FillGaps&start="+$scope.begin
+            +"&end="+$scope.highest+"&gap="+$scope.thresh;
+        $scope.opCommand(url);
+    }
+    $scope.opCommand =  function(url) {
+        console.log("REQUESTING: "+url);
+        $http.get(url).success(function(data) {
+            $scope.updateMsg = "success: "+data;
+        }).error(function(data){
+            $scope.updateMsg = "error: "+data;
+            alert("error: "+data);
+        });
+    }
+    
+});
+
+</script>
 </head>
-<body>
+<body ng-controller="bunchCtrl">
 <h3><a href="news.jsp">News</a> Gaps <a href="main.jsp"><img src="home.gif" border="0"></a></h3>
 
+<div style="color:red;">{{updateMsg}}</div>
+
 <table><tr><form action="newsGaps.jsp">
-<td>begin: <input type="text" name="begin" value="<%=begin%>"></td>
-<td>highest: <input type="text" name="highest" value="<%=highest%>"></td>
-<td><%=highest-begin%></td>
+<td>begin: <input type="text" name="begin" ng-model="begin"></td>
+<td>highest: <input type="text" name="highest" ng-model="highest"></td>
+<td>{{highest-begin|number}}</td>
 </tr><tr>
-<td>limit: <input type="text" name="limit" value="<%=limit%>"></td>
 <td>thresh: <input type="text" name="thresh" value="<%=thresh%>"></td>
-</tr><tr>
-<td>step: <input type="text" name="step" value="<%=step%>"></td>
 <td><input type="submit" value="Search"></td>
+<td><button ng-click="fillGaps()">Fill gaps</button></td>
 </tr></table>
 
 <ul>
 <%
-
+    for (GapRecord gr : gapList) {
+        
+        %><li>Gap of <%=gr.sizeOfGap%> occurred <%=gr.countOfGaps%> times</li><%
+    }
     if (pos<begin) {
         pos = begin;
     }
-    %><li>Starting at <%=pos%></li><%
-    long gapStart = 0;
-    long fetchStart = 0;
-    boolean inGap = false;
-    long totalFetched = 0;
-    long totalGap = 0;
-    long stepSize = step;
-
-
-    while (limit>0 && pos<highest) {
-
-        boolean avail = newsGroup.hasArticle(pos);
-        if (avail && inGap) {
-
-            long gapSize = pos-gapStart;
-            totalGap += gapSize;
-            if (gapSize > thresh) {
-
-                long steps = gapSize/stepSize - 1;
-                long remainder = gapSize - (steps*stepSize);
-                long start = gapStart + remainder/2;
-
-                %><li>Gap <%= (gapSize) %>
-                <a href="newsFetch.jsp?start=<%=start%>&step=<%=stepSize%>&count=<%=steps%>&command=Refetch">
-                Refetch from <%=gapStart%> to <%=pos%>  in <%=steps%> steps</a></li><%
-                limit--;
-            }
-            fetchStart = pos;
-            inGap = false;
-
-        }
-        else if (!avail && !inGap) {
-
-            totalFetched += pos-fetchStart;
-            inGap = true;
-            gapStart = pos;
-
-        }
-        if (avail) {
-            %><li><%=pos%></li><%
-        }
-
-        if (pos>= newsGroup.lastArticle) {
-            %><li>Last article in NewsGroup object: <%=newsGroup.lastArticle%></li><%
-            break;
-        }
-
-        pos++;
-
-    }
-    if (limit>0 && inGap) {
-
-        long gapSize = highest-gapStart;
-        totalGap += gapSize;
-        if (gapSize > thresh) { 
-
-            long steps = gapSize/stepSize - 1;
-            long remainder = gapSize - (steps*stepSize);
-            long start = gapStart + remainder/2;
-
-            %><li>Gap <%= (gapSize) %>
-            <a href="newsFetch.jsp?start=<%=start%>&step=<%=stepSize%>&count=<%=steps%>&command=Refetch">
-            Refetch from <%=gapStart%> to <%=highest%>  in <%=steps%> steps</a></li><%
-            limit--;
-        }
-    }
-
-    if (limit>0) {
-        %><li>That is all up to <%=pos%></li><%
-    }
-    else {
-        %><li>STOPPED SHORT by limit at <%=pos%></li><%
-    }
-%>
-
-<hr/>
-
-    <li>ENTIRE RANGE at <%= (stepSize) %>
-    <a href="newsFetch.jsp?start=<%=begin%>&step=<%=stepSize%>&count=<%=entireRange%>&command=Refetch">
-    Refetch from <%=begin%> to <%=(begin + (stepSize*entireRange))%>  in <%=entireRange%> steps of <%=stepSize%> size each</a></li>
+    %>
 </ul>
 <hr/>
 
-<hr/>
-Total Fetched <%=totalFetched%> - Total Gap <%=totalGap%>  - Percent read <%= (totalFetched*10)/(totalFetched+totalGap+1) %>%
+
 </body>
 </html>
 

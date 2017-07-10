@@ -385,6 +385,12 @@ public class NewsArticle {
                 else if (ch=='d') {
                     res.append(sanitize(optionValue[1]));
                 }
+                else if (ch=='e') {
+                    res.append(Long.toString(articleNo/10000));
+                }
+                else if (ch=='f') {
+                    res.append(Long.toString(articleNo/100000));
+                }
                 else if (idx >= 0 && idx < fPrint.size()) {
                     if (idx!=specialIndex) {
                         res.append(fPrint.get(idx));

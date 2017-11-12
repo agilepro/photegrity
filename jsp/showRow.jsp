@@ -180,6 +180,11 @@
         oneColumn.put("symbol", sii.getPosPat().getSymbol());
         oneColumn.put("disk", sii.diskMgr.diskName);
         oneColumn.put("isTrashed", sii.isTrashed);
+        JSONArray tags = new JSONArray();
+        for (TagInfo ti : sii.tagVec) {
+            tags.put(ti.tagName);
+        }
+        oneColumn.put("tags", tags);        
         rowData.put(oneColumn);
     }
 

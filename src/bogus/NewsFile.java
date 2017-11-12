@@ -16,15 +16,14 @@ public class NewsFile {
     private Vector<NewsArticle> parts;
     private NewsBunch nBunch;
     private String fileName;
-    private String pattern;
+    private FracturedFileName fracName;
     private LocalMapping map;
 
     public NewsFile(String _fileName, NewsBunch _bnch) throws Exception {
         nBunch = _bnch;
         parts = new Vector<NewsArticle>();
         fileName = _fileName;
-        String[] nameParts = NewsBunch.getFileNameParts(fileName);
-        pattern = nameParts[0];
+        fracName = FracturedFileName.parseFile(fileName);
         refreshMapping();
     }
     
@@ -34,10 +33,9 @@ public class NewsFile {
 	    	//this will get the file name from the template from the bunch
     		fileName = parts.elementAt(0).getFileName();
 	    	//refresh the pattern from the file name
-	        String[] nameParts = NewsBunch.getFileNameParts(fileName);
-	        pattern = nameParts[0];
+    		fracName = FracturedFileName.parseFile(fileName);
     	}
-        PosPat whereIAm =  nBunch.getPosPat(pattern);
+        PosPat whereIAm =  nBunch.getPosPat(fracName.prePart);
         map = LocalMapping.getMapping(whereIAm);
     }
 
@@ -51,8 +49,12 @@ public class NewsFile {
     public String getFileName() {
         return fileName;
     }
+    public String getRegularName() {
+        return fracName.getRegularName();
+    }
+    
     public String getPattern() {
-        return pattern;
+        return fracName.prePart;
     }
 
     /**
@@ -60,21 +62,20 @@ public class NewsFile {
      * number of that file
      */
     public int getSequenceNumber() {
-        String[] fileNameParts = NewsBunch.getFileNameParts(fileName);
-        int num = UtilityMethods.safeConvertInt(fileNameParts[1]);
+        int num = fracName.getNumValue();
         if (num == 0) {
-            if (fileNameParts[2].contains("cover")) {
+            if (fracName.tailPart.contains("cover")) {
                 return -100;
             }
-            if (fileNameParts[2].contains("flogo")) {
+            if (fracName.tailPart.contains("flogo")) {
                 return -200;
             }
-            if (fileNameParts[2].contains("sample")) {
+            if (fracName.tailPart.contains("sample")) {
                 return -300;
             }
             return 0;
         }
-        if (fileNameParts[2].endsWith("!")) {
+        if (fracName.tailPart.endsWith("!")) {
             return 0 - num;
         }
         return num;
@@ -94,7 +95,7 @@ public class NewsFile {
     			return map.source;
     		}
     	}
-    	return nBunch.getPosPat(pattern);
+    	return nBunch.getPosPat(fracName.prePart);
     }
 
     public String getDiskName() throws Exception {
@@ -117,9 +118,15 @@ public class NewsFile {
         if (map==null || !map.enabled) {
         	return new File(folder, fileName);
         }
-    	String destFileName = map.dest.translateFileName(fileName);
+    	FracturedFileName destFileName = map.dest.translateFracFileName(fileName);
         File destfolder = map.dest.getFolderPath();
-        return new File(destfolder, destFileName);
+        String possibleName = destFileName.existsAs(destfolder);
+        if (possibleName==null) {
+            return new File(destfolder, possibleName);
+        }
+        else {
+            return new File(destfolder, destFileName.getRegularName());
+        }
     }
 
     /**
@@ -344,6 +351,7 @@ public class NewsFile {
      * If a map entry maps them to a permanent place,
      * then they will simply be abandoned in that location.
      */
+    /*
     public void renameFile(String oldTemplate, String newTemplate) throws Exception {
         if (parts.size() == 0) {
             return;
@@ -373,6 +381,7 @@ public class NewsFile {
             throw new Exception("expected to rename but destination does not exist: " + newPath);
         }
     }
+    */
 
     public void renameFileDeluxe(File srcFolder, String srcTemplate, boolean srcPlus,
                 File destFolder, String destTemplate, boolean destPlus) throws Exception {
@@ -383,6 +392,7 @@ public class NewsFile {
         }
         NewsArticle art = parts.get(0);
 
+        /*
         int srcSpecial = -2;
         if (srcPlus) {
             srcSpecial = NewsBunch.findSpecialTokenIndex(srcTemplate);
@@ -391,14 +401,21 @@ public class NewsFile {
         if (destPlus) {
             destSpecial = NewsBunch.findSpecialTokenIndex(destTemplate);
         }
+        */
+        FracturedFileName sourceParts = FracturedFileName.parseTemplate(srcTemplate);
+        FracturedFileName destParts = FracturedFileName.parseTemplate(destTemplate);
+        
+        FracturedFileName sourceFilled = art.fillFracturedTemplate(sourceParts);
+        FracturedFileName destFilled = art.fillFracturedTemplate(destParts);
 
-        String srcName = art.fillTemplatePlus(srcTemplate, srcSpecial);
-        File srcPath = new File(srcFolder, srcName);
-        if (!srcPath.exists()) {
+        String srcExistingName = sourceFilled.existsAs(srcFolder);
+        if (srcExistingName==null) {
             //nothing to move
             return;
         }
-        String destName = art.fillTemplatePlus(destTemplate, destSpecial);
+        File srcPath = new File(srcFolder, srcExistingName);
+        
+        String destName = destFilled.getRegularName();
         File destPath = new File(destFolder, destName);
         if (destPath.exists()) {
             // just ignore it, don't move, don't delete
@@ -448,10 +465,10 @@ public class NewsFile {
         else if (!relPath.endsWith("/")) {
             relPath = relPath + "/";
         }
-        String parts[] = NewsBunch.getFileNameParts(fileName);
-        String patternFromFile = parts[0];
-        int val = UtilityMethods.safeConvertInt(parts[1]);
-        if(parts[1].startsWith("!")) {
+        FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+        String patternFromFile = ffn.prePart;
+        int val = ffn.getNumValue();
+        if(ffn.numPart.startsWith("!")) {
             //the number comes with the exclamation point, instead of a negative sign
             val = -val;
         }
@@ -468,7 +485,7 @@ public class NewsFile {
         if (images.size()==0) {
             if (fail) {
                 throw new Exception("Unable to find an image for "+disk.diskName+":"
-                            +relPath+patternFromFile+"[val="+val+" or "+parts[1]+"]");
+                            +relPath+patternFromFile+"[val="+val+" or "+ffn.numPart+"]");
             }
             return null;
         }
@@ -586,7 +603,7 @@ public class NewsFile {
         	//folderChildren = new File[0];
         	return null;
         }
-        String fileParts[] = NewsBunch.getFileNameParts(fileName);
+        FracturedFileName ffn  = FracturedFileName.parseFile(fileName);
         File bestFit = null;
 
         for (File aChild : folderChildren) {
@@ -595,11 +612,11 @@ public class NewsFile {
                 return aChild;
             }
 
-            String childParts[] = NewsBunch.getFileNameParts(aChild.getName());
+            FracturedFileName childParts = FracturedFileName.parseFile(aChild.getName());
 
-            if (fileParts[0].equalsIgnoreCase(childParts[0])) {
-                int fileNum = safeConvertBang(fileParts[1]);
-                int childNum = safeConvertBang(childParts[1]);
+            if (ffn.prePart.equalsIgnoreCase(childParts.prePart)) {
+                int fileNum = safeConvertBang(ffn.numPart);
+                int childNum = safeConvertBang(childParts.numPart);
                 if (fileNum==childNum && fileNum!=0) {
                     //don't do this for the zero, which includes cover, sample, etc
                     //also avoids bad matches in cases where there is no number

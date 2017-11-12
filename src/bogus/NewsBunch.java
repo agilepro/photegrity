@@ -704,6 +704,8 @@ public class NewsBunch {
                 throw new Exception("Article " + art.articleNo
                         + " has a null filename, but there is a fileTemplate on the pattern for "+digest);
             }
+            FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+            
             NewsFile file = files.get(fileName);
             if (file == null) {
                 file = new NewsFile(fileName, this);
@@ -1221,11 +1223,28 @@ public class NewsBunch {
                 "Malformed template has a dollarsign but does not have a digit after it: "
                         + template);
     }
+    
+    private static String nullString = "";
+    
+    public static String[] getTemplateParts(String template) {
+        String[] ret  = new String[3];
+        int lastDollarPos = template.lastIndexOf("$");
+        if (lastDollarPos>=0) {
+            ret[0] = template.substring(0,lastDollarPos);
+            ret[1] = template.substring(lastDollarPos,lastDollarPos+2);
+            ret[2] = template.substring(lastDollarPos+2);
+        }
+        else {
+            ret[0] = template;
+            ret[1] = nullString;
+            ret[2] = nullString;
+        }
+        return ret;
+    }
 
     public static String getFilePattern(String fileName) {
-
-        String[] parts = getFileNameParts(fileName);
-        return parts[0];
+        FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+        return ffn.prePart;
     }
 
     public static String[] getFileNameParts(String fileName) {
@@ -1324,8 +1343,7 @@ public class NewsBunch {
         String path = disk + ":" + pathInDisk;
         Hashtable<String, PosPat> pathSet = new Hashtable<String, PosPat>();
         for (NewsFile nf : getFiles()) {
-            String fileName = nf.getFileName();
-            String pattern = getFileNameParts(fileName)[0];
+            String pattern = nf.getPattern();
             String loc = path + pattern;
             if (!pathSet.containsKey(loc)) {
                 pathSet.put(loc, new PosPat(disk, pathInDisk, pattern));

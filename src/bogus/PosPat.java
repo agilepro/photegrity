@@ -629,9 +629,13 @@ public class PosPat {
     }
     
     public String translateFileName(String sourceFile) {
-		String[] parts = NewsBunch.getFileNameParts(sourceFile);
-    	String destName = pattern+parts[1]+parts[2];
-    	return destName;
+		FracturedFileName ffn = FracturedFileName.parseFile(sourceFile);
+    	return pattern+ffn.numPart+ffn.tailPart;
+    }
+    public FracturedFileName translateFracFileName(String sourceFile) {
+        FracturedFileName ffn = FracturedFileName.parseFile(sourceFile);
+        ffn.prePart = pattern;
+        return ffn;
     }
     
     /**
@@ -647,11 +651,13 @@ public class PosPat {
 		destFolder.mkdirs();
 		for (File child : sourceFolder.listFiles()) {
 			String fileName = child.getName();
-			String[] parts = NewsBunch.getFileNameParts(fileName);
-			if (sourcePatt.equalsIgnoreCase(parts[0])) {
-				String destName = dest.getPattern() + parts[1] + parts[2];
-				File destFile = new File(destFolder,destName);
-				if (!destFile.exists()) {
+			FracturedFileName parts = FracturedFileName.parseFile(fileName);
+			if (sourcePatt.equalsIgnoreCase(parts.prePart)) {
+			    FracturedFileName destFFN = parts.copy();
+			    destFFN.prePart = dest.getPattern();
+				String destName = destFFN.existsAs(destFolder);
+				if (destName==null) {
+				    File destFile = new File(destFolder,destFFN.getRegularName());
 					moveFileContents(child, destFile);
 				}
 				child.delete();

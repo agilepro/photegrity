@@ -112,20 +112,7 @@
 
     JSONArray allArts = new JSONArray();
     for (NewsArticle art : articles) {
-        JSONObject jobj = new JSONObject();
-        jobj.put("num", art.articleNo);
-        jobj.put("from", art.getHeaderFrom());
-        jobj.put("subject", art.getHeaderSubject());
-        jobj.put("dig", art.getHeaderSubject());
-        jobj.put("fileName", art.getFileName());
-        jobj.put("viz", art.isOnDisk());
-        String localPath = "";
-        File filePathX = art.getFilePath();
-        if (filePathX!=null) {
-            DiskMgr dm = DiskMgr.findDiskMgrFromPath(filePathX);
-            localPath = dm.diskName + "/" + dm.getOldRelativePathWithoutSlash(filePathX);
-        }
-        jobj.put("localPath", localPath);
+        JSONObject jobj = art.getJSON();
         allArts.put(jobj);
     }
 
@@ -138,7 +125,7 @@
     <script>
     var photoApp = angular.module('photoApp', []);
     photoApp.controller('photoCtrl', function ($scope) {
-        $scope.recs = <% allArts.write(out);%>;
+        $scope.recs = <% allArts.write(out,2,2);%>;
         $scope.thisPath = "<%=thisPage%>";
     });
 </script>
@@ -286,12 +273,13 @@
 </style>
 <table class="clevertable">
   <tr ng-repeat="rec in recs">
-     <td><a href="newsOne.jsp?artno={{rec.num}}">{{rec.num}}</a> &nbsp; </td>
+     <td title="{{rec.articleNo}}"><a href="newsOne.jsp?artno={{rec.articleNo}}">
+     {{rec.date|date:small|limitTo:16:5}}</a> &nbsp; </td>
      <td>{{rec.subject}}</td>
-     <td><a href="newsMatch.jsp?artno={{rec.num}}"><img src="search.png"></a>
+     <td><a href="newsMatch.jsp?artno={{rec.articleNo}}"><img src="search.png"></a>
          <span ng-show="rec.viz"><a href="/photo/photo/{{rec.localPath}}"
                target="photo"><img src="fileExists.png"></a></span>
-         <span ng-hide="rec.viz"><a href="newsOneAction.jsp?artno={{rec.num}}&action=Read%20Article"
+         <span ng-hide="rec.viz"><a href="newsOneAction.jsp?artno={{rec.articleNo}}&action=Read%20Article"
                target="photo"><img src="downicon.gif"></a></span></td>
      <td> {{rec.fileName}} </td>
      <td style="background-color:grey"> {{rec.from}} </td>

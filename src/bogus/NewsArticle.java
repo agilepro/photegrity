@@ -103,8 +103,16 @@ public class NewsArticle {
         if (!nBunch.hasFolder() || !nBunch.hasTemplate()) {
             return null;
         }
-        File ret = new File(nBunch.getFolderPath(), fillTemplate(nBunch.getTemplate()));
-        return ret;
+        File folder = nBunch.getFolderPath();
+        FracturedFileName template = FracturedFileName.parseTemplate(nBunch.getTemplate());
+        FracturedFileName filePath = this.fillFracturedTemplate(template);
+        String foundName = filePath.existsAs(folder);
+        if (foundName!=null) {
+            return new File(folder, foundName);
+        }
+        else {
+            return new File(folder, filePath.getRegularName());
+        }
     }
 
     public boolean isOnDisk() throws Exception {
@@ -114,8 +122,10 @@ public class NewsArticle {
         if (!nBunch.hasTemplate()) {
             return false;
         }
-        File f = getFilePath();
-        return (f.exists());
+        File folder = nBunch.getFolderPath();
+        FracturedFileName template = FracturedFileName.parseTemplate(nBunch.getTemplate());
+        FracturedFileName realName = this.fillFracturedTemplate(template);
+        return (realName.existsAs(folder)!=null);
     }
 
     /**
@@ -419,6 +429,19 @@ public class NewsArticle {
         }
         return res.toString();
     }
+    public FracturedFileName fillFracturedTemplate(FracturedFileName template) throws Exception {
+        FracturedFileName filled = new FracturedFileName();
+        filled.prePart = fillTemplate(template.prePart);
+        filled.tailPart = fillTemplate(template.tailPart);
+        if (template.numPart.length()==2) {
+            int index = UtilityMethods.safeConvertInt(template.numPart.substring(1,2));
+            filled.numPart = getParam(index);
+        }
+        else {
+            filled.numPart = "";
+        }
+        return filled;
+    }
     
     public String sanitize(String src) {
         StringBuilder sb = new StringBuilder();
@@ -460,6 +483,13 @@ public class NewsArticle {
             return fPrint.get(index);
         }
         return null;
+    }
+    
+    public int getParamValue(int index) throws Exception {
+        if (index >= 0 && index < fPrint.size()) {
+            return UtilityMethods.safeConvertInt(fPrint.get(index));
+        }
+        return -1;
     }
 
     public int getMultiFileNumerator() throws Exception {

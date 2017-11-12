@@ -161,8 +161,8 @@ public class NewsActionSeekPattern extends NewsAction {
             
             //ignore articles that don't have the right pattern
             String fileName = art.getFileName();
-            String[] fnParts = NewsBunch.getFileNameParts(fileName);
-            if (!pattern.equalsIgnoreCase(fnParts[0])) {
+            FracturedFileName fnParts = FracturedFileName.parseFile(fileName);
+            if (!pattern.equalsIgnoreCase(fnParts.prePart)) {
             	continue;
             }
             

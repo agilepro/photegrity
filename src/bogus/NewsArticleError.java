@@ -3,6 +3,7 @@ package bogus;
 import java.io.Writer;
 import java.util.List;
 import java.util.Vector;
+
 import org.workcast.streams.CSVHelper;
 
 /**
@@ -43,7 +44,7 @@ public class NewsArticleError {
     public boolean okToTryAgainNow() {
         //timeout is 1 day
         //retry embargo is 1 hour, or 12 times that
-        long retryEmbargoStart = System.currentTimeMillis() - (2*(errorCount+1)*timeout);
+        long retryEmbargoStart = System.currentTimeMillis() - ((errorCount)*timeout);
         return lastErrorTime < retryEmbargoStart;
     }
 
@@ -52,16 +53,16 @@ public class NewsArticleError {
     }
 
     public void assertOK() throws Exception {
-        long embargoStart = System.currentTimeMillis() - ((errorCount+1)*timeout);
+        long embargoStart = System.currentTimeMillis() - ((errorCount)*timeout);
         if (lastErrorTime > embargoStart) {
-            throw new Exception("Article " + articleNo + " has failed "+errorCount+" times, and too soon to try again.");
+            throw new Exception("Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/3600000) +" hours");
         }
     }
 
     public String status() {
-        long embargoStart = System.currentTimeMillis() - ((errorCount+1)*timeout);
+        long embargoStart = System.currentTimeMillis() - ((errorCount)*timeout);
         if (lastErrorTime > embargoStart) {
-            return "Article " + articleNo + " has failed "+errorCount+" times, and too soon to try again.";
+            return "Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/3600000) +" hours";
         }
         return "Article " + articleNo + " has failed "+errorCount+" times, OK to try again";
     }

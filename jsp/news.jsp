@@ -603,6 +603,10 @@
                 template = "$d" + ch1 + ch2 + "-" + template;
                 console.log("CONVERTED: "+ template);
             }
+            var pos = template.indexOf(".of.$");
+            if (pos>0) {
+                template = template.substring(0,pos)+".jpg";
+            }
             newBunch.template = template;
         }
         $scope.fixTemplate = function(bunch) {

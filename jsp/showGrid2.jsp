@@ -17,6 +17,7 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
 %><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="org.workcast.streams.JavaScriptWriter"
 %><%@page import="org.workcast.json.JSONObject"
 %><%@page import="org.workcast.json.JSONArray"
 %><%
@@ -69,6 +70,7 @@
 
     var bunchApp = angular.module('bunchApp', ['ui.bootstrap']);
     bunchApp.controller('bunchCtrl', function ($scope, $http, $timeout) {
+        $scope.query = "<%JavaScriptWriter.encode(out,query);%>";
         $scope.dataSet = <% grid.write(out, 2, 2); %>;
         $scope.dataSet.cols.sort();
         $scope.dataSet.rows.sort();
@@ -76,15 +78,24 @@
         $scope.xSize = 6;
         $scope.pinCols = [];
         $scope.pinMap = {};
+        $scope.biasMap = {};
         $scope.showCols = [];
         $scope.showRows = [];
+        $scope.rowNameToPos = {};
         $scope.onlyPinned = false;
         $scope.singleRow = false;
         $scope.currentRow = 0;
         $scope.currentCol = 0;
-        $scope.dataSet.cols.forEach( function(item) {
-            $scope.pinMap[item] = "unpinned";
+        $scope.dataSet.cols.forEach( function(colName) {
+            $scope.pinMap[colName] = "unpinned";
+            $scope.biasMap[colName] = 0;
         });
+        var rowPoz = 0;
+        $scope.dataSet.rows.forEach( function(rowName) {
+            $scope.rowNameToPos[rowName] = rowPoz;
+            rowPoz++;
+        });
+        
         
         
         $scope.imageUrl = function(col, row) {
@@ -101,8 +112,11 @@
         }
         $scope.imageOrDefault = function(col, row) {
             var colrecs = $scope.dataSet.grid[col];
+            var bias = $scope.biasMap[col];
             if (colrecs) {
-                var image = colrecs[row];
+                var rowOffset = $scope.rowNameToPos[row];
+                var modRow = $scope.dataSet.rows[rowOffset+bias];
+                var image = colrecs[modRow];
                 if (image) {
                     return [image];
                 }
@@ -110,6 +124,32 @@
             var image = $scope.dataSet.defs[col];
             image.isDefault = true;
             return [image];
+        }
+        $scope.findBias = function() {
+            $scope.dataSet.cols.forEach( function(colName) {
+                var offset = 0;
+                $scope.biasMap[colName] = -1;
+                var colSet = $scope.dataSet.grid[colName];
+                $scope.dataSet.rows.forEach( function(rowName) {
+                    if (colSet[rowName]) {
+                        if ($scope.biasMap[colName]==-1) {
+                            $scope.biasMap[colName] = offset;
+                        }
+                    }
+                    offset++;
+                });
+            });
+        }
+        $scope.colDown = function(colName) {
+            $scope.biasMap[colName]--;
+        }
+        $scope.colUp = function(colName) {
+            $scope.biasMap[colName]++;
+        }
+        $scope.clearBias = function() {
+            $scope.dataSet.cols.forEach( function(colName) {
+                $scope.biasMap[colName] = 0;
+            });
         }
         $scope.setRow = function(rowTarget) {
             var maxRow = $scope.dataSet.rows.length;
@@ -196,6 +236,10 @@
         }
         $scope.toggleSingleRow = function() {
             $scope.singleRow = !$scope.singleRow;
+        }
+        $scope.stripPath = function(path) {
+            var pos = path.lastIndexOf("/");
+            return (path.substring(pos+1));
         }
     });
 
@@ -288,6 +332,22 @@
         </td>
 
     </tr>
+    <tr>
+        <td>
+        </td>
+        <td ng-repeat="col in showCols">
+            <button ng-click="colDown(col)">-</button>
+            {{biasMap[col]}}
+            <button ng-click="colUp(col)">+</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+        <td ng-repeat="col in showCols">
+            <a href="show.jsp?q={{query}}e({{stripPath(col)}})" target="_blank">S</a>
+        </td>
+    </tr>
 </table>
 </div>
 
@@ -315,5 +375,8 @@
 <ul>
 <li ng-repeat="col in showCols" class="{{pinMap[col]}}">{{col}}</li>
 </ul>
+
+<button ng-click="findBias()">Find Bias</button>
+<button ng-click="clearBias()">Clear Bias</button>
 </body>
 </html>

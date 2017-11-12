@@ -52,7 +52,9 @@ public class NewsBunch {
     public int denominator;
     public int numerator = -1;
     public boolean hasMulti = false;
-    private String fileTemplate = "";
+    //private String fileTemplate = "";
+    private FracturedFileName fracTemplate;
+    
     private DiskMgr disk;
     private String pathInDisk;
     private String sender;
@@ -139,7 +141,7 @@ public class NewsBunch {
         nb.extraTags = oldOne.extraTags;
         nb.pState = oldOne.pState;
         nb.pathInDisk = oldOne.pathInDisk;
-        nb.fileTemplate = oldOne.fileTemplate;
+        nb.fracTemplate = oldOne.fracTemplate;
         return nb;
     }
 
@@ -278,10 +280,10 @@ public class NewsBunch {
         values.add(digest);
         String store = disk.diskName + ":" + pathInDisk;
         values.add(store);
-        if (fileTemplate == null) {
-            fileTemplate = "";
+        if (fracTemplate == null) {
+            fracTemplate = new FracturedFileName();
         }
-        values.add(fileTemplate);
+        values.add(fracTemplate.getBasicName());
         if (pState == NewsBunch.STATE_HIDDEN) {
             values.add("hide");
         }
@@ -379,7 +381,7 @@ public class NewsBunch {
                 newBunch.changeFolder(store, false);
             }
         }
-        newBunch.fileTemplate = values.get(2);
+        newBunch.fracTemplate = FracturedFileName.parseTemplate(values.get(2));
         String stateStr = values.get(3);
         if ("hide".equals(stateStr)) {
             newBunch.pState = NewsBunch.STATE_HIDDEN;
@@ -691,7 +693,7 @@ public class NewsBunch {
     }
 
     public List<NewsFile> getFiles() throws Exception {
-        if (fileTemplate == null || fileTemplate.length() == 0) {
+        if (fracTemplate == null || fracTemplate.isEmpty()) {
             throw new Exception("sorry, can't collect files until the file template is set for the bunch "+digest);
         }
         int countTotal = 0;
@@ -770,18 +772,21 @@ public class NewsBunch {
     }
 
     public boolean hasTemplate() {
-        return (fileTemplate != null && fileTemplate.length() > 0);
+        return (fracTemplate != null && !fracTemplate.isEmpty());
     }
 
     public String getTemplate() {
-        if (fileTemplate == null || fileTemplate.length() == 0) {
+        if (fracTemplate == null || fracTemplate.isEmpty()) {
             return guessFileTemplate();
         }
-        return fileTemplate;
+        return fracTemplate.getBasicName();
+    }
+    public FracturedFileName getFracTemplate() {
+        return fracTemplate;
     }
 
     public String getSampleFileName() throws Exception {
-        String temp = fileTemplate;
+        String temp = fracTemplate.getBasicName();
         if (temp == null || temp.length() == 0) {
             temp = guessFileTemplate();
         }
@@ -827,9 +832,10 @@ public class NewsBunch {
         // lets clean up the template a bit....
         // remove spaces just in case some got on there
         newTemplate = cleanUpTemplate(newTemplate);
+        FracturedFileName newFracTemplate = FracturedFileName.parseTemplate(newTemplate);
 
         if (dm2 == disk && destPath.equals(pathInDisk) &&
-                newTemplate.equals(fileTemplate) && newPlusOne == plusOneNumber) {
+                newFracTemplate.equals(fracTemplate) && newPlusOne == plusOneNumber) {
             // skip this trouble if setting to the same disk/path/name/plus it already at.
             return;
         }
@@ -842,14 +848,15 @@ public class NewsBunch {
 
         if (hasFolder() && renameFiles && hasTemplate()) {
 
-            String oldTemplate = fileTemplate;
-            if (newTemplate.equals(fileTemplate) && newPlusOne != plusOneNumber) {
+            FracturedFileName oldTemplate = fracTemplate;
+            if (newFracTemplate.equals(fracTemplate) && newPlusOne != plusOneNumber) {
                 // if we are not changing the template at the same time, we need
                 // to
                 // first move the files to a dummy name, so that number change
                 // problems do
                 // not clash
-                String nonClashTemplate = "~tmp~" + fileTemplate;
+                FracturedFileName nonClashTemplate = fracTemplate.copy();
+                nonClashTemplate.prePart = "~tmp~" + nonClashTemplate.prePart;
                 for (NewsFile nf : getFiles()) {
                     if (nf.isDownloaded()) {
                         out.write("\n<li>renaming file ");
@@ -857,10 +864,10 @@ public class NewsBunch {
                         out.write("</li>");
                         out.flush();
                     }
-                    nf.renameFileDeluxe(oldFolderPath, oldTemplate, plusOneNumber, oldFolderPath,
+                    nf.renameFracDeluxe(oldFolderPath, oldTemplate, plusOneNumber, oldFolderPath,
                             nonClashTemplate, plusOneNumber);
                 }
-                fileTemplate = nonClashTemplate;
+                fracTemplate = nonClashTemplate;
                 oldTemplate = nonClashTemplate;
             }
 
@@ -873,15 +880,15 @@ public class NewsBunch {
                     out.write("</li>");
                     out.flush();
                 }
-                nf.renameFileDeluxe(oldFolderPath, oldTemplate, plusOneNumber, newFolderPath,
-                        newTemplate, newPlusOne);
+                nf.renameFracDeluxe(oldFolderPath, oldTemplate, plusOneNumber, newFolderPath,
+                        newFracTemplate, newPlusOne);
             }
             samplePattern = null;
         }
         disk = dm2;
         setRelativePath(destPath);
         out.write("\n<li>relative path now set to "+destPath+"</li>");
-        fileTemplate = newTemplate;
+        fracTemplate = newFracTemplate;
         plusOneNumber = newPlusOne;
         // forces it to recalculate if needed
         specialTokenIndex = -2;
@@ -1069,9 +1076,9 @@ public class NewsBunch {
         String tokPattern = tokenFill();
         String lcPattern = tokPattern.toLowerCase();
 
-        if (fileTemplate != null && fileTemplate.length() > 0) {
+        if (fracTemplate != null && !fracTemplate.isEmpty()) {
             // don't do anything if there is already a file temaplate
-            return fileTemplate;
+            return fracTemplate.getBasicName();
         }
         String quotedSpan = getLastQuotedSpan(tokPattern);
         if (quotedSpan!=null && quotedSpan.length()>4) {
@@ -1199,7 +1206,7 @@ public class NewsBunch {
      */
     public int getSpecialTokenIndex() {
         if (specialTokenIndex < -1) {
-            specialTokenIndex = findSpecialTokenIndex(fileTemplate);
+            specialTokenIndex = fracTemplate.prePart.length();
         }
         return specialTokenIndex;
     }
@@ -1334,7 +1341,7 @@ public class NewsBunch {
             return tsites;
         }
         tsites = new Vector<PosPat>();
-        if (fileTemplate == null || fileTemplate.length() == 0
+        if (fracTemplate == null || fracTemplate.isEmpty()
                 || pathInDisk == null || pathInDisk.length()==0 ) {
             //without a template or path we can not find any of them, return empty
             sites = tsites;

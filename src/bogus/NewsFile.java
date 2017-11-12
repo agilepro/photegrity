@@ -15,15 +15,14 @@ import java.util.Vector;
 public class NewsFile {
     private Vector<NewsArticle> parts;
     private NewsBunch nBunch;
-    private String fileName;
+    //private String fileName;
     private FracturedFileName fracName;
     private LocalMapping map;
 
     public NewsFile(String _fileName, NewsBunch _bnch) throws Exception {
         nBunch = _bnch;
         parts = new Vector<NewsArticle>();
-        fileName = _fileName;
-        fracName = FracturedFileName.parseFile(fileName);
+        fracName = FracturedFileName.parseFile(_fileName);
         refreshMapping();
     }
     
@@ -31,7 +30,7 @@ public class NewsFile {
     	if (parts.size()>0) {
 	    	//check with the bunch again ... the template might have changed
 	    	//this will get the file name from the template from the bunch
-    		fileName = parts.elementAt(0).getFileName();
+    		String fileName = parts.elementAt(0).getFileName();
 	    	//refresh the pattern from the file name
     		fracName = FracturedFileName.parseFile(fileName);
     	}
@@ -47,7 +46,7 @@ public class NewsFile {
     }
 
     public String getFileName() {
-        return fileName;
+        return fracName.getBasicName();
     }
     public String getRegularName() {
         return fracName.getRegularName();
@@ -116,9 +115,12 @@ public class NewsFile {
         	return null;  //probably never happens
         }
         if (map==null || !map.enabled) {
-        	return new File(folder, fileName);
+        	return fracName.getBestPath(folder);
         }
-    	FracturedFileName destFileName = map.dest.translateFracFileName(fileName);
+
+    	FracturedFileName destFileName = fracName.copy();
+    	destFileName.prePart = map.dest.getPattern();
+    	
         File destfolder = map.dest.getFolderPath();
         String possibleName = destFileName.existsAs(destfolder);
         if (possibleName==null) {
@@ -134,10 +136,10 @@ public class NewsFile {
      * This file should not exist if there is an active mapping
      * to a permanent file. 
      */
-    public File getTempFilePath() {
-        File folder = nBunch.getFolderPath();
-        return new File(folder, fileName);
-    }
+    //public File getTempFilePath() {
+    //    File folder = nBunch.getFolderPath();
+    //    return new File(folder, fileName);
+    //}
     
     
     public int partsAvailable() {
@@ -390,21 +392,15 @@ public class NewsFile {
             //if for some reason there are no articles then we can't get the fingerprint
             return;
         }
-        NewsArticle art = parts.get(0);
 
-        /*
-        int srcSpecial = -2;
-        if (srcPlus) {
-            srcSpecial = NewsBunch.findSpecialTokenIndex(srcTemplate);
-        }
-        int destSpecial = -2;
-        if (destPlus) {
-            destSpecial = NewsBunch.findSpecialTokenIndex(destTemplate);
-        }
-        */
         FracturedFileName sourceParts = FracturedFileName.parseTemplate(srcTemplate);
         FracturedFileName destParts = FracturedFileName.parseTemplate(destTemplate);
-        
+        renameFracDeluxe(srcFolder, sourceParts, srcPlus, destFolder, destParts, destPlus);
+    }
+    
+    public void renameFracDeluxe(File srcFolder, FracturedFileName sourceParts, boolean srcPlus,
+                File destFolder, FracturedFileName destParts, boolean destPlus) throws Exception {
+        NewsArticle art = parts.get(0);
         FracturedFileName sourceFilled = art.fillFracturedTemplate(sourceParts);
         FracturedFileName destFilled = art.fillFracturedTemplate(destParts);
 
@@ -465,27 +461,26 @@ public class NewsFile {
         else if (!relPath.endsWith("/")) {
             relPath = relPath + "/";
         }
-        FracturedFileName ffn = FracturedFileName.parseFile(fileName);
-        String patternFromFile = ffn.prePart;
-        int val = ffn.getNumValue();
-        if(ffn.numPart.startsWith("!")) {
+        String patternFromFile = fracName.prePart;
+        int val = fracName.getNumValue();
+        if(fracName.numPart.startsWith("!")) {
             //the number comes with the exclamation point, instead of a negative sign
             val = -val;
         }
-        if (fileName.indexOf(".cover.")>0) {
+        if (fracName.tailPart.indexOf(".cover.")>0) {
             val = -100;
         }
-        else if (fileName.indexOf(".flogo.")>0) {
+        else if (fracName.tailPart.indexOf(".flogo.")>0) {
             val = -200;
         }
-        else if (fileName.indexOf(".sample.")>0) {
+        else if (fracName.tailPart.indexOf(".sample.")>0) {
             val = -300;
         }
         List<ImageInfo> images = ImageInfo.findAllMatching(disk.diskName, relPath, patternFromFile, val);
         if (images.size()==0) {
             if (fail) {
                 throw new Exception("Unable to find an image for "+disk.diskName+":"
-                            +relPath+patternFromFile+"[val="+val+" or "+ffn.numPart+"]");
+                            +relPath+patternFromFile+"[val="+val+" or "+fracName.numPart+"]");
             }
             return null;
         }
@@ -526,8 +521,8 @@ public class NewsFile {
                     + newFolderPath);
         }
 
-        File oldFilePath = new File(oldFolderPath, fileName);
-        File newFilePath = new File(newFolderPath, fileName);
+        File oldFilePath = fracName.getBestPath(oldFolderPath);
+        File newFilePath = fracName.getBestPath(newFolderPath);
         if (!oldFilePath.exists()) {
         	throw new Exception("the source file "+oldFilePath+" does not exist, so there is no file to move! "+oldFilePath);
         }

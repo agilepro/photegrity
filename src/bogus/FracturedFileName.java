@@ -120,6 +120,27 @@ public class FracturedFileName {
         return String.format("%s%03d%s", prePart, val, tailPart);
     }
     
+    public boolean isEmpty() {
+        return prePart.length()==0 && numPart.length()==0 && tailPart.length()==0;
+    }
+    public boolean equals(FracturedFileName other) {
+        return prePart.equals(other.prePart) && numPart.equals(other.numPart) && tailPart.equals(other.tailPart);
+    }
+    
+    /*
+     * Returns the name of a file in the folder that exists,
+     * otherwise the nice formatted regular name.
+     */
+    public File getBestPath(File destfolder) {
+        String possibleName = existsAs(destfolder);
+        if (possibleName!=null) {
+            return new File(destfolder, possibleName);
+        }
+        else {
+            return new File(destfolder, getRegularName());
+        }
+    }
+    
     
     /*
      * There are three forms for a file with a single digit number:

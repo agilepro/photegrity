@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 public class TagInfo {
     public String tagName;

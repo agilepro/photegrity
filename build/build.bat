@@ -17,12 +17,12 @@ mkdir %TARGET_DIR%\photo_war\WEB-INF\lib
 XCOPY /sy %SOURCE_DIR%\jsp %TARGET_DIR%\photo_war
 
 COPY %SOURCE_DIR%\thirdparty\js.jar %TARGET_DIR%\photo_war\WEB-INF\lib
-COPY %SOURCE_DIR%\thirdparty\mendo.jar %TARGET_DIR%\photo_war\WEB-INF\lib
+COPY %SOURCE_DIR%\thirdparty\purple.jar %TARGET_DIR%\photo_war\WEB-INF\lib
 COPY %SOURCE_DIR%\thirdparty\imgscalr-lib-4.2.jar %TARGET_DIR%\photo_war\WEB-INF\lib
 
 :### setup classpath
 
-set PHOTO_CP=%SERVLET_API_LOC%servlet-api.jar;%SERVLET_API_LOC%jsp-api.jar;%TARGET_DIR%\photo_war\WEB-INF\lib\mendo.jar;%TARGET_DIR%\photo_war\WEB-INF\lib\imgscalr-lib-4.2.jar
+set PHOTO_CP=%SERVLET_API_LOC%servlet-api.jar;%SERVLET_API_LOC%jsp-api.jar;%TARGET_DIR%\photo_war\WEB-INF\lib\purple.jar;%TARGET_DIR%\photo_war\WEB-INF\lib\imgscalr-lib-4.2.jar
 
 set NETCLASSES=%SOURCE_DIR%\src\org\apache\commons\net\bsd\*.java %SOURCE_DIR%\src\org\apache\commons\net\chargen\*.java %SOURCE_DIR%\src\org\apache\commons\net\daytime\*.java %SOURCE_DIR%\src\org\apache\commons\net\discard\*.java %SOURCE_DIR%\src\org\apache\commons\net\echo\*.java %SOURCE_DIR%\src\org\apache\commons\net\finger\*.java %SOURCE_DIR%\src\org\apache\commons\net\ftp\*.java %SOURCE_DIR%\src\org\apache\commons\net\imap\*.java %SOURCE_DIR%\src\org\apache\commons\net\io\*.java %SOURCE_DIR%\src\org\apache\commons\net\nntp\*.java %SOURCE_DIR%\src\org\apache\commons\net\ntp\*.java %SOURCE_DIR%\src\org\apache\commons\net\pop3\*.java %SOURCE_DIR%\src\org\apache\commons\net\smtp\*.java %SOURCE_DIR%\src\org\apache\commons\net\telnet\*.java %SOURCE_DIR%\src\org\apache\commons\net\tftp\*.java %SOURCE_DIR%\src\org\apache\commons\net\time\*.java %SOURCE_DIR%\src\org\apache\commons\net\util\*.java %SOURCE_DIR%\src\org\apache\commons\net\whois\*.java %SOURCE_DIR%\src\org\apache\commons\net\*.java %SOURCE_DIR%\src\org\apache\commons\net\ftp\parser\*.java
 

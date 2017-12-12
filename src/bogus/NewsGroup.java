@@ -16,7 +16,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.apache.commons.net.nntp.NewsgroupInfo;
-import org.workcast.streams.CSVHelper;
+import com.purplehillsbooks.streams.CSVHelper;
 
 /**
  * represents a news group on a news server this is a singleton class
@@ -72,7 +72,12 @@ public class NewsGroup {
      * contains the properties for connecting to a news group
      */
     public synchronized void openNewsGroupFile(File propertyFile) throws Exception {
-        openNewsGroupFile(propertyFile, true);
+        try {
+            openNewsGroupFile(propertyFile, true);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

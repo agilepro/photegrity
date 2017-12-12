@@ -6,8 +6,8 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 
-import org.workcast.json.JSONArray;
-import org.workcast.json.JSONObject;
+import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONObject;
 
 public class GridData {
 

@@ -8,7 +8,7 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
 * This is a base class for an object which could be a wikitable row

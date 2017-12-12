@@ -26,6 +26,9 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONException"
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
@@ -181,7 +184,8 @@
     }
     catch (Exception e) {
         response.setStatus(401);
-        out.write("Exception: "+e.toString());
+        JSONObject jo = JSONException.convertToJSON(e, "listBunces");
+        jo.write(out,2,2);
     }
 %>
 <%!

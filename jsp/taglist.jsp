@@ -17,7 +17,7 @@
 <%@page import="bogus.ImageInfo" %>
 <%@page import="bogus.PatternInfo" %>
 <%@page import="bogus.UtilityMethods"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
 
 <%

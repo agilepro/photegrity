@@ -9,7 +9,7 @@
 <%@page import="bogus.PatternInfo" %>
 <%@page import="bogus.DiskMgr" %>
 <%@page import="bogus.UtilityMethods"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
 
 <%

@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.workcast.json.JSONException;
-import org.workcast.json.JSONObject;
-import org.workcast.json.JSONTokener;
-import org.workcast.streams.StreamHelper;
+import com.purplehillsbooks.json.JSONException;
+import com.purplehillsbooks.json.JSONObject;
+import com.purplehillsbooks.json.JSONTokener;
+import com.purplehillsbooks.streams.StreamHelper;
 
 public class WebRequest {
     public HttpServletRequest  request;

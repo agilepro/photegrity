@@ -19,7 +19,7 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
-%><%@page import="org.workcast.streams.MemFile"
+%><%@page import="com.purplehillsbooks.streams.MemFile"
 %><%
 
 if (true) {

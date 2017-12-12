@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
-import org.workcast.json.JSONArray;
-import org.workcast.json.JSONObject;
+import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONObject;
 
 public class ImageInfo
 {

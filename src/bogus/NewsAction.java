@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 
-import org.workcast.streams.NullWriter;
+import com.purplehillsbooks.streams.NullWriter;
 
 /**
  * represents a base class for News Actions which can be run in the background

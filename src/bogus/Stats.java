@@ -10,7 +10,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Vector;
 
-import org.workcast.streams.CSVHelper;
+import com.purplehillsbooks.streams.CSVHelper;
 
 public class Stats {
 

@@ -18,7 +18,7 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Random"
 %><%@page import="java.util.Vector"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%
     request.setCharacterEncoding("UTF-8");
     String pageName = "allPatts.jsp";

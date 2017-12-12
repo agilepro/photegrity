@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
 
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
  * schedules a file save at a time when the background tasks are doing nothing

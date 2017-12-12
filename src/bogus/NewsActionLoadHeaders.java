@@ -2,7 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
  * represents a news group on a news server

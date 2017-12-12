@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import org.workcast.streams.HTMLWriter;
-import org.workcast.streams.MemFile;
+import com.purplehillsbooks.streams.HTMLWriter;
+import com.purplehillsbooks.streams.MemFile;
 
 import bandaid.Thumbnail;
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
  * represents an overloadable action this one bring in three sample files to get

@@ -10,7 +10,7 @@
 <%@page import="bogus.DiskMgr" %>
 <%@page import="bogus.HashCounter" %>
 <%@page import="bogus.UtilityMethods"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
 <%
     request.setCharacterEncoding("UTF-8");

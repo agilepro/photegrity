@@ -123,23 +123,13 @@ public class NewsFile {
     	
         File destfolder = map.dest.getFolderPath();
         String possibleName = destFileName.existsAs(destfolder);
-        if (possibleName==null) {
+        if (possibleName!=null) {
             return new File(destfolder, possibleName);
         }
         else {
             return new File(destfolder, destFileName.getRegularName());
         }
     }
-
-    /**
-     * The temporary file is the file that exists in the new folder
-     * This file should not exist if there is an active mapping
-     * to a permanent file. 
-     */
-    //public File getTempFilePath() {
-    //    File folder = nBunch.getFolderPath();
-    //    return new File(folder, fileName);
-    //}
     
     
     public int partsAvailable() {

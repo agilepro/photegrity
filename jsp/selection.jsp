@@ -12,7 +12,7 @@
 <%@page import="bogus.PatternInfo" %>
 <%@page import="bogus.TagInfo" %>
 <%@page import="bogus.UtilityMethods"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
 
 <%

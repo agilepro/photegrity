@@ -14,7 +14,7 @@
 %><%@page import="java.util.Enumeration"
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();

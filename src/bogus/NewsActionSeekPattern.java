@@ -4,7 +4,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
  * An action that goes and tries to find all the messages of a

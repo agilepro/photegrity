@@ -7,7 +7,7 @@
 %><%@page import="javax.servlet.http.HttpServletRequest"
 %><%@page import="org.w3c.dom.Document"
 %><%@page import="org.w3c.dom.Element"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="bogus.TagInfo"
 %><%!public static ImageInfo dummy = null;
 

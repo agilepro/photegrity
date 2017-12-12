@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.workcast.json.JSONObject;
+import com.purplehillsbooks.json.JSONObject;
 
 /**
  * This servlet serves up pages using the following URL format:

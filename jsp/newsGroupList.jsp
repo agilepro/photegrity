@@ -16,7 +16,7 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"

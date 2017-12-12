@@ -14,10 +14,10 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
-%><%@page import="org.workcast.json.JSONArray"
-%><%@page import="org.workcast.json.JSONObject"
-%><%@page import="org.workcast.json.JSONTokener"
-%><%@page import="org.workcast.streams.MemFile"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONTokener"
+%><%@page import="com.purplehillsbooks.streams.MemFile"
 %><%
     request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");

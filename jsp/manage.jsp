@@ -11,7 +11,7 @@
 %><%@page import="bogus.HashCounter"
 %><%@page import="bogus.UtilityMethods"
 %><%@page import="java.net.URLEncoder"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();

@@ -11,7 +11,7 @@
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Vector"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="bogus.NewsActionShrink"
 %>
 

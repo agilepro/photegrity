@@ -16,10 +16,10 @@
 %><%@page import="java.util.Enumeration"
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
-%><%@page import="org.workcast.streams.HTMLWriter"
-%><%@page import="org.workcast.streams.JavaScriptWriter"
-%><%@page import="org.workcast.json.JSONObject"
-%><%@page import="org.workcast.json.JSONArray"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.JavaScriptWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%
     request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");

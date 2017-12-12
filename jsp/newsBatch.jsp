@@ -27,10 +27,10 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
-%><%@page import="org.workcast.streams.HTMLWriter"
-%><%@page import="org.workcast.json.JSONObject"
-%><%@page import="org.workcast.json.JSONArray"
-%><%@page import="org.workcast.json.JSONException"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONException"
 %><%request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();
@@ -161,7 +161,8 @@
     }
     catch (Exception e) {
         response.setStatus(500);
-        results.put("error", JSONException.convertToJSON(e, "batch processing"));
+        JSONObject jo = JSONException.convertToJSON(e, "listBunces");
+        jo.write(out,2,2);
     }
     results.write(out, 2, 0);
 %>

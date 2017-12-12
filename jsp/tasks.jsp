@@ -10,7 +10,7 @@
 %><%@page import="bogus.NewsSession"
 %><%@page import="bogus.Stats"
 %><%@page import="bogus.UtilityMethods"
-%><%@page import="org.workcast.streams.CSVHelper"
+%><%@page import="com.purplehillsbooks.streams.CSVHelper"
 %><%@page import="java.io.File"
 %><%@page import="java.io.Reader"
 %><%@page import="java.io.FileInputStream"

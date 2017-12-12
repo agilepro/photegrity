@@ -16,9 +16,9 @@
 %><%@page import="java.util.Enumeration"
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
-%><%@page import="org.workcast.streams.HTMLWriter"
-%><%@page import="org.workcast.json.JSONObject"
-%><%@page import="org.workcast.json.JSONArray"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%
     request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
@@ -210,6 +210,9 @@
         $scope.query="<%=gData.query%>";
         $scope.selected = [];
         $scope.images = <% rowData.write(out,2,0); %>;
+        $scope.groupedImages = []; 
+        $scope.allTags = [];
+        $scope.hiddenTags = [];
 
         $scope.toggleColumn = function(colName) {
             var pos = $scope.selected.indexOf(colName);
@@ -219,6 +222,119 @@
             else {
                 $scope.selected.push(colName);
             }
+        }
+        
+        $scope.makeOneGroup = function() {
+            var newGroups = [];
+            var grouping = {};
+            grouping.label = "All Together";
+            grouping.set = [];
+            $scope.images.forEach( function(image) {
+                grouping.set.push(image);
+            });
+            newGroups.push(grouping);
+            $scope.groupedImages = newGroups;
+            $scope.refresh = $scope.makeOneGroup;
+        }
+        
+        $scope.findAllTags = function() {
+            var res = [];
+            $scope.images.forEach( function(image) {
+                image.tags.forEach( function(tag) {
+                    if (res.indexOf(tag)<0) {
+                        res.push(tag);
+                    }
+                });
+            });
+            res.sort();
+            $scope.allTags = res;
+            console.log("all tags: ", res);
+            return res;
+        }
+        
+        $scope.findAllComboTags = function() {
+            var res = [];
+            $scope.images.forEach( function(image) {
+                image.tags.sort();
+                var combo = image.tags.join(",");
+                if (res.indexOf(combo)<0) {
+                    res.push(combo);
+                }
+            });
+            res.sort();
+            $scope.AllCombo = res;
+            console.log("all combos: ", res);
+            return res;
+        }
+        $scope.findAllTags();
+        $scope.findAllComboTags();
+        $scope.makeOneGroup();
+        
+        $scope.groupByTag = function() {
+            var newGroups = [];
+            var allTags = $scope.findAllTags();
+            allTags.forEach( function(tag) {
+                if ($scope.hiddenTags.indexOf(tag)>=0) {
+                    return;
+                }
+                var grouping = {};
+                grouping.label = tag;
+                grouping.set = [];
+                $scope.images.forEach( function(image) {
+                    if (image.tags.indexOf(tag)>=0) {
+                        grouping.set.push(image);
+                    }
+                });
+                newGroups.push(grouping);
+            });
+            $scope.groupedImages = newGroups;
+            $scope.refresh = $scope.groupByTag;
+        }
+        $scope.groupByComboTag = function() {
+            var newGroups = [];
+            var allCombos = $scope.findAllComboTags();
+            allCombos.forEach( function(combo) {
+                var found=false;
+                $scope.hiddenTags.forEach( function(hidden) {
+                    if (combo.indexOf(hidden)>=0) {
+                        found = true;
+                    }
+                });
+                if (found) {
+                    return;
+                }
+                var grouping = {};
+                grouping.label = combo;
+                grouping.set = [];
+                $scope.images.forEach( function(image) {
+                    image.tags.sort();
+                    var tmpcombo = image.tags.join(",");
+                    if (combo==tmpcombo) {
+                        grouping.set.push(image);
+                    }
+                });
+                newGroups.push(grouping);
+            });
+            $scope.groupedImages = newGroups;
+            $scope.refresh = $scope.groupByComboTag;
+        }
+        
+        $scope.toggleTag = function(thisTag) {
+            if ($scope.hiddenTags.indexOf(thisTag)<0) {
+                $scope.hiddenTags.push(thisTag);
+                console.log("ADDED TAG: ", thisTag);
+            }
+            else {
+                var newList = [];
+                $scope.hiddenTags.forEach( function(tt) {
+                    if (tt!=thisTag) {
+                        newList.push(tt);
+                    }
+                });
+                $scope.hiddenTags = newList;
+                console.log("REMOVED TAG: ", thisTag);
+            }
+            $scope.refresh();
         }
     });
 
@@ -252,6 +368,11 @@
     width: 100px;
     margin:5px;
     background-color:#FFE;
+}
+.well {
+    border:black solid 1px;
+    background-color:skyblue;
+    padding:20px;
 }
 </style>
 
@@ -323,29 +444,47 @@
 
 <button ng-show="showAll" ng-click="showAll = false"><img src="radio_on.png"> Show All</button>
 <button ng-hide="showAll" ng-click="showAll = true"><img src="radio_off.png"> Show All</button>
+<button ng-click="makeOneGroup()">Together</button>
+<button ng-click="groupByTag()">By Tags</button>
+<button ng-click="groupByComboTag()">By Combo</button>
 
-<div id="content" style="clear: left">
-    <div class="box" ng-repeat="rec in images" ng-show="showAll || rec.isMarked">
-        <div style="height:20;">
-            <font size="-4" color="#99CC99"><%=rowQuant%></font>
-            <img src="radio_on.png" ng-show="rec.isMarked" ng-click="rec.isMarked=false">
-            <img src="radio_off.png" ng-hide="rec.isMarked" ng-click="rec.isMarked=true">
-            <a href="show.jsp?q={{query+'e('+rec.patt+')'|encode}}"  target="_blank">S</a> &nbsp;
-            <a href="manage.jsp?q={{query+'e('+rec.patt+')'|encode}}"><img border=0 src="searchicon.gif"></a> &nbsp;
-            <img src="trash.gif" ng-hide="rec.isTrashed" ng-click="rec.isTrashed=true">
-            <img src="delicon.gif" ng-show="rec.isTrashed" ng-click="rec.isTrashed=false">
+<div class="well">
+    <span ng-repeat="tag in allTags">
+      <button ng-click="toggleTag(tag)">
+        <img src="radio_on.png" ng-show="hiddenTags.indexOf(tag)<0">
+        <img src="radio_off.png" ng-hide="hiddenTags.indexOf(tag)<0">
+        {{tag}}
+      </button>
+    </span>
+</div>
+
+
+<div ng-repeat="group in groupedImages">
+    <div id="content" style="clear: left">
+        <div>{{group.label}}</div>
+        <div class="box" ng-repeat="rec in group.set" ng-show="showAll || rec.isMarked">
+            <div style="height:20;">
+                <font size="-4" color="#99CC99"><%=rowQuant%></font>
+                <img src="radio_on.png" ng-show="rec.isMarked" ng-click="rec.isMarked=false">
+                <img src="radio_off.png" ng-hide="rec.isMarked" ng-click="rec.isMarked=true">
+                <a href="show.jsp?q={{query+'e('+rec.patt+')'|encode}}"  target="_blank">S</a> &nbsp;
+                <a href="manage.jsp?q={{query+'e('+rec.patt+')'|encode}}"><img border=0 src="searchicon.gif"></a> &nbsp;
+                <img src="trash.gif" ng-hide="rec.isTrashed" ng-click="rec.isTrashed=true">
+                <img src="delicon.gif" ng-show="rec.isTrashed" ng-click="rec.isTrashed=false">
+            </div>
+        <a href="photo/{{rec.relPath}}" target="photo" ng-hide="rec.isNull">
+            <img src="thumb/100/{{rec.relPath}}" width="{{thumbsize}}" border="0" title="{{rec.relPath}}">
+        </a>
+        <a href="" ng-show="rec.isNull" >
+            <img style="opacity:0.2" src="thumb/100/{{rec.relPath}}" width="{{thumbsize}}" border="0" title="{{rec.relPath}}">
+        </a>
+
         </div>
-    <a href="photo/{{rec.relPath}}" target="photo" ng-hide="rec.isNull">
-        <img src="thumb/100/{{rec.relPath}}" width="{{thumbsize}}" border="0" title="{{rec.relPath}}">
-    </a>
-    <a href="" ng-show="rec.isNull" >
-        <img style="opacity:0.2" src="thumb/100/{{rec.relPath}}" width="{{thumbsize}}" border="0" title="{{rec.relPath}}">
-    </a>
-
     </div>
+    <div style="clear: left"></div>
 </div>
-<div style="clear: left">
-</div>
+
+
 <ol>
     <li ng-repeat="rec in images" ng-show="showAll || rec.isMarked">
         <img src="radio_on.png" ng-show="rec.isMarked" ng-click="rec.isMarked=false">

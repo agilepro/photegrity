@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.net.nntp.ArticleInfo;
-import org.workcast.json.JSONObject;
-import org.workcast.streams.CSVHelper;
-import org.workcast.streams.MemFile;
-import org.workcast.streams.StreamHelper;
+import com.purplehillsbooks.json.JSONObject;
+import com.purplehillsbooks.streams.CSVHelper;
+import com.purplehillsbooks.streams.MemFile;
+import com.purplehillsbooks.streams.StreamHelper;
 
 /**
  * represents a news article on a news server

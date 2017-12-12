@@ -13,6 +13,7 @@
 %><%@page import="java.io.File"
 %><%@page import="java.io.Reader"
 %><%@page import="java.io.Writer"
+%><%@page import="java.io.PrintStream"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.ArrayList"
 %><%@page import="java.util.Enumeration"
@@ -23,10 +24,11 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
-%><%@page import="org.workcast.streams.HTMLWriter"
-%><%@page import="org.workcast.streams.JavaScriptWriter"
-%><%@page import="org.workcast.json.JSONObject"
-%><%@page import="org.workcast.json.JSONArray"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.JavaScriptWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONException"
 %><%request.setCharacterEncoding("UTF-8");
 
     try{
@@ -159,7 +161,8 @@
     }
     catch (Exception e) {
         response.setStatus(401);
-        out.write("Exception: "+e.toString());
+        JSONObject jo = JSONException.convertToJSON(e, "listBunces");
+        jo.write(out,2,2);
     }
 
 %>

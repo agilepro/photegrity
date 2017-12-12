@@ -6,7 +6,7 @@
 <%@page import="java.io.BufferedReader"%>
 <%@page import="java.util.Properties"%>
 <%@page import="bogus.UtilityMethods"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
 <%
     request.setCharacterEncoding("UTF-8");

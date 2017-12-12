@@ -12,10 +12,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
-import org.workcast.json.JSONArray;
-import org.workcast.json.JSONObject;
-import org.workcast.streams.CSVHelper;
-import org.workcast.streams.HTMLWriter;
+import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONObject;
+import com.purplehillsbooks.streams.CSVHelper;
+import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
  * represents all the articles with a single subject digest
@@ -799,7 +799,7 @@ public class NewsBunch {
     }
 
     public void changeTemplate(String newTemplate, boolean renameFiles) throws Exception {
-        changeTemplate(newTemplate, renameFiles, new org.workcast.streams.NullWriter());
+        changeTemplate(newTemplate, renameFiles, new com.purplehillsbooks.streams.NullWriter());
     }
 
     public void changeTemplate(String newTemplate, boolean renameFiles, Writer out)
@@ -1003,7 +1003,7 @@ public class NewsBunch {
         while (newFolder.endsWith(".")) {
             newFolder = newFolder.substring(0,newFolder.length()-1);
         }
-        changeFolder(newFolder, moveFiles, new org.workcast.streams.NullWriter());
+        changeFolder(newFolder, moveFiles, new com.purplehillsbooks.streams.NullWriter());
     }
 
     public static boolean isPathReasonable(String newFolder) throws Exception {

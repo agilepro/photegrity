@@ -1,7 +1,7 @@
 <%@page errorPage="error.jsp"
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="java.io.Writer"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();

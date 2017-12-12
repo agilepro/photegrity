@@ -24,10 +24,10 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
-%><%@page import="org.workcast.streams.HTMLWriter"
-%><%@page import="org.workcast.streams.JavaScriptWriter"
-%><%@page import="org.workcast.json.JSONObject"
-%><%@page import="org.workcast.json.JSONArray"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.JavaScriptWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%
 
     request.setCharacterEncoding("UTF-8");
@@ -222,7 +222,7 @@
                 console.log("FETCHING: "+url);
                 var promise = $http.get(url);
                 promise.error(function(msg){
-                    alert("error: "+JSON.stringify(msg,null,2));
+                    alert("FETCHING error: "+JSON.stringify(msg,null,2));
                 });
                 return promise;
             },
@@ -247,7 +247,7 @@
                 console.log("BATCH: "+url);
                 var promise = $http.get(url);
                 promise.error(function(msg){
-                    alert("error: "+JSON.stringify(msg,null,2));
+                    alert("BATCH error: "+JSON.stringify(msg,null,2));
                 });
                 return promise;
             }
@@ -741,7 +741,7 @@
                 $scope.updateMsg = "success: "+data;
             }).error(function(data){
                 $scope.updateMsg = "error: "+data;
-                alert("error: "+data);
+                alert("REQUESTING error: "+data);
             });
         }
         $scope.recalcStats = function() {

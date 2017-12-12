@@ -2,7 +2,7 @@
 <%@page isErrorPage="true" %>
 <%@page import="bogus.UtilityMethods" %>
 <%@page import="java.io.PrintWriter"
-%><%@page import="org.workcast.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
 
 <%

@@ -1084,7 +1084,7 @@ public class NewsBunch {
         if (quotedSpan!=null && quotedSpan.length()>4) {
             String lastFour = quotedSpan.substring(quotedSpan.length()-4);
             //All yenc cases should be handled by this since yenc requires a quoted span.
-            if (lastFour.equalsIgnoreCase(".jpg") || lastFour.equalsIgnoreCase(".zip")  || lastFour.equalsIgnoreCase(".jpeg")) {
+            if (lastFour.equalsIgnoreCase(".jpg") || lastFour.equalsIgnoreCase(".zip") || lastFour.equalsIgnoreCase(".rar") || lastFour.equalsIgnoreCase(".jpeg") || lastFour.equalsIgnoreCase(".avi")|| lastFour.equalsIgnoreCase("par2")) {
                 return quotedSpan;
             }
         }

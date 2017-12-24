@@ -176,6 +176,7 @@
     newsInfo.put("groupName", newsGroup.groupName);
     newsInfo.put("diskName", newsGroup.defaultDiskMgr.diskName);
     newsInfo.put("windowSize", newsGroup.displayWindow);
+    newsInfo.put("windowMin", newsGroup.lowestToDisplay);
     newsInfo.put("firstArticle", newsGroup.firstArticle);
     newsInfo.put("lastArticle", newsGroup.lastArticle);
     newsInfo.put("articleCount", newsGroup.articleCount);
@@ -217,8 +218,11 @@
     var bunchApp = angular.module('bunchApp', ['ui.bootstrap']);
     bunchApp.factory('bunchFactory', function($http) {
         return {
-            listBunch: function(filter, window) {
+            listBunch: function(filter, window, start) {
                 var url = 'listBunches.jsp?filter='+encodeURIComponent(filter)+'&window='+window;
+                if (start) {
+                    url = url + "&min="+start;
+                }
                 console.log("FETCHING: "+url);
                 var promise = $http.get(url);
                 promise.error(function(msg){
@@ -226,8 +230,8 @@
                 });
                 return promise;
             },
-            listBunches: function(filter, window, callback) {
-                var promise = this.listBunch(filter, window);
+            listBunches: function(filter, window, start, callback) {
+                var promise = this.listBunch(filter, window, start);
                 promise.success(callback);
                 return promise;
             },
@@ -256,6 +260,8 @@
     bunchApp.controller('bunchCtrl', function ($scope, $http, bunchFactory, $timeout) {
         $scope.showTop = false;
         $scope.session = <% APIHandler.getSessionJSON(request).write(out,2,0); %>;
+        $scope.newsInfo = <% newsInfo.write(out,2,0); %>;
+        
         if(typeof(Storage) == "undefined") {
             alert("Sorry, your browser does not support web storage...");
         }
@@ -274,7 +280,16 @@
             }
         };
         $scope.readSessionInfo();
-
+        $scope.windowStart = <%=newsGroup.lowestToDisplay%>;
+        $scope.windowSize = <%=newsGroup.displayWindow%>;
+        $scope.fetchStart = 0;
+        $scope.fetchSize = 0;
+        
+        $scope.fetch =  {
+            start: $scope.newsInfo.highestFetched,
+            end: $scope.newsInfo.highestFetched + 10000,
+            step:31 
+        }
 
         $scope.pageSize = 20;
         $scope.zingFolder = "<%JavaScriptWriter.encode(out,zingFolder);%>";
@@ -303,7 +318,6 @@
             $scope.photoSettings.window = 100000;
             $scope.storeSessionInfo();
         }
-        $scope.newsInfo = <% newsInfo.write(out,2,0); %>;
         $scope.discardBefore = $scope.newsInfo.lowestFetched + 10000;
 
 
@@ -334,6 +348,7 @@
             }
         });
         $scope.setWindow = function(newWindow) {
+            $scope.windowSize = newWindow;
             $scope.photoSettings.window = newWindow;
             $scope.storeSessionInfo();
             $scope.rereadData();
@@ -442,7 +457,7 @@
             }
         }
         $scope.calcFiltered = function() {
-            console.log("calcFiltered "+$scope.photoSettings.sort);
+            console.log("calcFiltered ",$scope.photoSettings);
             if ($scope.photoSettings.sort == "digest") {
                 $scope.recs.sort( function(a, b){
                     return ( a.digest > b.digest )? 1 : -1;
@@ -492,10 +507,9 @@
             }
             var dispArray = $scope.filteredRecs;
             length = dispArray.length;
-            for(var j = 0; j < length; j++) {
-                var rec = dispArray[j];
+            dispArray.forEach( function(rec) {
                 $scope.annotateSpecial(rec);
-            }
+            });
             dispArray = dispArray.slice($scope.offset);
             return dispArray;
         }
@@ -707,8 +721,13 @@
             });
         }
         $scope.rereadData = function() {
-            bunchFactory.listBunches($scope.photoSettings.filter, $scope.photoSettings.window, function(data) {
-                $scope.recs = data;
+            $scope.photoSettings.start = $scope.windowStart;
+            $scope.photoSettings.window = $scope.windowSize;
+            bunchFactory.listBunches($scope.photoSettings.filter, $scope.photoSettings.window, 
+                   $scope.photoSettings.start, function(data) {
+                $scope.recs = data.list;
+                $scope.fetchStart = data.windowMin;
+                $scope.fetchSize = data.windowSize;
                 $scope.calcFiltered();
                 $scope.findSearchValueOffset();
             });
@@ -719,10 +738,6 @@
         $scope.rereadData();
 
         $scope.updateMsg = "";
-        $scope.fetch =  {
-            start: <%=newsGroup.lowestToDisplay%>,
-            end: <%= newsGroup.lowestToDisplay+newsGroup.displayWindow %>,
-            step:31 }
         $scope.fetchMoreNews = function() {
             var count = Math.trunc(($scope.fetch.end - $scope.fetch.start)/$scope.fetch.step);
             var url = "newsFetch.jsp?command=Refetch&start="+$scope.fetch.start
@@ -828,6 +843,7 @@
 <div ng-show="showTop" class="menuBox">
 <button ng-click="showTop=false">Hide</button> <span style="color:red;">{{updateMsg}}</span>
 <div>
+    Window Start: <input type="text" ng-model="windowStart"/> <button ng-click="rereadData()">Refresh</button><br/>
     Window Size: {{photoSettings.window}}
     <button ng-click="setWindow(10000);showTop=false">10</button>
     <button ng-click="setWindow(25000);showTop=false">25</button>
@@ -836,10 +852,9 @@
     <button ng-click="setWindow(200000);showTop=false">200</button>
     <button ng-click="setWindow(500000);showTop=false">500</button>
 (<%=allPatts.size()%> of <%=initialBunches%>)
-<a href="listBunches.jsp?filter={{photoSettings.filter | encode}}&window={{photoSettings.window}}">test fetch</a>
 </div>
 
-Start: <input name="start" type="text" value="<%=newsGroup.lowestToDisplay%>" size="10" ng-model="fetch.start"/>
+Start: <input name="start" type="text" size="10" ng-model="fetch.start"/>
 End: <input name="count" type="text" size="10" ng-model="fetch.end">
 Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
 <button ng-click="fetchMoreNews()">Fetch More News</button> &nbsp;
@@ -850,15 +865,15 @@ Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
   <li>Zing:  {{session.zingFolder}}/{{session.zingPat}}</li>
   <li>Server Range: {{newsInfo.firstArticle|number}} - {{newsInfo.lastArticle|number}}</li>
   <li>Server Count: {{newsInfo.articleCount|number}}</li>
-  <li>Fetched Range: {{newsInfo.lowestFetched|number}} - {{newsInfo.highestFetched|number}}</li>
+  <li>Fetched Range: {{newsInfo.lowestFetched|number}} - {{(newsInfo.highestFetched)|number}}</li>
   <li>Fetch Count: {{newsInfo.fetched|number}}</li>
-  <li>Display Range: {{newsInfo.lowestFetched|number}} - {{newsInfo.highestToDisplay|number}}</li>
-  <li>Display Window: {{newsInfo.windowSize|number}} is {{photoSettings.window|number}} </li>
+  <li>Display Range: {{fetchStart|number}} + {{fetchSize|number}} == {{(fetchStart + fetchSize)|number}}</li>
+  <li>Display Window: {{newsInfo.windowSize | number}} is {{photoSettings.window | number}} </li>
   <li>Total Raw Bytes: {{newsInfo.totalRawBytes|number}}</li>
   <li>Total Finished Bytes:{{newsInfo.totalFinishedBytes|number}}</li>
   <li>Total Files: {{newsInfo.totalFiles|number}}</li>
   <li>Download Rate: {{newsInfo.downloadRate|number}} bytes/second</li>
-
+  <li>Test link: <a href="listBunches.jsp?filter={{encodeURIComponent(filter)}}&window={{windowSize}}&min={{windowStart}}">click</a>
 </ul>
 <button ng-click="scheduledSave()">Scheduled Save</button>
     <a href="newsGaps.jsp?limit=100&step=23&thresh={{fetch.step}}&begin={{newsInfo.lowestFetched}}&highest={{newsInfo.lowestFetched+photoSettings.window}}">

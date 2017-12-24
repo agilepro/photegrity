@@ -54,14 +54,12 @@
         if (filter==null) {
             throw new Exception("Filter parameter is now required");
         }
+        long windowMin = UtilityMethods.defParamLong(request, "min", newsGroup.lowestToDisplay);
         int windowSize = UtilityMethods.defParamInt(request, "window", (int) newsGroup.displayWindow);
+        
         //here we pass by global variable ... not good
         newsGroup.displayWindow = windowSize;
-
-        String dMode = UtilityMethods.defParam(request, "dMode", null);
-        if (dMode!=null) {
-            throw new Exception("dMode parameter is no longer used.");
-        }
+        newsGroup.lowestToDisplay = windowMin;
 
         Vector<String> destVec = (Vector<String>) session.getAttribute("destVec");
         String zingFolder = "";
@@ -88,7 +86,26 @@
         //long position = newsGroup.nextFetch;
         String groupName = newsGroup.getName();
 
-        List<NewsBunch> allPatts = newsGroup.getFilteredBunches(filter);
+
+        List<NewsBunch> allPatts = new Vector<NewsBunch>();
+        for (NewsBunch tBunch : newsGroup.getAllBunches()) {
+            if (tBunch.minId>windowMin+windowSize) {
+                continue;
+            }
+            if (tBunch.maxId<windowMin) {
+                continue;
+            }
+            if (tBunch.digest.indexOf(filter)>=0) {
+            	allPatts.add(tBunch);
+            }
+            else if (tBunch.getSender().indexOf(filter)>=0) {
+            	allPatts.add(tBunch);
+            }
+            else if (tBunch.extraTags!=null && tBunch.extraTags.indexOf(filter)>=0) {
+            	allPatts.add(tBunch);
+            }
+        }
+
 
         //figure out the starting point
         int start = UtilityMethods.defParamInt(request, "start", 0);
@@ -130,6 +147,12 @@
 
         for (NewsBunch nbnch : allPatts)
         {
+            if (nbnch.maxId<windowMin) {
+                continue;
+            }
+            if (nbnch.minId>windowMin+windowSize) {
+                continue;
+            }
             JSONObject rec = nbnch.getJSON();
             if (!nbnch.hasFolder()) {
                 rec.put("folderStyle", "folder0.gif");
@@ -156,12 +179,17 @@
             allBunchList.put(rec);
         }
 
+        JSONObject ret = new JSONObject();
+        ret.put("windowMin", windowMin);
+        ret.put("windowSize", windowSize);
+        ret.put("list", allBunchList);
+        
         //now, write all the records out to the stream
-        allBunchList.write(out,2,0);
+        ret.write(out,2,0);
     }
     catch (Exception e) {
         response.setStatus(401);
-        JSONObject jo = JSONException.convertToJSON(e, "listBunces");
+        JSONObject jo = JSONException.convertToJSON(e, "listBunches");
         jo.write(out,2,2);
     }
 

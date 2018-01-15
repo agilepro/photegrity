@@ -3,6 +3,8 @@ package bogus;
 import java.io.File;
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
+
 /**
  * schedules an action to (1) backup the current files, 
  * and then (2) discard articles in a particular range.
@@ -75,6 +77,13 @@ public class NewsActionDiscard extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Discard news articles numbered "+rangeStart+" to "+rangeEnd;
+    }
+    
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        jo.put("start", rangeStart);
+        jo.put("end", rangeEnd);
+        return jo;
     }
 
 }

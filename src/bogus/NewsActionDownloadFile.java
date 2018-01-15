@@ -6,10 +6,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import bandaid.Thumbnail;
+
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 import com.purplehillsbooks.streams.MemFile;
-
-import bandaid.Thumbnail;
 
 /**
  * represents a news group on a news server
@@ -211,6 +212,7 @@ public class NewsActionDownloadFile extends NewsAction {
             if (newsFile != null) {
                 newsFile.setFailMsg(e);
             }
+            failure = e;
             String msg = UtilityMethods.getErrorString(e);
             out.write("\n    Fail: " + msg);
             out.flush();
@@ -233,6 +235,20 @@ public class NewsActionDownloadFile extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Download "+workingPart+"/"+workingTotal+" of file "+newsFile.getFilePath();
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        double seconds = getSeconds();
+        if (workingPart>0 && workingTotal>0) {
+            double timePerUnit = seconds / workingPart;
+            jo.put("timeEstimate", timePerUnit * workingTotal);
+        }
+        jo.put("verb", "Download");
+        jo.put("part", workingPart);
+        jo.put("total", workingTotal);
+        jo.put("file", newsFile.getFilePath());
+        return jo;
     }
 
 }

@@ -2,6 +2,8 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
+
 /**
  * schedules a file save at a time when the background tasks are doing nothing
  * else...
@@ -32,6 +34,11 @@ public class NewsActionIndexPrep extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Preparing index";
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

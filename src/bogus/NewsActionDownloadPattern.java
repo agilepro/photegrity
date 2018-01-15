@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -131,6 +132,11 @@ public class NewsActionDownloadPattern extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Download Pattern ("+pattern+") from "+seeker.digest;
+    }
+    
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

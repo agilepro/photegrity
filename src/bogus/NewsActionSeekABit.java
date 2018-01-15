@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -243,6 +244,11 @@ public class NewsActionSeekABit extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Seek a bit from "+seeker.getTemplate()+" [tried "+giveUpList.size()+"]";
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

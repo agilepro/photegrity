@@ -4,6 +4,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -205,6 +206,11 @@ public class NewsActionSeekPattern extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Seek pattern ("+pattern+") from bunch ("+seeker.digest+")";
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

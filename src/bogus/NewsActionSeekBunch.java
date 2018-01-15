@@ -4,6 +4,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -204,6 +205,15 @@ public class NewsActionSeekBunch extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Seek bunch "+seeker.digest;
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        jo.put("verb", "Seek Bunch");
+        jo.put("part", iterPosition);
+        jo.put("total", checkList.size());
+        jo.put("digest", seeker.digest);
+        return jo;
     }
 
 }

@@ -38,6 +38,18 @@
 <HTML>
 <HEAD><TITLE>JSP Test</TITLE></HEAD>
 <BODY BGCOLOR="#FDF5E6">
+
+<style>
+.bigtable {
+    width:800px;
+    background-color: #FDF5E6;
+}
+.bigtable tr:hover {
+    background-color: #ffffff;
+}
+</style>
+
+
 <table>
 <tr><td><H1><img src="homeBig.gif" border="0">Photo Browser</H1></td><td> &nbsp;  &nbsp;  &nbsp;
 <a href="<%= hangOut %>" title="return to the place you saved to hang out at">HangOut</a> - -
@@ -90,7 +102,7 @@
   <input type="hidden" name="refreshAll" value="true"></td>
 </form>
 </tr></table>
-<hr><table width="800">
+<hr><table class="bigtable">
 <%
     Hashtable ht = DiskMgr.getDiskList();
     if (ht==null) {

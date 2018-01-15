@@ -2,6 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -54,6 +55,11 @@ public class NewsActionSpectrum extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Spectrum "+progress+"/"+count;
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

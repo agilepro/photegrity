@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -83,6 +84,11 @@ public class NewsActionShrink extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Shrinking the files '"+query+"' finished "+position+" of "+groupImages.size();
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

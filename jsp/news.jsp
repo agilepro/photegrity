@@ -42,6 +42,10 @@
     }
 
     NewsGroup newsGroup = NewsGroup.getCurrentGroup();
+    
+    if (newsGroup.lowestToDisplay < newsGroup.lowestFetched - 1000) {
+        newsGroup.lowestToDisplay = newsGroup.lowestFetched;
+    }
 
     boolean groupLoaded = (newsGroup.defaultDiskMgr!=null);
 

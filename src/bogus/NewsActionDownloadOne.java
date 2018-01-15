@@ -3,6 +3,7 @@ package bogus;
 import java.io.File;
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -60,6 +61,11 @@ public class NewsActionDownloadOne extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Download one article "+art.getFileName();
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

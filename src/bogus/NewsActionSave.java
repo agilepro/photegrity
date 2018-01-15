@@ -2,6 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -28,6 +29,11 @@ public class NewsActionSave extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Save index";
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

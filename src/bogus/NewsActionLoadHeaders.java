@@ -2,6 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -84,7 +85,17 @@ public class NewsActionLoadHeaders extends NewsAction {
     }
 
     public String getStatusView() throws Exception {
-        return "Load Headers "+start+".."+count+" by "+stepSize+", @"+curStep;
+        return "Load Headers from "+start+" by "+stepSize+", @"+curStep+" of "+count;
+    }
+    
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        jo.put("verb", "Load Headers");
+        jo.put("part", curStep);
+        jo.put("total", count);
+        jo.put("start", start);
+        jo.put("stepSize", stepSize);
+        return jo;
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.NullWriter;
 
 /**
@@ -228,17 +229,21 @@ public abstract class NewsAction {
         jobQueueMid.clear();
         jobQueueLow.clear();
     }
-
-    public String getStatusViewTimed() throws Exception {
+    
+    public double getSeconds() {
         double time = accumulatedTime / 1000.0;
         if (thisStartTime>0) {
             //if this task is currently running, add the new runtime
             time = time + (System.currentTimeMillis()-thisStartTime)/1000.0;
         }
-        return getStatusView()+" ("+time+" secs) "+serviceLevelName;
+        return time;
+    }
+
+    public String getStatusViewTimed() throws Exception {
+        return getStatusView()+" ("+getSeconds()+" secs) "+serviceLevelName;
     }
     public String getStatusView() throws Exception {
-        return "{"+getClass().getName()+"}";
+        return statusObject().toString();
     }
     static public List<NewsAction> getAllActions() {
         Vector<NewsAction> ret = new Vector<NewsAction>();
@@ -250,5 +255,17 @@ public abstract class NewsAction {
         ret.addAll(jobQueueMid);
         ret.addAll(jobQueueLow);
         return ret;
+    }
+    
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = new JSONObject();
+        jo.put("class", this.getClass().getName());
+        jo.put("seconds", getSeconds());
+        jo.put("level",serviceLevelName);
+        jo.put("active",active);
+        if (failure!=null) {
+            jo.put("failure",failure.toString());
+        }
+        return jo;
     }
 }

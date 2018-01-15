@@ -4,6 +4,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.purplehillsbooks.json.JSONObject;
+
 /**
  * represents a news group on a news server
  */
@@ -95,6 +97,11 @@ public class NewsActionFillGaps extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Fill Gaps "+start+".."+end+" by "+maxGap;
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

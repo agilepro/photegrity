@@ -2,6 +2,8 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
+
 /**
  * schedules a file save at a time when the background tasks are doing nothing
  * else...
@@ -31,6 +33,11 @@ public class NewsActionLoadDisk extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Loading the disk '"+diskToLoad.diskName+"'";
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

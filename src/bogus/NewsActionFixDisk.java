@@ -3,6 +3,8 @@ package bogus;
 import java.io.File;
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONObject;
+
 /**
  * Fixes the cashe in memory of what is on disk for a particular folder.
  * Everytime a file is moved in or out of a folder, this should be called
@@ -42,6 +44,11 @@ public class NewsActionFixDisk extends NewsAction {
 
     public String getStatusView() throws Exception {
         return "Fixing the disk "+diskToLoad.diskName+":"+diskToLoad.getRelativePath(folder);
+    }
+
+    public JSONObject statusObject() throws Exception {
+        JSONObject jo = super.statusObject();
+        return jo;
     }
 
 }

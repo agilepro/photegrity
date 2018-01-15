@@ -124,6 +124,9 @@ public class FracturedFileName {
         return prePart.length()==0 && numPart.length()==0 && tailPart.length()==0;
     }
     public boolean equals(FracturedFileName other) {
+        if (other==null) {
+            return false;
+        }
         return prePart.equals(other.prePart) && numPart.equals(other.numPart) && tailPart.equals(other.tailPart);
     }
     

@@ -16,7 +16,7 @@ public class NewsArticleError {
     String errorReason;
 
     //ignore repeated failures within 5 minutes
-    public static long timeout = 24 * 60 * 60 * 1000;
+    public static long timeout = 24L * 60 * 60 * 1000;
 
     public NewsArticleError(long artNo) {
         articleNo = artNo;

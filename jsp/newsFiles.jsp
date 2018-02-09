@@ -167,6 +167,7 @@
                 $scope.divideStates();
             });
         }
+        $scope.template = "<%JavaScriptWriter.encode(out, bunch.getTemplate());%>";
 
         $scope.lastPaths = <%lastPaths.write(out,2,0);%>;
         $scope.folder = "<%HTMLWriter.writeHtml(out, folder);%>";
@@ -225,14 +226,19 @@
         };
 
         $scope.deleteFile = function(searchName) {
+            console.log("Deleting file "+searchName);
             var length = $scope.fileSet.length;
             for(var j = 0; j < length; j++) {
                 var rec = $scope.fileSet[j];
                 if (rec.fileName == searchName) {
                     rec.needSave = true;
-                    $http.get("newsFileDelJS.jsp?fn="+encodeURIComponent(rec.bestName)+"&dig="+encodeURIComponent($scope.digest))
+                    $http.get("newsFileDelJS.jsp?fxx="+encodeURIComponent(rec.bestName)+"&dig="+encodeURIComponent($scope.digest))
                     .success( function(data) {
+                        console.log("Success deleting file ",data);
                         $scope.opResult = "Delete ("+searchName+": "+data;
+                    })
+                    .error( function(data) {
+                        console.log("Failure deleting file ",data);
                     });
                 }
             }
@@ -247,6 +253,9 @@
                                +"&f="+encodeURIComponent($scope.f))
                     .success( function(data) {
                         $scope.opResult = "Fetch ("+searchName+"): "+data;
+                    })
+                    .error( function(data) {
+                        console.log("Failure deleting file ",data);
                     });
                 }
             }
@@ -269,6 +278,43 @@
                 alert("NF Error: "+JSON.stringify(data,null,2));
             });
         }
+        
+        $scope.randomName= function() {
+            console.log("TEMPLATE", $scope.template);
+            var pos = $scope.template.lastIndexOf("$");
+            if (pos<0) {
+                alert("cant find a token in that template: ",$scope.template);
+                return;
+            }
+            var rez = "";
+            while (rez.length<14) {
+                rez = rez + String.fromCharCode(Math.random()*26 + 97);
+            }
+            var newTemplate = rez + $scope.template.substring(pos);
+            $scope.template = newTemplate;
+            console.log("RANDOM", newTemplate);
+        }
+        $scope.setFilePath = function(cmd) {
+            var address = "newsDetailAction.jsp?dig=<%= URLEncoder.encode(dig, "UTF-8") %>&f=<%= URLEncoder.encode(f, "UTF-8") %>&createIt=yes";
+            address = address + "&cmd="+encodeURIComponent(cmd);
+            address = address + "&folder="+encodeURIComponent($scope.folder);
+            address = address + "&go=<%=URLEncoder.encode(thisPage, "UTF-8")%>";
+            address = address + "&template="+encodeURIComponent($scope.template);
+            window.location.assign(address);
+
+            /*
+            $http.get(address).success(function(data) {
+                console.log("setFilePath success: ",data);
+                $scope.opResult = "success: "+data;
+                $scope.refetchData();
+                location.reload();
+            }).error(function(data){
+                console.log("setFilePath error: ",data);
+                $scope.opResult = "error: "+data;
+                alert("NF Error: "+JSON.stringify(data,null,2));
+            });
+            */
+        }
 
     });
 
@@ -290,7 +336,7 @@
     HTMLWriter.writeHtml(out, bunch.digest);
 %></td></tr></table>
 <ul>
-    <form action="newsDetailAction.jsp?dig=<%= URLEncoder.encode(dig, "UTF-8") %>&f=<%= URLEncoder.encode(f, "UTF-8") %>" name="moveForm" method="post">
+    
     <li>Current: <font color="brown"><%
         HTMLWriter.writeHtml(out, folder);
         HTMLWriter.writeHtml(out, bunch.getTemplate());
@@ -303,7 +349,8 @@
             placeholder="Paths"
             typeahead="path for path in lastPaths | filter:$viewValue | limitTo:8">
         <span ng-click="showFolders=!showFolders">vv</span>
-        <input type="submit" name="cmd" value="Set And Move Files">
+        <button ng-click="setFilePath('Set And Move Files')">Set And Move Files</button>
+        <button ng-click="setFilePath('Set Without Files')">Set Without Files</button>
         <input type="hidden" name="createIt" value="yes">
         <input type="submit" name="cmd" value="Set Without Files">
 
@@ -318,16 +365,17 @@
         }
     %>
     </li>
-    <li>Template: <input type="text" name="template" value="<%HTMLWriter.writeHtml(out, bunch.getTemplate());%>" size="50">
+    <li>Template: <input type="text" ng-model="template" size="50"/>
 
-                <input type="checkbox" name="plusOne" value="true" <% if (bunch.plusOneNumber) {%>checked="checked"<%}%>> Plus One
+                <input type="checkbox" ng-model="plusOneNumber"> Plus One
+                <button ng-click="randomName()">Randomize</button>
                 <br/>
-                <input type="submit" name="cmd" value="SetPattern">
-                <input type="submit" name="cmd" value="Cover">
-                <input type="submit" name="cmd" value="Flogo">
-                <input type="submit" name="cmd" value="Sample">
-                <input type="submit" name="cmd" value="SetIndex">
-                <input type="submit" name="cmd" value="SetOneIndex">
+        <button ng-click="setFilePath('SetPattern')">SetPattern</button>
+        <button ng-click="setFilePath('Cover')">Cover</button>
+        <button ng-click="setFilePath('Flogo')">Flogo</button>
+        <button ng-click="setFilePath('Sample')">Sample</button>
+        <button ng-click="setFilePath('SetIndex')">SetIndex</button>
+        <button ng-click="setFilePath('SetOneIndex')">SetOneIndex</button>
                 AutoPath: <input type="checkbox" name="autopath" value="true" checked="checked">
                 Zing: <%HTMLWriter.writeHtml(out, zingpat);%>
                 </li>

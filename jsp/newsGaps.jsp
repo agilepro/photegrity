@@ -68,8 +68,10 @@ bunchApp.controller('bunchCtrl', function ($scope, $http, $timeout) {
     $scope.opCommand =  function(url) {
         console.log("REQUESTING: "+url);
         $http.get(url).success(function(data) {
+            console.log("SUCCESS", data);
             $scope.updateMsg = "success: "+data;
         }).error(function(data){
+            console.log("FAIL", data);
             $scope.updateMsg = "error: "+data;
             alert("error: "+data);
         });
@@ -84,7 +86,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http, $timeout) {
 
 <div style="color:red;">{{updateMsg}}</div>
 
-<table><tr><form action="newsGaps.jsp">
+<table><tr>
 <td>begin: <input type="text" name="begin" ng-model="begin"></td>
 <td>highest: <input type="text" name="highest" ng-model="highest"></td>
 <td>{{highest-begin|number}}</td>

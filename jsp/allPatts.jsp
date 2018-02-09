@@ -18,7 +18,10 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Random"
 %><%@page import="java.util.Vector"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.JavaScriptWriter"
 %><%
     request.setCharacterEncoding("UTF-8");
     String pageName = "allPatts.jsp";
@@ -144,15 +147,46 @@
     if (zingpat==null) {
         zingpat = "";
     }
+    
+    String lastPatternName = "";
+    JSONArray allPatterns = new JSONArray();
+    for (PatternInfo pinf : sortedPatterns) {
+        lastPatternName = sortedPatterns.get(0).pattern;
+        allPatterns.put(pinf.getJSON());
+    }
 
 
 %>
 
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD><TITLE>P <%=dispMin%>/<%=sortedPatterns.size()%> <%= query %></TITLE></HEAD>
-<BODY BGCOLOR="#FDF5E6">
+<html ng-app="fileApp">
+<head>
+    <meta charset="UTF-8">
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <script src="lib/angular.js"></script>
+    <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
+    <TITLE>P <%=dispMin%>/<%=sortedPatterns.size()%> <%= query %></TITLE>
+</head>
+
+<script>
+var fileApp = angular.module('fileApp', []);
+fileApp.controller('fileCtrl', function ($scope, $http) {
+    $scope.templatePattern = "<%JavaScriptWriter.encode(out,lastPatternName);%>";
+    $scope.allPatterns = <%allPatterns.write(out,2,2);%>;
+    
+    $scope.randomName= function() {
+        var rez = "";
+        while (rez.length<14) {
+            rez = rez + String.fromCharCode(Math.random()*26 + 97);
+        }
+        $scope.templatePattern = rez;
+        console.log("RANDOM", rez);
+    }
+
+});
+</script>
+
+<body ng-controller="fileCtrl">
 <table><tr><td>
 
 <table><tr>
@@ -206,7 +240,7 @@
 <%
     int row = 0;
     int count = 0;
-    String lastPatternName = null;
+    lastPatternName = null;
     for (PatternInfo pi : sortedPatterns) {
         count++;
         if (count<dispMin) {
@@ -398,8 +432,13 @@
       <td>
 <%
         }
+        int cxx = 0;
         for (PosPat pp : PosPat.findAllPattern(pi.pattern)){
             String sym = pp.getSymbol();
+            if (cxx++>12) {
+                out.write("...<br/>\n");
+                break;
+            }
             if (sym.length()>45) {
                 sym = sym.substring(0,45);
             }
@@ -409,7 +448,7 @@
             if (!pp.getDiskMgr().isLoaded) {
                 out.write("<img src=\"load.gif\">");
             }
-            out.write("<br>\n");
+            out.write("<br/>\n");
         }
 %>
         </td>
@@ -425,12 +464,13 @@
         <td>
 
         <input type="submit" value="Change">
-        to <input type="text" name="p2" value="<%HTMLWriter.writeHtml(out,lastPatternName);%>" size="40">
+        to <input type="text" name="p2" ng-model="templatePattern" size="40">
         from <b><%HTMLWriter.writeHtml(out,lastPatternName);%></b>
         <input type="hidden" name="p1" value="<%HTMLWriter.writeHtml(out,lastPatternName);%>">
         <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
         <input type="hidden" name="dest" value="<%HTMLWriter.writeHtml(out,thisPageURL);%>">
         </td></form>
+        <td><button ng-click="randomName()">Randomize</button></td>
     </tr>
     <tr><form action="changeSelection.jsp" method="get">
         <td>

@@ -4,6 +4,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONObject;
+
 public class PatternInfo
 {
     public String    pattern;
@@ -29,6 +31,16 @@ public class PatternInfo
         // it does not matter what we put in the hash table, the
         // test is just that something is there.
         this.addImage(ii);
+    }
+    
+    public JSONObject getJSON() throws Exception {
+        JSONObject jo = new JSONObject();
+        jo.put("count", count);
+        jo.put("min", min);
+        jo.put("max", max);
+        jo.put("hasNegZero", hasNegZero);
+        jo.put("pattern", pattern);
+        return jo;
     }
 
     public void addImage(ImageInfo ii)

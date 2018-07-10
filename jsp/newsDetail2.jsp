@@ -197,6 +197,7 @@
     %><input type="submit" name="cmd" value="Mark Interested"><%
 
     %><input type="submit" name="cmd" value="Seek Bunch"><%
+    %><input type="submit" name="cmd" value="Probe Ends"><%
 
     %><input type="submit" name="cmd" value="Download All"><%
 

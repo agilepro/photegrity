@@ -157,6 +157,7 @@
         $scope.digest = "<%JavaScriptWriter.encode(out, dig);%>";
         $scope.f = "<%JavaScriptWriter.encode(out, f);%>";
         $scope.bunch = <% bunch.getJSON().write(out,2,0); %>;
+        $scope.folderPath = "<% JavaScriptWriter.encode(out, folderPath.toString()); %>/";
         $scope.refetchData = function() {
             $scope.opResult = $scope.opResult + " *refresh"+$scope.counter++;
             fileFactory.listFiles( function(data) {
@@ -227,12 +228,14 @@
 
         $scope.deleteFile = function(searchName) {
             console.log("Deleting file "+searchName);
+            var path = $scope.folderPath + searchName;
+            console.log("Full path "+path);
             var length = $scope.fileSet.length;
             for(var j = 0; j < length; j++) {
                 var rec = $scope.fileSet[j];
                 if (rec.fileName == searchName) {
                     rec.needSave = true;
-                    $http.get("newsFileDelJS.jsp?fxx="+encodeURIComponent(rec.bestName)+"&dig="+encodeURIComponent($scope.digest))
+                    $http.get("newsFileDelJS.jsp?path="+encodeURIComponent(path))
                     .success( function(data) {
                         console.log("Success deleting file ",data);
                         $scope.opResult = "Delete ("+searchName+": "+data;

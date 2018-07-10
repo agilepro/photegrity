@@ -92,10 +92,23 @@ Get: </td><td><form action="newsFetch.jsp">
             <form action="newsOneAction.jsp" method="get">
                 <input type="hidden" name="artno" value="<%=artnoInt%>">
                 <input type="submit" name="action" value="Read Article">
-            </form><%
+            </form>
+            <form action="newsOneAction.jsp" method="get">
+                <input type="hidden" name="artno" value="<%=artnoInt%>">
+                <input type="submit" name="action" value="Forget Article">
+            </form>
+            <%
         }
         else {
-            %><h2>Loaded <%=art.buffer.totalBytes()%> bytes. <a href="newsPict.jsp?artno=<%=artnoInt%>" target="images">Picture.jpg</a> </h2><pre><%
+            %><h2>Loaded <%=art.buffer.totalBytes()%> bytes. <a href="newsPict.jsp?artno=<%=artnoInt%>" target="images">Picture.jpg</a> </h2>
+            <form action="newsOneAction.jsp" method="get">
+                <input type="hidden" name="artno" value="<%=artnoInt%>">
+                <input type="submit" name="action" value="Erase Article">
+            </form>
+            
+            
+            
+            <pre><%
             InputStream is = art.buffer.getInputStream();
             streamABit(out, is, 300);
 

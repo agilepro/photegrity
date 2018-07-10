@@ -36,36 +36,21 @@
         return;
     }
 
-    String fn       = UtilityMethods.defParam(request, "fn", null);
-    if (fn==null) {
-        %>Need a file name passed as a parameter named 'fn'<%
-        return;
-    }
-    String dig      = UtilityMethods.defParam(request, "dig", null);
-    if (dig==null) {
-        %>Need a digest passed as a parameter named 'dig'<%
-        return;
-    }
-    String f      = UtilityMethods.defParam(request, "f", null);
-    if (f==null) {
-        %>Need a from name passed as a parameter named 'f'<%
+    String path       = UtilityMethods.defParam(request, "path", null);
+    if (path==null) {
+        %>Need a full path name passed as a parameter named 'path'<%
         return;
     }
 
-    NewsGroup newsGroup = NewsGroup.getCurrentGroup();
-    NewsBunch bunch = newsGroup.getBunch(dig, f);
-    if (bunch==null) {
-        %>Unable to find a bunch with that digest value<%
+    File   filePath = new File(path);
+    if (!filePath.exists()) {
+        %>The path does not exist: <%=path%>'<%
         return;
     }
-    String folder = bunch.getFolderLoc();
-    boolean folderExists = bunch.hasFolder();
-    File   folderPath = bunch.getFolderPath();
-    if (folderExists) {
-        File filePath = new File(folderPath, fn);
-        if (filePath.exists()) {
-            filePath.delete();
-        }
+        
+    if (!filePath.delete()) {
+        %>Delete did not work for some reason: <%=path%>'<%
+        return;
     }
 
 %>

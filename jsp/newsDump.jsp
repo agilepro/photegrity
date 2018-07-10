@@ -97,7 +97,7 @@
         String thisSubj = art.getHeaderSubject();
         String thisDig = art.getDigest();
 %>
-<tr><td><a href="newsMatch.jsp?artno=<%=art.getNumber()%>"><%=art.getNumber()%></a> &nbsp; </td>
+<tr><td><a href="newsOne.jsp?artno=<%=art.getNumber()%>"><%=art.getNumber()%></a> &nbsp; </td>
 <td></td>
 <td><% writeCareful(out, thisSubj, highlight); %> </td></tr>
 <%

@@ -10,6 +10,7 @@
 %><%@page import="bogus.NewsActionFixDisk"
 %><%@page import="bogus.NewsActionSeekABit"
 %><%@page import="bogus.NewsActionSeekBunch"
+%><%@page import="bogus.NewsActionProbeEnds"
 %><%@page import="bogus.NewsArticle"
 %><%@page import="bogus.NewsBunch"
 %><%@page import="bogus.NewsFile"
@@ -112,6 +113,12 @@
         if ("Seek Bunch".equals(cmd)) {
             NewsActionSeekBunch nasp = new NewsActionSeekBunch(bunch);
             nasp.addToFrontOfHigh();
+            response.sendRedirect(newsPage);
+            return;
+        }
+        if ("Probe Ends".equals(cmd)) {
+            NewsActionProbeEnds nape = new NewsActionProbeEnds(bunch);
+            nape.addToFrontOfHigh();
             response.sendRedirect(newsPage);
             return;
         }

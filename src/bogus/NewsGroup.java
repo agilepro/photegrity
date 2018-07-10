@@ -16,6 +16,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.apache.commons.net.nntp.NewsgroupInfo;
+
 import com.purplehillsbooks.streams.CSVHelper;
 
 /**
@@ -312,11 +313,25 @@ public class NewsGroup {
     /**
     * register article must be synchronized to avoid causing concurrency issues
     */
-    public synchronized void registerArticle(Long lval, NewsArticle art) {
+    public synchronized void registerArticle(long lval, NewsArticle art) {
         articles.add(art);
         index.put(lval, art);
     }
 
+    public synchronized void eraseArticle(long lval) {
+        NewsArticle art = index.get(lval);
+        if (art!=null) {
+            articles.remove(art);
+        }
+        index.remove(lval);
+    }
+    public synchronized void eraseRange(long start, long end) {
+        for (long lval=start; lval<end; lval++) {
+            eraseArticle(lval);
+        }
+    }
+    
+    
     public synchronized List<NewsArticle> getArticles() {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
         for (NewsArticle art : articles) {

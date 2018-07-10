@@ -29,6 +29,7 @@
 
     String artno     = UtilityMethods.reqParam(request, "News One Page", "artno");
     String go        = UtilityMethods.defParam(request, "go", "newsOne.jsp?artno="+artno);
+    String action    = UtilityMethods.defParam(request, "action", "Read Article");
 
     long artnoLong = Long.parseLong(artno);
     NewsArticle art = (NewsArticle) newsGroup.getArticleOrNull(artnoLong);
@@ -37,6 +38,18 @@
         throw new Exception("newsOneAction can't find the article ("+artno+")?  Or somthing else is wrong.");
     }
 
-    NewsActionDownloadOne nado = new NewsActionDownloadOne(art);
-    nado.addToFrontOfHigh();
+    if ("Read Article".equals(action)) {
+        NewsActionDownloadOne nado = new NewsActionDownloadOne(art);
+        nado.addToFrontOfHigh();
+    }
+    else if ("Erase Article".equals(action)) {
+        art.clearMsgBody();
+    }
+    else if ("Forget Article".equals(action)) {
+        newsGroup.eraseArticle(artnoLong);
+    }
+    else {
+        throw new Exception("Don't know command: "+action);
+    }
+    
     response.sendRedirect(go);%>

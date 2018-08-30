@@ -298,7 +298,10 @@ public class NewsGroup {
     }
 
     public void clearError(long artNo) {
-        errorIndex.remove(artNo);
+        NewsArticleError val = errorIndex.get(artNo);
+        if (val!=null) {
+            val.unerror();
+        }
     }
 
     public void registerError(long artNo, Exception e) {

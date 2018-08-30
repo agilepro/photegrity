@@ -207,7 +207,8 @@
     %><input type="submit" name="cmd" value="Cancel Interest"><%
 
     %><input type="submit" name="cmd" value="Seek Bunch"><%
-        if (folderExists) {
+    %><input type="submit" name="cmd" value="Probe Ends"><%
+       if (folderExists) {
     %><input type="submit" name="cmd" value="Download All"><%
         }
             else {

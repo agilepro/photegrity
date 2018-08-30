@@ -15,8 +15,8 @@ public class NewsArticleError {
     int errorCount = 0;
     String errorReason;
 
-    //ignore repeated failures within 5 minutes
-    public static long timeout = 24L * 60 * 60 * 1000;
+    //ignore repeated failures within 1 hour
+    public static long timeout = 60 * 60 * 1000;
 
     public NewsArticleError(long artNo) {
         articleNo = artNo;
@@ -42,9 +42,8 @@ public class NewsArticleError {
     }
 
     public boolean okToTryAgainNow() {
-        //timeout is 1 day
-        //retry embargo is 1 hour, or 12 times that
-        long retryEmbargoStart = System.currentTimeMillis() - ((errorCount)*timeout);
+        //retry embargo is 1 hour
+        long retryEmbargoStart = System.currentTimeMillis() - timeout;
         return lastErrorTime < retryEmbargoStart;
     }
 
@@ -53,16 +52,20 @@ public class NewsArticleError {
     }
 
     public void assertOK() throws Exception {
-        long embargoStart = System.currentTimeMillis() - ((errorCount)*timeout);
+        long embargoStart = System.currentTimeMillis() - timeout;
         if (lastErrorTime > embargoStart) {
-            throw new Exception("Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/3600000) +" hours");
+            throw new Exception("Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/60000) +" minutes");
         }
+    }
+    
+    public void unerror() {
+        lastErrorTime = System.currentTimeMillis() - timeout - 1000;
     }
 
     public String status() {
-        long embargoStart = System.currentTimeMillis() - ((errorCount)*timeout);
+        long embargoStart = System.currentTimeMillis() - timeout;
         if (lastErrorTime > embargoStart) {
-            return "Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/3600000) +" hours";
+            return "Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/60000) +" minutes";
         }
         return "Article " + articleNo + " has failed "+errorCount+" times, OK to try again";
     }

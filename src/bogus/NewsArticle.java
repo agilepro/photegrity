@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.commons.net.nntp.ArticleInfo;
+
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.CSVHelper;
 import com.purplehillsbooks.streams.MemFile;
@@ -43,9 +44,9 @@ public class NewsArticle {
 
     public MemFile buffer = null;
 
-    public static String[] options = { "Subject:", "From:", "Date:" };
+    private static String[] options = { "Subject:", "From:", "Date:" };
 
-    public String[] optionValue = new String[3];
+    private String[] optionValue = new String[3];
 
     public NewsArticle(NewsGroup newGroup, long articleNumber, String[] parsedValues) throws Exception {
         if (newGroup == null) {

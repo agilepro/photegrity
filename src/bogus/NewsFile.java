@@ -337,43 +337,7 @@ public class NewsFile {
     }
     
     
-    /**
-     * This only changes the local, temp location and it
-     * moves file if they are in the temp location
-     * If a map entry maps them to a permanent place,
-     * then they will simply be abandoned in that location.
-     */
-    /*
-    public void renameFile(String oldTemplate, String newTemplate) throws Exception {
-        if (parts.size() == 0) {
-            return;
-        }
-        NewsArticle art = parts.get(0);
-        String oldName = art.fillTemplate(oldTemplate);
-        File oldPath = new File(nBunch.getFolderPath(), oldName);
-        if (!oldPath.exists()) {
-            return;
-        }
-        String newName = art.fillTemplate(newTemplate);
-        File newPath = new File(nBunch.getFolderPath(), newName);
-        if (newPath.exists()) {
-            // just ignore it, don't move, don't delete
-            return;
-        }
-        // oldPath.renameTo(newPath);
 
-        ImageInfo ii = getImageInternal(true);
-        if (ii==null) {
-            throw new Exception("File exists, but ImageInfo is unable to find it: ("+oldPath+") for some unknown reason");
-        }
-        ii.renameFile(newName);
-
-        // check to see if it really happened
-        if (!newPath.exists()) {
-            throw new Exception("expected to rename but destination does not exist: " + newPath);
-        }
-    }
-    */
 
     public void renameFileDeluxe(File srcFolder, String srcTemplate, boolean srcPlus,
                 File destFolder, String destTemplate, boolean destPlus) throws Exception {

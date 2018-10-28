@@ -88,6 +88,9 @@
 
 
         List<NewsBunch> allPatts = new Vector<NewsBunch>();
+        
+        String[] filterList = UtilityMethods.splitOnDelimiter(filter, ' ');
+        
         for (NewsBunch tBunch : newsGroup.getAllBunches()) {
             if (tBunch.minId>windowMin+windowSize) {
                 continue;
@@ -95,15 +98,15 @@
             if (tBunch.maxId<windowMin) {
                 continue;
             }
-            if (tBunch.digest.indexOf(filter)>=0) {
+            if (determineFilter(filterList, tBunch)) {
             	allPatts.add(tBunch);
             }
-            else if (tBunch.getSender().indexOf(filter)>=0) {
-            	allPatts.add(tBunch);
-            }
-            else if (tBunch.extraTags!=null && tBunch.extraTags.indexOf(filter)>=0) {
-            	allPatts.add(tBunch);
-            }
+            //else if (tBunch.getSender().indexOf(filter)>=0) {
+            //	allPatts.add(tBunch);
+            //}
+            //else if (tBunch.extraTags!=null && tBunch.extraTags.indexOf(filter)>=0) {
+            //	allPatts.add(tBunch);
+            //}
         }
 
 
@@ -191,6 +194,43 @@
         response.setStatus(401);
         JSONObject jo = JSONException.convertToJSON(e, "listBunches");
         jo.write(out,2,2);
+    }
+
+%>
+<%!
+
+    public boolean determineFilter(String[] filterList, NewsBunch rec) throws Exception  {
+        if (filterList==null || filterList.length==0) {
+            return true;
+        }
+        for (String fitem : filterList) {
+            if (fitem.startsWith("-")) {
+                fitem = fitem.substring(1);
+                if (rec.digest.indexOf(fitem) > -1) {
+                    return false;
+                }
+                else if (rec.getTemplate().indexOf(fitem) > -1) {
+                    return false;
+                }
+                else if (rec.getSender().indexOf(fitem) > -1) {
+                    return false;
+                }
+                continue;
+            }
+            else {
+                if (rec.digest.indexOf(fitem) > -1) {
+                    continue;
+                }
+                else if (rec.getTemplate().indexOf(fitem) > -1) {
+                    continue;
+                }
+                else if (rec.getSender().indexOf(fitem) > -1) {
+                    continue;
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
 %>

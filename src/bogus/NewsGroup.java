@@ -42,7 +42,7 @@ public class NewsGroup {
     public int step = 0;
     public int failCount = 0;
 
-    private List<NewsArticle> articles;
+    //private List<NewsArticle> articles;
     private Hashtable<Long, NewsArticle> index;
     private Hashtable<Long, NewsArticleError> errorIndex;
     public static NewsSession session;
@@ -147,7 +147,6 @@ public class NewsGroup {
         while (count-- > 0 &&  NewsAction.active) {
             Thread.sleep(120);
         }
-        articles.clear();
         index.clear();
         bunchIndex.clear();
         fastIndex.clear();
@@ -202,7 +201,6 @@ public class NewsGroup {
         firstArticle = 0;
         lastArticle = 0;
         articleCount = 0;
-        articles = new Vector<NewsArticle>();
         index = new Hashtable<Long, NewsArticle>();
     }
 
@@ -317,15 +315,10 @@ public class NewsGroup {
     * register article must be synchronized to avoid causing concurrency issues
     */
     public synchronized void registerArticle(long lval, NewsArticle art) {
-        articles.add(art);
         index.put(lval, art);
     }
 
     public synchronized void eraseArticle(long lval) {
-        NewsArticle art = index.get(lval);
-        if (art!=null) {
-            articles.remove(art);
-        }
         index.remove(lval);
     }
     public synchronized void eraseRange(long start, long end) {
@@ -337,7 +330,7 @@ public class NewsGroup {
     
     public synchronized List<NewsArticle> getArticles() {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
-        for (NewsArticle art : articles) {
+        for (NewsArticle art : index.values()) {
             ret.add(art);
         }
         // Collections.sort(ret, new authSubComp());
@@ -346,7 +339,7 @@ public class NewsGroup {
 
     public synchronized List<NewsArticle> getArticlesDigest(String dig, String from) {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
-        for (NewsArticle art : articles) {
+        for (NewsArticle art : index.values()) {
             if (dig.equals(art.getDigest()) && art.getFrom().equals(from)) {
                 ret.add(art);
             }
@@ -376,7 +369,7 @@ public class NewsGroup {
         zeroCounts();
         highestFetched = 0;
         lowestFetched = 999999999999L;
-        for (NewsArticle art : getArticles()) {
+        for (NewsArticle art : index.values()) {
             long artNo = art.articleNo;
             if (artNo > highestFetched) {
                 highestFetched = artNo;
@@ -406,7 +399,7 @@ public class NewsGroup {
         FileOutputStream fos = new FileOutputStream(tempFile);
         Writer fw = new OutputStreamWriter(fos, "UTF-8");
 
-        for (NewsArticle art : getArticles()) {
+        for (NewsArticle art : index.values()) {
             art.writeCacheLine(fw);
         }
 
@@ -480,7 +473,6 @@ public class NewsGroup {
     
     private synchronized void loadCache() throws Exception {
         LocalMapping.readData(containingFolder);
-        articles = new Vector<NewsArticle>();
         index = new Hashtable<Long, NewsArticle>();
         errorIndex = new Hashtable<Long, NewsArticleError>();
         defaultDiskMgr = DiskMgr.getDiskMgr(containingFolder.getName());
@@ -510,14 +502,12 @@ public class NewsGroup {
             NewsArticle art = NewsArticle.createFromLine(this, values);
             if (art != null) {
                 long artno = art.getNumber();
-                articles.add(art);
                 index.put(new Long(artno), art);
             }
             values = CSVHelper.parseLine(fr);
         }
 
         fr.close();
-        sortArticles();
         NewsBunch.restoreData(this);
         recalcStats();
     }
@@ -569,9 +559,9 @@ public class NewsGroup {
         fr.close();
     }
 
-    public synchronized void sortArticles() throws Exception {
-        Collections.sort(articles, new authSubComp());
-    }
+    //public synchronized void sortArticles() throws Exception {
+    //    Collections.sort(articles, new authSubComp());
+    //}
 
     
     /**
@@ -731,7 +721,7 @@ public class NewsGroup {
      */
     public void discardOldArticles(long earlyLimit) {
         Vector<NewsArticle> earlyOnes = new Vector<NewsArticle>();
-        for (NewsArticle art : articles) {
+        for (NewsArticle art : index.values()) {
             if (art.articleNo < earlyLimit) {
                 earlyOnes.add(art);
             }
@@ -741,7 +731,6 @@ public class NewsGroup {
         for (NewsArticle art : earlyOnes) {
             if (art.articleNo < earlyLimit) {
                 index.remove(art.articleNo);
-                articles.remove(art);
             }
         }
 

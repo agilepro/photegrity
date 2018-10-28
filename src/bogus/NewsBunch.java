@@ -1412,7 +1412,7 @@ public class NewsBunch {
             List<NewsArticle> arts = getArticles();
             if (arts.size()>0) {
                 NewsArticle art = arts.get(0);
-                sender = art.optionValue[1];
+                sender = art.getFrom();
             }
         }
         return sender;

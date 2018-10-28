@@ -16,7 +16,7 @@ public class NewsArticleError {
     String errorReason;
 
     //ignore repeated failures within 1 hour
-    public static long timeout = 60 * 60 * 1000;
+    public static long TIMEOUT_ONE_HOUR = 60 * 60 * 1000;
 
     public NewsArticleError(long artNo) {
         articleNo = artNo;
@@ -24,7 +24,7 @@ public class NewsArticleError {
 
     public void registerNewAttempt(String errorMsg) {
         long time = System.currentTimeMillis();
-        long embargoStart = time - timeout;
+        long embargoStart = time - TIMEOUT_ONE_HOUR;
         if (lastErrorTime > embargoStart) {
             //ignore another failure within 1 day of the last
             //should not be trying again for at least a couple days anyway,
@@ -43,7 +43,7 @@ public class NewsArticleError {
 
     public boolean okToTryAgainNow() {
         //retry embargo is 1 hour
-        long retryEmbargoStart = System.currentTimeMillis() - timeout;
+        long retryEmbargoStart = System.currentTimeMillis() - TIMEOUT_ONE_HOUR;
         return lastErrorTime < retryEmbargoStart;
     }
 
@@ -52,18 +52,18 @@ public class NewsArticleError {
     }
 
     public void assertOK() throws Exception {
-        long embargoStart = System.currentTimeMillis() - timeout;
+        long embargoStart = System.currentTimeMillis() - TIMEOUT_ONE_HOUR;
         if (lastErrorTime > embargoStart) {
             throw new Exception("Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/60000) +" minutes");
         }
     }
     
     public void unerror() {
-        lastErrorTime = System.currentTimeMillis() - timeout - 1000;
+        lastErrorTime = System.currentTimeMillis() - TIMEOUT_ONE_HOUR - 1000;
     }
 
     public String status() {
-        long embargoStart = System.currentTimeMillis() - timeout;
+        long embargoStart = System.currentTimeMillis() - TIMEOUT_ONE_HOUR;
         if (lastErrorTime > embargoStart) {
             return "Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/60000) +" minutes";
         }

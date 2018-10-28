@@ -161,7 +161,6 @@ public class NewsActionSeekABit extends NewsAction {
         if (!doOneWay(out, artlist, deadline)) {
             return false;
         }
-        ng.sortArticles();
         return true;
     }
 

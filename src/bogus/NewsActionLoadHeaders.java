@@ -81,7 +81,6 @@ public class NewsActionLoadHeaders extends NewsAction {
         out.flush();
 
         newsGroup.recalcStats();
-        newsGroup.sortArticles();
     }
 
     public String getStatusView() throws Exception {

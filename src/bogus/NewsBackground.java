@@ -10,12 +10,13 @@ public class NewsBackground extends Thread {
     private Writer out;
     public static NewsBackground singleton;
     public static NewsAction lastActive;
+    public File logFile;
     long lastSaveTime = System.currentTimeMillis();
 
     public NewsBackground(File containingFolder) throws Exception {
-        File destFile = new File(containingFolder, "NewsProcessing" + System.currentTimeMillis()
+        logFile = new File(containingFolder, "NewsProcessing" + System.currentTimeMillis()
                 + ".log");
-        FileOutputStream fos = new FileOutputStream(destFile);
+        FileOutputStream fos = new FileOutputStream(logFile);
         out = new OutputStreamWriter(fos, "UTF-8");
         out.write("Start Background Processing "+new Date()+"\n");
     }
@@ -108,7 +109,7 @@ public class NewsBackground extends Thread {
             }
         }
         try {
-            out.write("\n\nGAVE UP PROCESSING TO ANOTHER THREAD\n");
+            out.write("\n\nGAVE UP PROCESSING TO THREAD:"+singleton.logFile+"\n");
             out.flush();
             out.close();
         }

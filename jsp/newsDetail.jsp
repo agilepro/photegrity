@@ -89,7 +89,7 @@
 
     //need a sample article to deal with
     NewsArticle firstArticle = articles.get(0);
-    String fromUser = firstArticle.optionValue[1];
+    String fromUser = firstArticle.getHeaderFrom();
 
 %>
 <html>

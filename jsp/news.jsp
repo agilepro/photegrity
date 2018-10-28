@@ -492,18 +492,11 @@
                 if (!$scope.photoSettings.showState[rec.state]) {
                     continue;
                 }
-                if (rec.digest.indexOf($scope.photoSettings.filter) > -1) {
-                    dispArray.push(rec);
-                }
-                else if (rec.template.indexOf($scope.photoSettings.filter) > -1) {
-                    dispArray.push(rec);
-                }
-                else if (rec.sender.indexOf($scope.photoSettings.filter) > -1) {
-                    dispArray.push(rec);
-                }
+                dispArray.push(rec);
             }
             $scope.filteredRecs = dispArray;
         }
+        
 
         $scope.getFiltered = function() {
             if ($scope.recs.length==0) {

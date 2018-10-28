@@ -134,6 +134,10 @@ public class NewsActionDownloadFile extends NewsAction {
             }
             // now, take the combined input, and decode it into another memFile
             if (combineFirstForUUDecode) {
+                //File debugFileFolder = newsFile.getFilePath();
+                //File debugFileDump = new File(debugFileFolder.getParent(),"debug.txt");
+                //StreamHelper.copyReaderToUTF8File(mf.getReader(), debugFileDump);
+                
                 MemFile mf2 = new MemFile();
                 InputStream in1 = mf.getInputStream();
                 UUDecoderStream uuds = new UUDecoderStream(in1);

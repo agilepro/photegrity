@@ -50,9 +50,30 @@
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls.min.js"></script>
     <link href="photoStyle.css" rel="stylesheet">
+    
+<script>
+
+function getArticles(start, length) {
+    var step = 1;
+    if (length>30) {
+        step = Math.floor(length/8);
+        length = Math.floor(length/step);
+    }
+    var theUrl = "newsFetch.jsp?start="+start+"&step="+step+"&count="+length+"&command=UnError";
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+
+</script>
+    
+    
+    
 </head>
 <body>
-<h3><a href="news.jsp">News</a> Dump - <a href="newsDump.jsp?artno=<%=artno-100%>&high=<%=encodedHighlight%>"><%=artno-100%></a> and <a href="newsDump.jsp?artno=<%=artno+100%>&high=<%=encodedHighlight%>"><%=artno+100%></a></h3>
+<h3><a href="news.jsp">News</a> Dump - <a href="newsDump.jsp?artno=<%=artno-100%>&high=<%=encodedHighlight%>"><%=artno-100%></a>
+ and <a href="newsDump.jsp?artno=<%=artno+100%>&high=<%=encodedHighlight%>"><%=artno+100%></a></h3>
 
 <table>
 
@@ -80,7 +101,7 @@
 
             %>
             <tr><td style="color:gray;"><%=position%></td>
-                <td><a href="newsFetch.jsp?start=<%= position %>&step=<%=step%>&count=<%= total %>&command=UnError">get</a> <%= art.articleNo-position %></td>
+                <td style="cursor:pointer"><a onclick="getArticles(<%=position%>,<%=total%>)">get</a> <%= art.articleNo-position %></td>
                 <%displayError(out,newsGroup,position);%>
                 </tr>
         <%

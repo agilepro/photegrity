@@ -204,7 +204,14 @@ public class NewsActionSeekBunch extends NewsAction {
     }
 
     public String getStatusView() throws Exception {
-        return "Seek bunch "+seeker.digest;
+        String trac = seeker.digest;
+        if (trac.length()>40) {
+            trac = trac.substring(0,40);
+        }
+        if (checkList==null) {
+            return "Seek bunch (initializing) "+seeker.digest;
+        }
+        return "Seek bunch ("+iterPosition+"/"+checkList.size()+","+giveUpList.size()+") "+seeker.digest;
     }
 
     public JSONObject statusObject() throws Exception {

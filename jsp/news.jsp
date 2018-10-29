@@ -255,7 +255,7 @@
                 console.log("BATCH: "+url);
                 var promise = $http.get(url);
                 promise.error(function(msg){
-                    alert("BATCH error: "+JSON.stringify(msg,null,2));
+                    alert("BATCH error: "+msg);
                 });
                 return promise;
             }
@@ -788,7 +788,8 @@
           {val:"download",disp:"Download those that need it."},
           {val:"complete",disp:"Mark All Completed"},
           {val:"hide",disp:"Hide All in Selection"},
-          {val:"clear",disp:"Reset All to initial state"}
+          {val:"clear",disp:"Reset All to initial state"},
+          {val:"unhide",disp:"Unhide those that are hidden"}
           ];
       $scope.batchOp = "nothing";
       $scope.batchPath = "";

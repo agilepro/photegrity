@@ -65,6 +65,15 @@
                 oneBunch.pState = NewsBunch.STATE_INITIAL;
                 rows.put(tokPattern+" cleared");
             }
+            else if ("unhide".equals(batchop)) {
+                if (oneBunch.pState == NewsBunch.STATE_HIDDEN) {
+                    oneBunch.pState = NewsBunch.STATE_GETABIT;
+                    rows.put(tokPattern+" unhidden");
+                }
+                else {
+                    rows.put(tokPattern+" skipped");
+                }
+            }
             else if (oneBunch.pState == NewsBunch.STATE_HIDDEN) {
                 rows.put(tokPattern+" is HIDDEN - can not do "+batchop);
             }
@@ -161,7 +170,7 @@
     }
     catch (Exception e) {
         response.setStatus(500);
-        JSONObject jo = JSONException.convertToJSON(e, "listBunces");
+        JSONObject jo = JSONException.convertToJSON(e, "listBunces"); 
         jo.write(out,2,2);
     }
     results.write(out, 2, 0);

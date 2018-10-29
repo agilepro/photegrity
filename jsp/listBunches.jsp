@@ -192,7 +192,7 @@
     }
     catch (Exception e) {
         response.setStatus(401);
-        JSONObject jo = JSONException.convertToJSON(e, "listBunches");
+        JSONObject jo = JSONException.convertToJSON(e, "listBunches"); 
         jo.write(out,2,2);
     }
 

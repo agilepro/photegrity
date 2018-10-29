@@ -59,7 +59,7 @@
     }
     catch (Exception e) {
         response.setStatus(401);
-        JSONObject jo = JSONException.convertToJSON(e, "listBunces");
+        JSONObject jo = JSONException.convertToJSON(e, "listBunces"); 
         jo.write(out,2,2);
     }
 %>

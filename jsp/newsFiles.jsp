@@ -336,7 +336,7 @@
  <span style="background-color: yellow;">{{opResult}}</span></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="{{bunch.color}}"><%
-    HTMLWriter.writeHtml(out, bunch.digest);
+    HTMLWriter.writeHtml(out, bunch.tokenFill());
 %></td></tr></table>
 <ul>
     

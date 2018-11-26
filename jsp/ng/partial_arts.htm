@@ -6,7 +6,7 @@
    | <a href="#/patterns/{{digest|btoa}}">Patterns</a></p>
 
 <table><tr><td>Pattern: </td><td bgcolor="((bunch.getStateColor()))">((
-    HTMLWriter.writeHtml(out, tokenFill(bunch.digest));
+    HTMLWriter.writeHtml(out, bunch.tokenFill());
 ))</td></tr></table>
 <ul>
     <form action="newsDetailAction.jsp?dig=((URLEncoder.encode(dig, "UTF-8")))"  name="moveForm" method="post">

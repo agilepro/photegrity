@@ -1,7 +1,7 @@
 package bogus;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 
 /**
@@ -56,6 +56,10 @@ class BodyContentInputStream extends InputStream
         }
 
         return wrappedStream.read();
+    }
+
+    public void close() throws IOException {
+        wrappedStream.close();
     }
 
 }

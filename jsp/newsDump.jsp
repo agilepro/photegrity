@@ -80,6 +80,7 @@ function getArticles(start, length) {
 <%
     int count = 0;
     int limit = 100;
+    int emptyLimit = 1000;
     long position = artno;
     for (NewsArticle art : articles)
     {
@@ -112,6 +113,10 @@ function getArticles(start, length) {
             <%displayError(out,newsGroup,position);%>
             </tr><%
             position++;
+            if (emptyLimit-- < 0) {
+                limit=0;
+                break;
+            }
         }
         position = art.articleNo+1;
         String thisFrom = art.getHeaderFrom();

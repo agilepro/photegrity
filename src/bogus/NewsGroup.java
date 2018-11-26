@@ -263,7 +263,7 @@ public class NewsGroup {
         setGroupOnSession();
         try {
             String[] optionValues = NewsArticle.parseHeader(articleNo);
-            art = new NewsArticle(this, articleNo, optionValues);
+            art = new NewsArticle(this, articleNo, optionValues[0], optionValues[1], optionValues[2]);
         }
         catch (Exception e) {
             registerError(articleNo, e);
@@ -277,7 +277,7 @@ public class NewsGroup {
         registerArticle(lval, art);
         String patt = art.getDigest();
         if (patt != null) {
-            NewsBunch npatt = getBunch(art.getDigest(), art.getFrom());
+            NewsBunch npatt = getBunch(art.getDigest(), art.getHeaderFrom());
             npatt.addCount(articleNo);
             npatt.registerNewArticle();
         }
@@ -340,7 +340,7 @@ public class NewsGroup {
     public synchronized List<NewsArticle> getArticlesDigest(String dig, String from) {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
         for (NewsArticle art : index.values()) {
-            if (dig.equals(art.getDigest()) && art.getFrom().equals(from)) {
+            if (dig.equals(art.getDigest()) && art.getHeaderFrom().equals(from)) {
                 ret.add(art);
             }
         }
@@ -377,7 +377,7 @@ public class NewsGroup {
             if (artNo < lowestFetched) {
                 lowestFetched = artNo;
             }
-            NewsBunch npatt = getBunch(art.getDigest(), art.getFrom());
+            NewsBunch npatt = getBunch(art.getDigest(), art.getHeaderFrom());
             npatt.addCount(artNo);
         }
     }
@@ -719,17 +719,17 @@ public class NewsGroup {
      * from the internal collection of articles.  Presumably, you have already
      * scanned them by this time, and this will free up memory and file space.
      */
-    public void discardOldArticles(long earlyLimit) {
-        Vector<NewsArticle> earlyOnes = new Vector<NewsArticle>();
+    public void discardArticleRange(long rangeStart, long rangeEnd) {
+        Vector<NewsArticle> toRemove = new Vector<NewsArticle>();
         for (NewsArticle art : index.values()) {
-            if (art.articleNo < earlyLimit) {
-                earlyOnes.add(art);
+            if (art.articleNo > rangeStart && art.articleNo < rangeEnd) {
+                toRemove.add(art);
             }
         }
 
         //now delete them
-        for (NewsArticle art : earlyOnes) {
-            if (art.articleNo < earlyLimit) {
+        for (NewsArticle art : toRemove) {
+            if (art.articleNo > rangeStart && art.articleNo < rangeEnd) {
                 index.remove(art.articleNo);
             }
         }
@@ -737,7 +737,7 @@ public class NewsGroup {
         //now clean out the error entries
         Vector<Long> errorsToForget = new Vector<Long>();
         for (Long aNum : errorIndex.keySet()) {
-            if (aNum < earlyLimit) {
+            if (aNum > rangeStart && aNum < rangeEnd) {
                 errorsToForget.add(aNum);
             }
         }

@@ -61,7 +61,7 @@
 
     String template = bunch.getTemplate();
     if (template==null || template.length()==0) {
-        template = tokenFill(bunch.digest);
+        template = bunch.tokenFill();
     }
     if (template.equals("$0.jpg")) {
         String xy = bunch.getFolderLoc().toLowerCase();
@@ -140,7 +140,7 @@
    | <a href="newsDetail2.jsp?<%=startPart%>&d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>&sort=dig">Sort_by_Subject</a></p>
 
 <table><tr><td>Pattern: </td><td bgcolor="<%=bunch.getStateColor()%>"><%
-    HTMLWriter.writeHtml(out, tokenFill(bunch.digest));
+    HTMLWriter.writeHtml(out, bunch.tokenFill());
 %></td></tr></table>
 <ul>
     <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>"  name="moveForm" method="post">
@@ -291,52 +291,6 @@
 <p>Displayed {{recs.length}} subject lines, ((pCount)) of them partially complete.</p>
 </body>
 
-<%!
-
-    public String tokenFill(String digest) {
-
-        StringBuffer res = new StringBuffer();
-        int count = 0;
-        for (int i=0; i<digest.length(); i++) {
-
-            char ch = digest.charAt(i);
-
-            if (ch == NewsArticle.special) {
-                res.append("$");
-                res.append(Integer.toString(count));
-                count++;
-            }
-            else {
-                res.append(ch);
-            }
-
-        }
-        return res.toString();
-    }
-    public String cleanString(String digest) {
-
-        StringBuffer res = new StringBuffer();
-        int count = 0;
-        for (int i=0; i<digest.length(); i++) {
-
-            char ch = digest.charAt(i);
-
-            if (ch>'a'&&ch<'z') {
-                res.append(ch);
-            }
-            else if (ch>'A'&&ch<'Z') {
-                res.append(ch);
-            }
-            else {
-                //ignore it
-            }
-
-        }
-        return res.toString();
-    }
-    
-    
-%>
 
 
 <script>

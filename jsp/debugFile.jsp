@@ -55,7 +55,7 @@
         throw new Exception("The page newsMatch.jsp requires an article number with header that have been downloaded.");
     }
     NewsArticle art = (NewsArticle) newsGroup.getArticleOrNull(artnoInt);
-    NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getFrom());
+    NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getHeaderFrom());
     NewsFile nf = npatt.getFileForArticle(art);
 
     String thisUrl = "debugFile.jsp?artno="+artnoInt;

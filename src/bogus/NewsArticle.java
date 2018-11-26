@@ -34,6 +34,10 @@ public class NewsArticle {
 
     // for feedback in the UI
     public boolean isDownloading;
+    
+    //if we read this once, and then later read and find it different, mark this
+    //so we can track where these changes happen.
+    public boolean headersChanged = false;
     public Exception failMsg;
 
     NewsGroup group;
@@ -46,16 +50,21 @@ public class NewsArticle {
 
     private static String[] options = { "Subject:", "From:", "Date:" };
 
-    private String[] optionValue = new String[3];
+    //private String[] optionValue = new String[3];
+    String headerSubject;
+    String headerFrom;
+    String headerDate;
 
-    public NewsArticle(NewsGroup newGroup, long articleNumber, String[] parsedValues) throws Exception {
+    public NewsArticle(NewsGroup newGroup, long articleNumber, String _subject, String _from, String _date) throws Exception {
         if (newGroup == null) {
             throw new Exception(
                     "Received a null newGroupName parameter to the NewsGroup constructor.");
         }
         group = newGroup;
         articleNo = articleNumber;
-        optionValue = parsedValues;
+        headerSubject = _subject;
+        headerFrom = _from;
+        headerDate = _date;
         getBunch();
     }
 
@@ -75,21 +84,21 @@ public class NewsArticle {
     }
 
     public String getHeaderSubject() {
-        return optionValue[0];
+        return headerSubject;
     }
 
     public String getHeaderFrom() {
-        return optionValue[1];
+        return headerFrom;
     }
 
     public String getHeaderDate() {
-        return optionValue[2];
+        return headerDate;
     }
 
     public NewsBunch getBunch() throws Exception {
         if (nBunch == null) {
             String d = getDigest();
-            String f = getFrom();
+            String f = getHeaderFrom();
             nBunch = group.getBunch(d,f);
             if (nBunch == null) {
                 throw new Exception(
@@ -141,11 +150,16 @@ public class NewsArticle {
      * are designated in 'options'
      */
     public static String[] parseHeader(long artNo) throws Exception {
-        long timeStart = System.currentTimeMillis();
         if (!NewsGroup.connect) {
             throw new Exception("Can't get the article when not connect.");
         }
         Reader msgReader = NewsGroup.session.getArticleHeader(artNo);
+        String[] parsedValues = readHeader(msgReader);
+        return parsedValues;
+    }
+    
+    public static String[] readHeader(Reader msgReader) throws Exception {
+        long timeStart = System.currentTimeMillis();
         String[] parsedValues = new String[3];
 
         char[] buffer = new char[10000];
@@ -225,10 +239,6 @@ public class NewsArticle {
     public static char special = '\u25A3';
 
 
-    public String getFrom() {
-        return optionValue[1];
-    }
-
     
     
     /**
@@ -238,22 +248,10 @@ public class NewsArticle {
         if (dig != null) {
             return dig;
         }
-        String subj = optionValue[0];
+        String subj = headerSubject;
         if (subj == null) {
             throw new RuntimeException("somehow the subj of this message is null");
         }
-
-        //strip out whatever exists between yEnc and that parentheses
-        //which is usually the size in bytes.  Ignore that
-        /*
-        int yEncPos = subj.indexOf("yEnc");
-        if (yEncPos>30) {
-            int lastParen = subj.lastIndexOf("(");
-            if (lastParen>yEncPos) {
-                subj = subj.substring(0,yEncPos+5) + subj.substring(lastParen);
-            }
-        }
-        */
 
         //look for a 'pure' file size on the end
         int digitOnEnd = subj.length()-1;
@@ -388,13 +386,13 @@ public class NewsArticle {
                     res.append(Long.toString(articleNo));
                 }
                 else if (ch=='b') {
-                    res.append(optionValue[1]);
+                    res.append(headerFrom);
                 }
                 else if (ch=='c') {
                     res.append(Long.toString(articleNo/1000));
                 }
                 else if (ch=='d') {
-                    res.append(sanitize(optionValue[1]));
+                    res.append(sanitize(headerFrom));
                 }
                 else if (ch=='e') {
                     res.append(Long.toString(articleNo/10000));
@@ -556,6 +554,37 @@ public class NewsArticle {
         return new BodyContentInputStream(buffer.getInputStream());
     }
 
+    
+    public Reader getHeaderFromBody() throws Exception {
+        if (buffer == null) {
+            throw new Exception(
+                    "body has not been read yet.  Do that before calling getBodyContent.");
+        }
+        return new BodyHeaderReader(buffer.getReader());
+    }
+    
+    public boolean confirmHeadersFromBody() throws Exception {
+        String[] vals = readHeader(getHeaderFromBody());
+        boolean ok = true;
+        if (!headerSubject.equals(vals[0])) {
+            headerSubject = vals[0];
+            headersChanged = true;
+            ok = false;
+        }
+        if (!headerFrom.equals(vals[1])) {
+            headerFrom = vals[1];
+            headersChanged = true;
+            ok = false;
+        }
+        if (!headerDate.equals(vals[2])) {
+            headerDate = vals[2];
+            headersChanged = true;
+            ok = false;
+        }
+        return ok;
+    }
+    
+    
     /**
      * Determine the encoding by looking at the body of the message.
      * (Which means this might download the body for you.)
@@ -659,9 +688,9 @@ public class NewsArticle {
     public void writeCacheLine(Writer w) throws Exception {
         Vector<String> values = new Vector<String>();
         values.add(Long.toString(getNumber()));
-        values.add(optionValue[0]);
-        values.add(optionValue[1]);
-        values.add(optionValue[2]);
+        values.add(headerSubject);
+        values.add(headerFrom);
+        values.add(headerDate);
         CSVHelper.writeLine(w, values);
     }
 
@@ -672,11 +701,7 @@ public class NewsArticle {
             return null;
         }
         long articleNumber = Long.parseLong(values.get(0));
-        String[] myValues = new String[3];
-        myValues[0] = values.get(1);
-        myValues[1] = values.get(2);
-        myValues[2] = values.get(3);
-        return new NewsArticle(theGroup, articleNumber, myValues);
+        return new NewsArticle(theGroup, articleNumber, values.get(1), values.get(2), values.get(3));
     }
 
     public static void sortByDigest(List<NewsArticle> list) throws Exception {

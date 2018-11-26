@@ -61,7 +61,7 @@
 
     String template = bunch.getTemplate();
     if (template==null || template.length()==0) {
-        template = tokenFill(bunch.digest);
+        template = bunch.tokenFill();
     }
     String folder = bunch.getFolderLoc();
     boolean folderExists = bunch.hasFolder();
@@ -110,24 +110,4 @@
     allArts.write(out, 2, 0);
 
 %>
-<%!public String tokenFill(String digest) {
 
-        StringBuffer res = new StringBuffer();
-        int count = 0;
-        for (int i=0; i<digest.length(); i++) {
-
-            char ch = digest.charAt(i);
-
-            if (ch == NewsArticle.special) {
-                res.append("$");
-                res.append(Integer.toString(count));
-                count++;
-            }
-            else {
-                res.append(ch);
-            }
-
-        }
-        return res.toString();
-    }
-%>

@@ -354,6 +354,8 @@ public class NewsFile {
     
     public void renameFracDeluxe(File srcFolder, FracturedFileName sourceParts, boolean srcPlus,
                 File destFolder, FracturedFileName destParts, boolean destPlus) throws Exception {
+        System.out.println("renameFracDeluxe for "+srcFolder+destParts.getBasicName());
+        long startTime = System.currentTimeMillis();
         NewsArticle art = parts.get(0);
         FracturedFileName sourceFilled = art.fillFracturedTemplate(sourceParts);
         FracturedFileName destFilled = art.fillFracturedTemplate(destParts);
@@ -386,6 +388,7 @@ public class NewsFile {
         if (!destPath.exists()) {
             throw new Exception("expected to rename but destination does not exist: " + destPath);
         }
+        System.out.println("renameFracDeluxe finished in "+(System.currentTimeMillis()-startTime)+"ms");
     }
 
     /**

@@ -182,6 +182,17 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
         $scope.templatePattern = rez;
         console.log("RANDOM", rez);
     }
+    $scope.clearSpaces = function() {
+        var rez = "";
+        for (var i = 0; i < $scope.templatePattern.length; i++) {
+          var ch = $scope.templatePattern[i];
+          if (ch!=' ') {
+              rez = rez.concat(ch);
+          }
+        }
+        $scope.templatePattern = rez;
+        console.log("clearSpaces", rez);
+    }
 
 });
 </script>
@@ -470,7 +481,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
         <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
         <input type="hidden" name="dest" value="<%HTMLWriter.writeHtml(out,thisPageURL);%>">
         </td></form>
-        <td><button ng-click="randomName()">Randomize</button></td>
+        <td><button ng-click="randomName()">Randomize</button>
+            <button ng-click="clearSpaces()">ClearSpaces</button></td>
     </tr>
     <tr><form action="changeSelection.jsp" method="get">
         <td>

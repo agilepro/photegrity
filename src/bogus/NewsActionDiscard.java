@@ -63,7 +63,7 @@ public class NewsActionDiscard extends NewsAction {
 	        UtilityMethods.copyFileContents(localMapFile, localMapFileBack);
 	        
 	        out.write("\nDISCARD: Removing articles from "+rangeStart+" to "+rangeEnd);
-	        ng.discardOldArticles(rangeEnd);
+	        ng.discardArticleRange(rangeStart, rangeEnd);
 	        
 	        out.write("\nDISCARD: Saving Again ... ");
 	        ng.saveCache();

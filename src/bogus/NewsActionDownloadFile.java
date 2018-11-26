@@ -117,6 +117,11 @@ public class NewsActionDownloadFile extends NewsAction {
                 if (art.buffer == null) {
                     out.write(" downloading: ");
                     art.getMsgBody();
+                    if (!art.confirmHeadersFromBody()) {
+                        out.write("\n    HEADERS CHANGED! " + art.getHeaderSubject());
+                        out.flush();
+                        throw new Exception("HEADERS CHANGED "+ art.articleNo + "|" + art.getHeaderSubject());
+                    }
                 }
                 else {
                     out.write(" storing: ");
@@ -126,6 +131,7 @@ public class NewsActionDownloadFile extends NewsAction {
                 if (art.buffer != null) {
                     if (combineFirstForUUDecode) {
                         mf.fillWithInputStream(art.getBodyContent());
+                        
                     }
                     else {
                         art.streamDecodedContent(memoryBuffer);

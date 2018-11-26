@@ -52,8 +52,8 @@
 <%
     if (art!=null)
     {
-        NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getFrom());
-        String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8")+"&f="+URLEncoder.encode(art.getFrom(), "UTF-8");
+        NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getHeaderFrom());
+        String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8")+"&f="+URLEncoder.encode(art.getHeaderFrom(), "UTF-8");
 %>
 
 <table><tr><td>article number: <%= art.getNumber()  %>

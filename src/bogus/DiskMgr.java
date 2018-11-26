@@ -413,6 +413,7 @@ public class DiskMgr {
 
     private void scanDiskOneFolder(File scanFile, Vector<ImageInfo> answer)
             throws Exception {
+        System.out.println("scanDiskOneFolder: "+scanFile);
         try {
             if (!scanFile.exists()) {
                 return;

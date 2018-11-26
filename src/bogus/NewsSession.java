@@ -39,7 +39,7 @@ public class NewsSession {
 		return isConnected;
 	}
 
-	public void connect() throws Exception {
+	public synchronized void connect() throws Exception {
 		if (!NewsGroup.connect) {
 			//not in connected mode, so don't connect
 			return;
@@ -59,7 +59,7 @@ public class NewsSession {
 		isConnected = true;
 	}
 
-	public void disconnect() throws Exception {
+	public synchronized void disconnect() throws Exception {
 		if (client != null && client.isConnected()) {
 			client.disconnect();
 		}
@@ -72,7 +72,7 @@ public class NewsSession {
 	 * sets the group to the name only if not currently set to that group. If
 	 * already set this returns fast.
 	 */
-	void internalSetGroup(String groupName) throws Exception {
+	public synchronized void internalSetGroup(String groupName) throws Exception {
 		if (!isConnected) {
 			throw new Exception(
 					"internalSelectArticle was called but the session is not connected!");
@@ -98,7 +98,7 @@ public class NewsSession {
 		return true;
 	}
 
-	public Reader getArticleHeader(long articleNo) throws Exception {
+	public synchronized Reader getArticleHeader(long articleNo) throws Exception {
 		if (!isConnected) {
 			throw new Exception("getArticleHeader was called but the session is not connected!");
 		}
@@ -111,7 +111,7 @@ public class NewsSession {
 		return msgReader;
 	}
 
-	public Reader getArticleBody(long articleNo) throws Exception {
+	public synchronized Reader getArticleBody(long articleNo) throws Exception {
 		if (!isConnected) {
 			throw new Exception("getArticleBody was called but the session is not connected!");
 		}

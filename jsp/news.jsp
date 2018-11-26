@@ -541,8 +541,11 @@
             var needsDot = false;
             for (var i=0; i<strval.length; i++) {
                 var ch = strval.charAt(i);
+                if (ch=='&') {
+                    ch = '-';
+                }
                 if ( (ch>='a' && ch<='z') || (ch>='A' && ch<='Z') 
-                    || (ch>='0' && ch<='9') || ch=='_' || ch=='$') {
+                    || (ch>='0' && ch<='9') || ch=='_' || ch=='-' || ch=='$') {
                         if (needsDot) {
                             resVal = resVal + '.';
                             needsDot = false;

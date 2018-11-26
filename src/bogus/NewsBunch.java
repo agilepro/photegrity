@@ -693,6 +693,7 @@ public class NewsBunch {
     }
 
     public List<NewsFile> getFiles() throws Exception {
+        System.out.println("getFiles  called on "+digest);
         if (fracTemplate == null || fracTemplate.isEmpty()) {
             throw new Exception("sorry, can't collect files until the file template is set for the bunch "+digest);
         }
@@ -815,6 +816,7 @@ public class NewsBunch {
     public void changeLocAndTemplate(String newFolder, String newTemplate, boolean renameFiles,
             Writer out, boolean newPlusOne) throws Exception {
 
+        long startTime = System.currentTimeMillis();
         DiskMgr oldDM         = disk;
         File    oldFolderPath = getFolderPath();
 
@@ -874,6 +876,7 @@ public class NewsBunch {
             // clear out the cached pattern record
             samplePattern = null;
             for (NewsFile nf : getFiles()) {
+                System.out.println("looping rename: "+nf.getFileName());
                 if (nf.isDownloaded()) {
                     out.write("\n<li>moving file ");
                     HTMLWriter.writeHtml(out, nf.getFileName());
@@ -899,7 +902,7 @@ public class NewsBunch {
         out.write("\n<li>refreshing disk to memory "+newFolderPath+"</li>");
         dm2.refreshDiskFolder(newFolderPath);
         out.write("\n<li>DONE refreshing disk folder</li>");
-
+        System.out.println("changeLocAndTemplate took "+(System.currentTimeMillis()-startTime)+"ms");
     }
 
 
@@ -1412,7 +1415,7 @@ public class NewsBunch {
             List<NewsArticle> arts = getArticles();
             if (arts.size()>0) {
                 NewsArticle art = arts.get(0);
-                sender = art.getFrom();
+                sender = art.getHeaderFrom();
             }
         }
         return sender;

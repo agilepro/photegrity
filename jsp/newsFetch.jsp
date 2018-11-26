@@ -126,6 +126,17 @@
         response.sendRedirect(go);
         return;
     }
+    else if ("DiscardRange".equals(command)) {
+        int startInt = UtilityMethods.defParamInt(request, "start", 0);
+        int countInt = UtilityMethods.defParamInt(request,  "count", 100);
+        int stepInt = UtilityMethods.defParamInt(request,  "step", 1);
+        NewsActionDiscard nad = new NewsActionDiscard(startInt,startInt+countInt);
+        nad.addToFrontOfHigh();
+        NewsActionLoadHeaders nadh = new NewsActionLoadHeaders(startInt, countInt, stepInt);
+        nadh.addToFrontOfMid();
+        response.sendRedirect(go);
+        return;
+    }
     else if ("Refetch".equals(command)) {
         int startInt = UtilityMethods.defParamInt(request, "start", -1000);
         int countInt = UtilityMethods.defParamInt(request,  "count", 100);

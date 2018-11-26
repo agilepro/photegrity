@@ -104,7 +104,7 @@
  | <font color="red">Patterns</font></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="<%=bunch.getStateColor()%>"><%
-    HTMLWriter.writeHtml(out, bunch.digest);
+    HTMLWriter.writeHtml(out, bunch.tokenFill());
 %></td></tr></table>
 <ul>
     <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>" name="moveForm" method="post">

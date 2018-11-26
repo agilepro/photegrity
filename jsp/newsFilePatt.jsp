@@ -148,7 +148,7 @@
  | <a href="newsPatterns.jsp?d=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>">Patterns</a></p>
 
 <table><tr><td>Bunch Subject: </td><td bgcolor="<%=bunch.getStateColor()%>"><%
-    HTMLWriter.writeHtml(out, bunch.digest);
+    HTMLWriter.writeHtml(out, bunch.tokenFill());
 %></td></tr></table>
 <ul>
     <form action="newsDetailAction.jsp?dig=<%=URLEncoder.encode(dig, "UTF-8")%>&f=<%=URLEncoder.encode(f, "UTF-8")%>" name="moveForm" method="post">
@@ -345,6 +345,7 @@ Fetch <%=(maxArtNo-minArtNo)%> Interior Articles</a>
 <a href="newsFetch.jsp?start=<%=minArtNo%>&step=1&count=<%=(maxArtNo-minArtNo)%>&command=UnError">(ERR)</a>
 <a href="newsFetch.jsp?start=<%=minArtNo-200%>&step=1&count=200&command=Refetch">Fetch 200 earlier Articles</a>
 <a href="newsFetch.jsp?start=<%=maxArtNo%>&step=1&count=200&command=Refetch">Fetch 200 later Articles</a>
+<a href="newsFetch.jsp?start=<%=minArtNo-100%>&count=<%=(maxArtNo-minArtNo+200)%>&command=DiscardRange">Trash ENTIRE Range</a>
 </body>
 
 

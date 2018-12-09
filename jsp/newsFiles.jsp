@@ -161,6 +161,7 @@
         $scope.refetchData = function() {
             $scope.opResult = $scope.opResult + " *refresh"+$scope.counter++;
             fileFactory.listFiles( function(data) {
+                console.log("DATA", data);
                 $scope.fileSet = data;
             });
             fileFactory.getBunch( function(data) {
@@ -489,6 +490,7 @@
     <a href="debugFile.jsp?artno={{rec.sampleArticle}}"><img src="debug-icon.png" title="Debug this file object"></a>
     <a href="newsMatch.jsp?artno={{rec.sampleArticle}}"><img src="search.png"></a>
     </td>
+    <td style="color:lightgray;"><span ng_show="rec.fileDate>0">{{rec.fileDate|date}}</span></td>
     <td style="color:red;">{{rec.hadError}}</td>
     </tr>
 

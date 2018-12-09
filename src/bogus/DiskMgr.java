@@ -471,18 +471,34 @@ public class DiskMgr {
 
 
     public synchronized void refreshDiskFolder(File folderPath) throws Exception {
+        long startTime = System.currentTimeMillis();
+        System.out.println("refreshDiskFolder1 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
         if (!isLoaded) {
             //if there is nothing in memory, then nothing to fix
             return;
         }
         String relPath = this.getRelativePath(folderPath);
+        System.out.println("refreshDiskFolder2 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
         ImageInfo.removeDiskPath(this, relPath);
+        System.out.println("refreshDiskFolder3 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
         Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
+        System.out.println("refreshDiskFolder4 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
         scanDiskOneFolder(folderPath, imagesForDisk);
+        System.out.println("refreshDiskFolder5 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
         ImageInfo.acceptNewImages(imagesForDisk);
+        System.out.println("refreshDiskFolder6 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
         PosPat.registerImages(imagesForDisk);
         isChanged = true;
+        System.out.println("refreshDiskFolder7 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
+        
+        startTime = System.currentTimeMillis();
+        Vector<ImageInfo> bogusCopy = new Vector<ImageInfo>();
+        for (ImageInfo iii : ImageInfo.imagesByName) {
+            bogusCopy.add(iii);
+        }
+        System.out.println("SIMPLE COPY - "+(System.currentTimeMillis()-startTime)+"ms - ");
     }
+
 
 
     public synchronized void writeSummary() throws Exception {
@@ -550,11 +566,8 @@ public class DiskMgr {
      * directory, or else make an entry in the supp.txt file in order to hide it
      * from future manipulations.
      */
-    public void suppressFile(String path, String name) throws Exception {
-        if (!path.startsWith(extraPath)) {
-            throw new Exception("File Path for a suppress command MUST start with '"
-                    + extraPath + "', instead received: " + path);
-        }
+    public void suppressFile(File path, String name) throws Exception {
+        assertOnDisk(path);
         try {
             File theFile = new File(path, name);
             if (!theFile.exists()) {
@@ -623,19 +636,18 @@ public class DiskMgr {
             throws Exception {
         try {
             assertOnDisk(toPath);
-
-            String toPathStr = toPath.toString().replace('\\', '/');
+            File fPath = new File(fromPath);
 
             // suppress moves to the same location
             if (diskName.equalsIgnoreCase(fromDisk.diskName)
-                    && toPathStr.equalsIgnoreCase(fromPath)) {
+                    && toPath.equals(fPath)) {
                 return fileName; // nothing to do
             }
 
             String newToName = findSuitableName(toPath, fileName);
 
             File toFile = new File(toPath, newToName);
-            File fromFile = new File(fromPath, fileName);
+            File fromFile = new File(fPath, fileName);
             if (toFile.exists()) {
                 throw new Exception(
                     "New logic of findSuitableName should assure that the destination file does not exist:"
@@ -654,7 +666,7 @@ public class DiskMgr {
             fis.close();
             fos.close();
 
-            fromDisk.suppressFile(fromPath, fileName);
+            fromDisk.suppressFile(fPath, fileName);
             if (isLoaded) {
                 isChanged = true;
             }

@@ -262,7 +262,13 @@ public class GridData {
         
         for (Vector<ImageInfo> rowVec : grid) {
             for (ImageInfo ii : rowVec) {
-                String thisValue = Integer.toString(1000+ii.value).substring(1);
+                String thisValue = "??";
+                if (ii.value>=0) {
+                    thisValue = Integer.toString(1000+ii.value).substring(1);
+                }
+                else {
+                    thisValue = Integer.toString(ii.value);
+                }
                 valueSet.add(thisValue);
                 String thisCol = ii.getPatternSymbol();
                 colSet.add(thisCol);

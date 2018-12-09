@@ -25,6 +25,7 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.List"
 %><%@page import="java.util.Properties"
+%><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
@@ -76,7 +77,7 @@
     String patternLC = pattern.toLowerCase();
 
 
-    Vector<PatternInfo> piSet = new Vector<PatternInfo>();
+    List<PatternInfo> piSet = new Vector<PatternInfo>();
     for (PatternInfo pit : ImageInfo.getAllPatternsStartingWith(pattern)) {
         if (pit.pattern.equalsIgnoreCase(pattern)) {
             piSet.add(pit);
@@ -84,13 +85,13 @@
     }
 
     //find the offset in the master pattern list
-    Vector<PosPat> allPatts = PosPat.getAllEntries();
+    List<PosPat> allPatts = PosPat.getAllEntries();
 
     int min = 0;
     int max = allPatts.size();
     while (max - min > 1) {
         int middle = (max+min)/2;
-        String item = allPatts.elementAt(middle).getPattern();
+        String item = allPatts.get(middle).getPattern();
         if (pattern.compareToIgnoreCase(item) > 0) {
             min = middle;
         }
@@ -99,7 +100,7 @@
         }
     }
     String startPart = "search="+URLEncoder.encode(art.getDigest(),"UTF-8");
-    Vector<String> allTags = new Vector<String>();
+    List<String> allTags = new Vector<String>();
 
     %>
     <html>
@@ -119,7 +120,7 @@
             }
         }
         else {
-            Vector<PosPat> vpp = npatt.getPosPatList();
+            List<PosPat> vpp = npatt.getPosPatList();
             for (PosPat pp : vpp) {
                 for (String tag : parseTags(pp.getSymbol())) {
                     if (!allTags.contains(tag)) {
@@ -273,7 +274,7 @@
         }
         %>"</p>
         <%
-        Vector<String> examplePaths = new Vector<String>();
+        List<String> examplePaths = new Vector<String>();
         Vector sortedImages = new Vector();
         sortedImages.addAll(pi.allImages);
         ImageInfo.sortImages(sortedImages, "name");
@@ -433,7 +434,7 @@
 <h3>Pos Pat</h3>
 <ul>
 <%
-    Vector<String> allTags2 = new Vector<String>();
+    List<String> allTags2 = new Vector<String>();
     if (npatt.hasTemplate()) {
         for (PosPat ppp : npatt.getPosPatList()) {
             String ppp_patt = ppp.getPattern();
@@ -465,9 +466,9 @@
 </html>
 <%!
 
-public Vector<String> parseTags(String firstPart) throws Exception {
+public List<String> parseTags(String firstPart) throws Exception {
 
-    Vector<String> res = new Vector<String>();
+    List<String> res = new Vector<String>();
     if (firstPart==null || firstPart.length()==0) {
         return res;
     }

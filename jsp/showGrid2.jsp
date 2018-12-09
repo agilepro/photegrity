@@ -241,6 +241,33 @@
             var pos = path.lastIndexOf("/");
             return (path.substring(pos+1));
         }
+        
+        $scope.mergeLeft = function() {
+            if ($scope.pinCols.length!=2) {
+                throw "Problem that pinCols is not exclusively 2 columns to manipulate";
+            }
+            
+            mergeColumns($scope.pinCols[1], $scope.pinCols[0]);
+        }
+        $scope.mergeRight = function() {
+            if ($scope.pinCols.length!=2) {
+                throw "Problem that pinCols is not exclusively 2 columns to manipulate";
+            }
+            
+            mergeColumns($scope.pinCols[0], $scope.pinCols[1]);
+        }
+        
+        function mergeColumns(sourceCol, destCol) {
+            console.log("col1", sourceCol);
+            console.log("col2", destCol);
+            var url = "mergeSets.jsp?q="+encodeURIComponent($scope.query)
+            +"&col1="+encodeURIComponent(sourceCol)
+            +"&bias1="+$scope.biasMap[sourceCol]
+            +"&col2="+encodeURIComponent(destCol)
+            +"&bias2="+$scope.biasMap[destCol];
+            window.open(url);
+        }
+        
     });
 
 </script>
@@ -288,20 +315,25 @@
       <a href="showGrid.jsp?r=<%=r%>">Grid1</a>
    </td></tr>
 </table>
-<button ng-click="setRow(currentRow+1)">Down</button>
-<button ng-click="setRow(currentRow-1)">Up</button>
-<button ng-click="setCol(currentCol-1)">Left</button>
-<button ng-click="setCol(currentCol+1)">Right</button>
-<button ng-click="togglePin()">
-    <span class="glyphicon glyphicon-check" ng-show="onlyPinned"></span>           
-    <span class="glyphicon glyphicon-unchecked" ng-hide="onlyPinned"></span>           
-    Only Pinned
-</button>
-<button ng-click="toggleSingleRow()">
-    <span class="glyphicon glyphicon-check" ng-show="singleRow"></span>           
-    <span class="glyphicon glyphicon-unchecked" ng-hide="singleRow"></span>           
-    Single Row
-</button>
+<div>
+    <button ng-click="setRow(currentRow+1)">Down</button>
+    <button ng-click="setRow(currentRow-1)">Up</button>
+    <button ng-click="setCol(currentCol-1)">Left</button>
+    <button ng-click="setCol(currentCol+1)">Right</button>
+    <button ng-click="togglePin()">
+        <span class="glyphicon glyphicon-check" ng-show="onlyPinned"></span>           
+        <span class="glyphicon glyphicon-unchecked" ng-hide="onlyPinned"></span>           
+        Only Pinned
+    </button>
+    <button ng-click="toggleSingleRow()">
+        <span class="glyphicon glyphicon-check" ng-show="singleRow"></span>           
+        <span class="glyphicon glyphicon-unchecked" ng-hide="singleRow"></span>           
+        Single Row
+    </button>
+    <button ng-show="onlyPinned && pinCols.length==2" ng-click="mergeLeft()">Merge Left</button>
+    <button ng-show="onlyPinned && pinCols.length==2" ng-click="mergeRight()">Merge Right</button>
+    
+</div>
 <div ng-hide="singleRow">
     <table class="spacey">
     <tr>

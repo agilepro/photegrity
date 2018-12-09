@@ -128,7 +128,7 @@ public class NewsGroup {
     /**
      * Closes the file, and clean up all the memory
      */
-    public void closeNewsGroupFile() throws Exception {
+    public synchronized void closeNewsGroupFile() throws Exception {
 	    clearArticles();
 	    defaultDiskMgr = null;
 	    selectedGroup = null;
@@ -147,13 +147,13 @@ public class NewsGroup {
         while (count-- > 0 &&  NewsAction.active) {
             Thread.sleep(120);
         }
-        index.clear();
-        bunchIndex.clear();
-        fastIndex.clear();
+        index = new Hashtable<Long, NewsArticle>();
+        bunchIndex = new Hashtable<String, NewsBunch>();
+        fastIndex = new Hashtable<Long, NewsBunch>();
         NewsBunch.groupIsFullyIndexed = false;
     }
 
-    public static List<NewsBunch> getUnhiddenBunches() {
+    public static synchronized List<NewsBunch> getUnhiddenBunches() {
         Vector<NewsBunch> ret = new Vector<NewsBunch>();
         for (NewsBunch nbunch : bunchIndex.values()) {
             if (nbunch.pState != NewsBunch.STATE_HIDDEN && nbunch.count > 0) {
@@ -163,7 +163,7 @@ public class NewsGroup {
         // need to sort them here
         return ret;
     }
-    public static List<NewsBunch> getAllBunches() {
+    public static synchronized List<NewsBunch> getAllBunches() {
         Vector<NewsBunch> ret = new Vector<NewsBunch>();
         for (NewsBunch npatt : bunchIndex.values()) {
             ret.add(npatt);
@@ -197,7 +197,7 @@ public class NewsGroup {
         reset();
     }
 
-    public void reset() {
+    public synchronized void reset() {
         firstArticle = 0;
         lastArticle = 0;
         articleCount = 0;
@@ -205,7 +205,7 @@ public class NewsGroup {
     }
 
     
-    private void getGroupInfoFromServer() throws Exception {
+    private synchronized void getGroupInfoFromServer() throws Exception {
         firstArticle = 0;
         lastArticle = 0;
         articleCount = 0;
@@ -295,14 +295,14 @@ public class NewsGroup {
         return val;
     }
 
-    public void clearError(long artNo) {
+    public synchronized void clearError(long artNo) {
         NewsArticleError val = errorIndex.get(artNo);
         if (val!=null) {
             val.unerror();
         }
     }
 
-    public void registerError(long artNo, Exception e) {
+    public synchronized void registerError(long artNo, Exception e) {
         NewsArticleError val = errorIndex.get(artNo);
         if (val == null) {
             val = new NewsArticleError(artNo);
@@ -328,7 +328,7 @@ public class NewsGroup {
     }
     
     
-    public synchronized List<NewsArticle> getArticles() {
+    public List<NewsArticle> getArticles() {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
         for (NewsArticle art : index.values()) {
             ret.add(art);
@@ -337,7 +337,7 @@ public class NewsGroup {
         return ret;
     }
 
-    public synchronized List<NewsArticle> getArticlesDigest(String dig, String from) {
+    public List<NewsArticle> getArticlesDigest(String dig, String from) {
         Vector<NewsArticle> ret = new Vector<NewsArticle>();
         for (NewsArticle art : index.values()) {
             if (dig.equals(art.getDigest()) && art.getHeaderFrom().equals(from)) {
@@ -365,7 +365,7 @@ public class NewsGroup {
             patt.count = 0;
         }
     }
-    public void recalcStats() throws Exception {
+    public synchronized void recalcStats() throws Exception {
         zeroCounts();
         highestFetched = 0;
         lowestFetched = 999999999999L;
@@ -382,7 +382,7 @@ public class NewsGroup {
         }
     }
 
-    public void clearOutBunch(String bunch, String from) throws Exception {
+    public synchronized void clearOutBunch(String bunch, String from) throws Exception {
         NewsBunch npatt = getBunch(bunch, from);
         npatt.pState = NewsBunch.STATE_HIDDEN;
         for (NewsArticle art : getArticlesDigest(bunch, from)) {
@@ -390,7 +390,7 @@ public class NewsGroup {
         }
     }
 
-    public void saveCacheCSV() throws Exception {
+    public synchronized void saveCacheCSV() throws Exception {
         File destFile = new File(containingFolder, groupName + ".news");
         File tempFile = new File(containingFolder, groupName + ".news.temp");
         if (tempFile.exists()) {
@@ -412,7 +412,7 @@ public class NewsGroup {
         tempFile.renameTo(destFile);
     }
 
-    public void saveErrorsCSV() throws Exception {
+    public synchronized void saveErrorsCSV() throws Exception {
         File oldDestFile = new File(containingFolder, groupName + ".errs");
         File destFile = new File(containingFolder, groupName + ".err2");
         File tempFile = new File(containingFolder, groupName + ".err2.temp");
@@ -438,7 +438,7 @@ public class NewsGroup {
         }
     }
 
-    public void saveCache() throws Exception {
+    public synchronized void saveCache() throws Exception {
         LocalMapping.storeData(containingFolder);
         saveCacheCSV();
         saveErrorsCSV();
@@ -447,7 +447,7 @@ public class NewsGroup {
         recalcStats();
     }
 
-    public void saveBunchData() throws Exception {
+    public synchronized void saveBunchData() throws Exception {
         File fileTemplate = new File(containingFolder, groupName + ".patt");
         File tempFile = new File(containingFolder, groupName + ".patt.temp");
         if (tempFile.exists()) {
@@ -570,7 +570,7 @@ public class NewsGroup {
      * @return
      * @throws Exception
      */
-    public NewsBunch getBunch(String digest, String from) throws Exception {
+    public synchronized NewsBunch getBunch(String digest, String from) throws Exception {
         if (digest == null) {
             throw new Exception("null value passed for patter in getPattern");
         }
@@ -597,7 +597,7 @@ public class NewsGroup {
         return newBunch;
     }
     
-    public NewsBunch findBunchByKey(long key) throws Exception {
+    public synchronized NewsBunch findBunchByKey(long key) throws Exception {
         NewsBunch foundBunch = fastIndex.get(key);
         if (foundBunch != null) {
             return foundBunch;
@@ -609,7 +609,7 @@ public class NewsGroup {
      * Find all known bunches in a particular range
      * @return
      */
-    public List<NewsBunch> getBunchesInRange() {
+    public synchronized List<NewsBunch> getBunchesInRange() {
     	//fixing this up here, in case it was left at zero or something else wrong
     	if (lowestToDisplay<lowestFetched) {
     		lowestToDisplay = lowestFetched;
@@ -632,7 +632,7 @@ public class NewsGroup {
      * @param filter
      * @return
      */
-    public List<NewsBunch> getFilteredBunches(String filter) throws Exception {
+    public synchronized List<NewsBunch> getFilteredBunches(String filter) throws Exception {
         List<NewsBunch> filteredBunches = new Vector<NewsBunch>();
         for (NewsBunch tBunch : getBunchesInRange()) {
             if (tBunch.digest.indexOf(filter)>=0) {
@@ -675,7 +675,7 @@ public class NewsGroup {
         }
     }
 
-    public long takePhaseStep() throws Exception {
+    public synchronized long takePhaseStep() throws Exception {
 
         step++;
         if (phase < 0) {
@@ -719,7 +719,7 @@ public class NewsGroup {
      * from the internal collection of articles.  Presumably, you have already
      * scanned them by this time, and this will free up memory and file space.
      */
-    public void discardArticleRange(long rangeStart, long rangeEnd) {
+    public synchronized void discardArticleRange(long rangeStart, long rangeEnd) {
         Vector<NewsArticle> toRemove = new Vector<NewsArticle>();
         for (NewsArticle art : index.values()) {
             if (art.articleNo > rangeStart && art.articleNo < rangeEnd) {

@@ -150,15 +150,17 @@ public class NewsArticle {
      * are designated in 'options'
      */
     public static String[] parseHeader(long artNo) throws Exception {
+        System.out.println("HEADER - start "+artNo+" - "+(System.currentTimeMillis()%10000));
         if (!NewsGroup.connect) {
             throw new Exception("Can't get the article when not connect.");
         }
         Reader msgReader = NewsGroup.session.getArticleHeader(artNo);
         String[] parsedValues = readHeader(msgReader);
+        System.out.println("HEADER - finish "+artNo+" - "+(System.currentTimeMillis()%10000)+" - "+parsedValues[0]);
         return parsedValues;
     }
     
-    public static String[] readHeader(Reader msgReader) throws Exception {
+    private static String[] readHeader(Reader msgReader) throws Exception {
         long timeStart = System.currentTimeMillis();
         String[] parsedValues = new String[3];
 

@@ -150,12 +150,16 @@ public class ImageInfo
             imagesByName = new Vector<ImageInfo>();
             pathCompressor = new Hashtable<String, String>();
             unsorted = false;
-            return imagesByName;
         }
         if (unsorted) {
+            Vector<ImageInfo> temp = new Vector<ImageInfo>();
+            for (ImageInfo ii : imagesByName) {
+                temp.add(ii);
+            }
             ImagesByNameComparator sc1 = new ImagesByNameComparator();
-            Collections.sort(imagesByName, sc1);
+            Collections.sort(temp, sc1);
             unsorted = false;
+            imagesByName = temp;
         }
         return imagesByName;
     }
@@ -585,7 +589,9 @@ public class ImageInfo
      * particular relative path
      */
     public static synchronized void removeDiskPath(DiskMgr dm, String relPath) throws Exception {
+        long startTime = System.currentTimeMillis();
         Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
+        Vector<ImageInfo> wipeables = new Vector<ImageInfo>();
         if (imagesByName != null) {
             for (ImageInfo ii : imagesByName) {
                 if (ii.diskMgr != dm) {
@@ -595,10 +601,16 @@ public class ImageInfo
                     imagesForDisk.add(ii);
                 }
                 else {
-                	ii.wipeAllConnections();
+                    wipeables.add(ii);
                 }
             }
         }
+        System.out.println("removeDiskPath1 - "+(System.currentTimeMillis()-startTime)+"ms - ");
+        startTime = System.currentTimeMillis();
+        for (ImageInfo ii : wipeables) {
+            ii.wipeAllConnections();
+        }
+        System.out.println("removeDiskPath1 - "+(System.currentTimeMillis()-startTime)+"ms - ");
         imagesByName = imagesForDisk;
         imagesByPath = null;
         imagesBySize = null;
@@ -1099,11 +1111,11 @@ public class ImageInfo
         throws Exception
     {
         //TODO: replace this with a File object
-        String fullPath = getFullPath();
+        File fPath = this.getFilePath();
         try {
             PosPat.removeImage(this);
 
-            diskMgr.suppressFile(fullPath, fileName);
+            diskMgr.suppressFile(fPath, fileName);
             deleteThumbnails();
 
             for (TagInfo tag : tagVec) {
@@ -1113,7 +1125,7 @@ public class ImageInfo
             unPlugImage();
 
         } catch (Exception e) {
-            throw new Exception2("Unable to suppress image "+fullPath+"/"+fileName,e);
+            throw new Exception2("Unable to suppress image "+fPath+"/"+fileName,e);
         }
     }
 
@@ -1155,7 +1167,7 @@ public class ImageInfo
             if (!oldPath.exists()) {
                 throw new Exception("Image does not exist before move: "+oldPath);
             }
-            if (dm2!=diskMgr || !destFolder.equals(new File(oldFolderPath)))
+            if (dm2!=diskMgr || !destFolder.equals(oldPath))
             {
                 PosPat.removeImage(this);
                 eraseStats();
@@ -1178,7 +1190,7 @@ public class ImageInfo
                 }
                 //check that old one is gone
                 if (oldPath.exists()) {
-                    throw new Exception("Image still exists ini old location after move from "
+                    throw new Exception("Image still exists in old location after move from "
                                 +oldPath+" to "+destFolder);
                 }
             }

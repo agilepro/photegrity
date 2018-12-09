@@ -3,6 +3,7 @@ package bogus;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -20,10 +21,10 @@ public class PosPat {
     private DiskMgr diskMgr;
     private String localPath;
     private String pattern;
-    private Vector<String> pathTags = new Vector<String>();
+    private List<String> pathTags = new ArrayList<String>();
     private int imageCount;
     private HashCounterIgnoreCase tags;
-    private static Vector<PosPat> ppIndex = new Vector<PosPat>();
+    private static List<PosPat> ppIndex = new ArrayList<PosPat>();
     private static Hashtable<String,String> compressor = new Hashtable<String,String>();
 
 
@@ -126,7 +127,7 @@ public class PosPat {
     public Vector<String> getTags() {
         return tags.sortedKeys();
     }
-    public Vector<String> getPathTags() {
+    public List<String> getPathTags() {
         return pathTags;
     }
     public boolean hasTag(String tag) {
@@ -260,35 +261,15 @@ public class PosPat {
         return pp;
     }
 
-    /**
-    * Pass a symbol (disk/localpath/pattern) in to get a PosPat
-    * object back, either an existing one, or a new one.
-    *
-    public static synchronized PosPat locateOrCreate(String symbol) throws Exception {
-        int colonPos = symbol.indexOf(":");
-        if (colonPos<=0) {
-            throw new Exception("locateOrCreate needs a properly formatted symbol passed in, "
-                       + "which has a disk name followed by colon.  Did not find any disk name in: "
-                       + symbol);
-        }
-        String diskName = symbol.substring(0, colonPos);
-        DiskMgr dm = DiskMgr.getDiskMgr(diskName);
-        int lastSlash = symbol.lastIndexOf("/");
-        if (colonPos<=colonPos) {
-            throw new Exception("locateOrCreate needs a properly formatted symbol passed in, "
-                       + "which has a pattern preceeded by a slash.  Did not find any pattern in: "
-                       + symbol);
-        }
-        String localPath = symbol.substring(colonPos+1, lastSlash+1);
-        String pattern = symbol.substring(lastSlash+1);
-
-        return PosPat.findOrCreate(dm, localPath, pattern);
-    }*/
-
 
     public static synchronized PosPat addWithoutSorting(DiskMgr _dm, String _localPath, String _pattern)  {
         PosPat pp = new PosPat(_dm, _localPath, _pattern);
-        ppIndex.add(pp);
+        ArrayList<PosPat> newList = new ArrayList<PosPat>();
+        for (PosPat existing: ppIndex) {
+            newList.add(existing);
+        }
+        newList.add(pp);
+        ppIndex = newList;
         return pp;
     }
     private static synchronized PosPat insertWithoutSorting(DiskMgr _dm, String _localPath,
@@ -316,8 +297,22 @@ public class PosPat {
             }
         }
 
+        //this is an attempt to insert without ever modifying and existing index
+        //instead, create a new one.
         PosPat pp = new PosPat(_dm, _localPath, _pattern);
-        ppIndex.insertElementAt(pp, pos);
+        ArrayList<PosPat> newList = new ArrayList<PosPat>();
+        int count = 0;
+        for (PosPat existing : ppIndex) {
+            if (pos == count++) {
+                newList.add(pp);
+            }
+            newList.add(existing);
+        }
+        //handle the add-on-the-end case
+        if (pos == count++) {
+            newList.add(pp);
+        }
+        ppIndex = newList;
         return pp;
     }
 
@@ -409,7 +404,7 @@ public class PosPat {
     }
 
 
-    private static int findFirstEntryWithPattern(Vector<PosPat> vec, String term) {
+    private static int findFirstEntryWithPattern(List<PosPat> vec, String term) {
 
         int low = 0;
         int high = vec.size();
@@ -505,7 +500,7 @@ public class PosPat {
             Collections.sort(ppIndex, sc);
         }
 
-    public static Vector<PosPat> getAllEntries() {
+    public static List<PosPat> getAllEntries() {
         return ppIndex;
     }
 

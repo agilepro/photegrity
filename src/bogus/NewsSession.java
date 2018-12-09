@@ -13,11 +13,11 @@ public class NewsSession {
 	// available ... just in case
 	public NNTPClient client;
 
-	String currentGroup;
-	String server;
-	String user;
-	String pass;
-	boolean isConnected = false;
+	private String currentGroup;
+	private String server;
+	private String user;
+	private String pass;
+	private boolean isConnected = false;
 
 	private static NewsSession theSingletonNewsSession;
 

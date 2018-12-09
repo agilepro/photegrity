@@ -40,23 +40,56 @@
     String artno     = UtilityMethods.reqParam(request, "News One Page", "artno");
     String thisPage = "newsOne.jsp?artno="+URLEncoder.encode(artno, "UTF-8");
     long artnoInt = Long.parseLong(artno);
-    NewsArticle art = (NewsArticle) newsGroup.getArticleOrNull(artnoInt);
-    String headerSubj = art.getHeaderSubject();
-    String encodedHeaderSubj = URLEncoder.encode(headerSubj.substring(0,8),"UTF-8");
+    NewsArticle art = null;
+    String headerSubj = "unknown";
+    String encodedHeaderSubj = "unknown";
+    String digest = "";
+    if (newsGroup.hasArticle(artnoInt)) {
+        art = (NewsArticle) newsGroup.getArticleOrNull(artnoInt);
+    }
+    if (art!=null) {
+        headerSubj = art.getHeaderSubject();
+        encodedHeaderSubj = URLEncoder.encode(headerSubj.substring(0,8),"UTF-8");
+        digest = art.getDigest();
+    }
 %>
 <html>
+
+<script>
+
+function getArticle() {
+    var theUrl = "newsFetch.jsp?start=<%= artnoInt  %>&step=1&count=1&command=UnError";
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+
+</script>
 <body>
-<h3>One News Article</h3>
-<p><a href="news.jsp?search=<%UtilityMethods.writeURLEncoded(out, art.getDigest());%>">News</a></p>
+<h3>News Article <%= artnoInt  %></h3>
+<p>
+   <a href="news.jsp?search=<%UtilityMethods.writeURLEncoded(out, digest);%>">News</a> &nbsp;
+   <a href="newsDump.jsp?artno=<%= artnoInt  %>">Dump</a>
+</p>
 <hr/>
 <%
-    if (art!=null)
+    if (art==null)
+    {
+ 
+%>
+    <button onClick="getArticle()">Read the Headers</button>
+ 
+        
+<%        
+    }
+    else
     {
         NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getHeaderFrom());
         String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8")+"&f="+URLEncoder.encode(art.getHeaderFrom(), "UTF-8");
 %>
 
-<table><tr><td>article number: <%= art.getNumber()  %>
+<table><tr><td>article number: <%= artnoInt  %>
 Get: </td><td><form action="newsFetch.jsp">
 <input type="hidden" name="command" value="Refetch">
 <input type="hidden" name="start" value="<%=artnoInt%>">
@@ -74,9 +107,9 @@ Get: </td><td><form action="newsFetch.jsp">
 <input type="submit" name="xxx" value="-20">
 </form></td></tr></table>
 <ul>
-<li> Article No: <%= art.getNumber() %>
-    <a href="newsGaps.jsp?limit=100&begin=<%= art.getNumber() %>&thresh=10&step=10">Gaps</a>
-    <a href="newsDump.jsp?artno=<%= art.getNumber() %>&high=<%=encodedHeaderSubj%>">Dump</a></li>
+<li> Article No: <%= artnoInt %>
+    <a href="newsGaps.jsp?limit=100&begin=<%= artnoInt %>&thresh=10&step=10">Gaps</a>
+    <a href="newsDump.jsp?artno=<%= artnoInt %>&high=<%=encodedHeaderSubj%>">Dump</a></li>
 <li> Subject: <% HTMLWriter.writeHtml(out, art.getHeaderSubject()); %> </li>
 <li> From: <% HTMLWriter.writeHtml(out, art.getHeaderFrom()); %> </li>
 <li> Date: <% HTMLWriter.writeHtml(out, art.getHeaderDate()); %> </li>

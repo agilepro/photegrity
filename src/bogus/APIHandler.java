@@ -16,6 +16,7 @@
 
 package bogus;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.util.Vector;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.json.JSONTokener;
 
@@ -104,6 +106,9 @@ public class APIHandler {
 					return setSessionFromJSON();
 				}
 			}
+            if ("batchUpdate".equals(mainGroup)) {
+                return doBatchUpdate(objIn);
+            }
 			if (mainGroup.startsWith("b=")) {
 				return handleBunches(mainGroup.substring(2));
 			}
@@ -310,5 +315,91 @@ public class APIHandler {
 			sb.append( (char)( ch1*16  + ch2 ) );
 		}
 		return sb.toString();
+	}
+	
+	public JSONObject doBatchUpdate(JSONObject objIn) throws Exception {
+	    JSONObject res = new JSONObject();
+	    JSONArray listIn = objIn.getJSONArray("list");
+	    JSONArray outList = new JSONArray();
+	    res.put("list",outList);
+	    File sourceToClean = null;
+        File destToClean = null;
+        DiskMgr sourceDM = null;
+        DiskMgr destDM = null;
+        int counter = 1;
+	    
+	    for (int i=0; i<listIn.length();i++) {
+	        JSONObject op = listIn.getJSONObject(i);
+	        JSONObject resInts = new JSONObject();
+	        resInts.put("num", i);
+	        resInts.put("src", op);
+	        try {
+    	        String cmd   = op.getString("cmd");
+    	        String disk  = op.getString("disk");
+    	        String path  = op.getString("path");
+    	        String fn    = op.getString("fn");
+    	        DiskMgr dm = DiskMgr.getDiskMgr(disk);
+	            File sourceFolder = dm.getFilePath(path);
+    	        if ("del".equals(cmd)) {
+    	            dm.suppressFile(sourceFolder, fn);
+    	            resInts.put("del", "success");
+    	            sourceToClean = sourceFolder;
+    	            sourceDM = dm;
+    	            System.out.println("BATCH: deleted "+fn);
+    	        }
+    	        else if ("move".equals(cmd)) {
+    	            File sourceFilePath = new File(sourceFolder, fn);
+    	            if (!sourceFilePath.exists()) {
+    	                throw new Exception ("Source file does not exist at "+sourceFilePath);
+    	            }
+    	            String tempFileName = "TMP"+System.currentTimeMillis()+"-"+(counter++)+".jpg";
+                    String disk2  = op.getString("disk2");
+                    DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
+                    
+    	            ImageInfo ii = new ImageInfo(sourceFilePath, dm);
+    	            
+                    String path2  = op.getString("path2");
+                    String fn2    = op.getString("fn2");
+    	            File destFolder = dm.getFilePath(path2);
+    	            File destFilePath = new File(destFolder, fn2);
+                    if (destFilePath.exists()) {
+                        throw new Exception ("Dest file exists before move "+destFilePath);
+                    }
+                    if (!destFolder.equals(sourceFolder)) {
+                        ii.renameFile(tempFileName);
+                        ii.moveImage(dm2, destFolder);
+                    }
+    	            ii.renameFile(fn2);
+                    if (!destFilePath.exists()) {
+                        throw new Exception ("Dest file does NOT exist after move "+destFilePath);
+                    }
+    	            resInts.put("move", "success");
+
+                    sourceToClean = sourceFolder;
+                    sourceDM = dm;
+    	            destToClean = destFolder;
+    	            destDM = dm2;
+                    System.out.println("BATCH: moved "+fn+ " to " + fn2);
+    	        }
+    	        else {
+    	            throw new Exception("Do not understand operation: "+cmd);
+    	        }
+	        }
+	        catch (Exception e) {
+	            resInts.put("error", JSONException.convertToJSON(e, "can't process "+i));
+	            System.out.println("BATCH: error "+e.toString());
+	        }
+	        outList.put(resInts);
+	    }
+	    
+	    if (sourceToClean!=null && sourceDM!=null) {
+	        sourceDM.refreshDiskFolder(sourceToClean);
+	        res.put("clean1", sourceToClean.toString());
+	    }
+        if (destToClean!=null && destDM!=null) {
+            destDM.refreshDiskFolder(destToClean);
+            res.put("clean2", destToClean.toString());
+        }
+	    return res;
 	}
 }

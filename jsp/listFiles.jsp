@@ -124,9 +124,11 @@
         String bestName = nf.getFileName();
         File matchingFile = NewsFile.isInList(fileName, folderChildren);
         long fileSize = 0;
+        long fileDate = 0;
         if (matchingFile!=null){
             bestName = matchingFile.getName();
             fileSize = matchingFile.length();
+            fileDate = matchingFile.lastModified();
         }
         oneFile.put("bestName", bestName);
         String bestPath = localPath;
@@ -143,6 +145,7 @@
         oneFile.put("isComplete", nf.isComplete());
         oneFile.put("isMapped", nf.isMapped());
         oneFile.put("fileSize", fileSize);
+        oneFile.put("fileDate", fileDate);
         oneFile.put("partsAvailable", nf.partsAvailable());
         oneFile.put("partsExpected", nf.partsExpected());
         oneFile.put("sampleArticle", nf.getSampleArticleNum());

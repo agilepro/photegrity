@@ -1,6 +1,7 @@
 <%@page errorPage="error.jsp"
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="bogus.DiskMgr"
+%><%@page import="bogus.FracturedFileName"
 %><%@page import="bogus.ImageInfo"
 %><%@page import="bogus.NewsArticle"
 %><%@page import="bogus.NewsBunch"
@@ -56,24 +57,23 @@
         throw new Exception("The page newsMatch.jsp requires an article number with header that have been downloaded.");
     }
     NewsArticle art = (NewsArticle) newsGroup.getArticleOrNull(artnoInt);
-    NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getHeaderFrom());
-    NewsFile nf = npatt.getFileForArticle(art);
+    NewsBunch nBunch = newsGroup.getBunch(art.getDigest(), art.getHeaderFrom());
+    NewsFile nf = nBunch.getFileForArticle(art);
 
     String url = "newsDetail2.jsp?d="+URLEncoder.encode(art.getDigest(), "UTF-8")+"&f="+URLEncoder.encode(art.getHeaderFrom(), "UTF-8");
     String thisUrl = "newsMatch.jsp?artno="+artnoInt;
 
-    String  fileName = art.fillTemplate(npatt.getTemplate());
+    String  fileName = art.getFileName();
 
+    FracturedFileName ffn = FracturedFileName.parseFile(fileName);
 
-    String[] parts  = NewsBunch.getFileNameParts(fileName);
-
-    String pattern = parts[0];
-    String value = parts[1];
+    String pattern = ffn.prePart;
+    String value = ffn.numPart;
     int valueInt = UtilityMethods.safeConvertInt(value);
     if (value.startsWith("!")) {
         valueInt = -valueInt;
     }
-    String tail = parts[2];
+    String tail = ffn.tailPart;
     String patternLC = pattern.toLowerCase();
 
 
@@ -102,11 +102,7 @@
     String startPart = "search="+URLEncoder.encode(art.getDigest(),"UTF-8");
     List<String> allTags = new Vector<String>();
 
-    %>
-    <html>
-    <body>
-    <%
-    if (nf!=null && npatt.hasTemplate()) {
+    if (nf!=null && nBunch.hasTemplate()) {
         File matchingFile = nf.findMatchingFile();
         if (matchingFile!=null && false) {
             ImageInfo ii = nf.getImageInfo();
@@ -120,7 +116,7 @@
             }
         }
         else {
-            List<PosPat> vpp = npatt.getPosPatList();
+            List<PosPat> vpp = nBunch.getPosPatList();
             for (PosPat pp : vpp) {
                 for (String tag : parseTags(pp.getSymbol())) {
                     if (!allTags.contains(tag)) {
@@ -130,7 +126,7 @@
             }
         }
     }
-    for (String t2 : parseTags(npatt.extraTags)) {
+    for (String t2 : parseTags(nBunch.extraTags)) {
         allTags.add(t2);
     }
     for (String t3 : parseTags(ignoreTags)) {
@@ -160,11 +156,11 @@
 <ul>
 <li> Article number: <%= art.getNumber()  %> </li>
 <li> Date: <%= art.getHeaderDate()  %> </li>
-<li> SampleFileName: <%  HTMLWriter.writeHtml(out, npatt.getSampleFileName() ); %></li>
+<li> SampleFileName: <%  HTMLWriter.writeHtml(out, nBunch.getSampleFileName() ); %></li>
 <li> Subject: <% HTMLWriter.writeHtml(out, art.getHeaderSubject()); %> </li>
 <li> From: <% HTMLWriter.writeHtml(out, art.getHeaderFrom()); %> <% HTMLWriter.writeHtml(out, art.getHeaderDate()); %> </li>
 <li> Digest: <a href="<%=url%>"><% HTMLWriter.writeHtml(out, art.getDigest() ); %></a> </li>
-<li> FolderLoc: <% HTMLWriter.writeHtml(out, npatt.getFolderLoc() ); %> </li>
+<li> FolderLoc: <% HTMLWriter.writeHtml(out, nBunch.getFolderLoc() ); %> </li>
 <li> FileName: <% HTMLWriter.writeHtml(out, fileName); %>
       <% if (art.buffer!=null) { %> <a href="newsPict.jsp?artno=<%=artnoInt%>" target="photo">BODY</a> <% } %></li>
 <li> Pattern:
@@ -220,7 +216,7 @@
 <hr/>
     <ul>
     <%
-    String thisSymbol = npatt.getFolderLoc() + npatt.getSampleFilePattern();
+    String thisSymbol = nBunch.getFolderLoc() + nBunch.getSampleFilePattern();
     for (PosPat pp : PosPat.findAllPattern(pattern)) {
         DiskMgr dm = pp.getDiskMgr();
         String loc = dm.diskName + ":" + pp.getLocalPath();
@@ -250,7 +246,7 @@
 
         <form action="newsMatchAction.jsp">
         <input type="hidden" name="artno" value="<%=artnoInt%>"/>
-        Add Tags: <input type="text" name="extraTags" value="<%HTMLWriter.writeHtml(out, npatt.extraTags);%>" size="50">
+        Add Tags: <input type="text" name="extraTags" value="<%HTMLWriter.writeHtml(out, nBunch.extraTags);%>" size="50">
         <input type="submit" name="cmd" value="Set Tags">
         </form>
 
@@ -301,10 +297,10 @@
                   <input type="hidden" name="artno" value="<%=artnoInt%>"/>
                   <input type="hidden" name="cmd" value="Use This Path"/>
                   <input type="submit" name="p" value="<% HTMLWriter.writeHtml(out, thisImagePath); %>"/>
-                  <% if (thisImagePath.equalsIgnoreCase(npatt.getFolderLoc())) { %>
+                  <% if (thisImagePath.equalsIgnoreCase(nBunch.getFolderLoc())) { %>
                   <font color="red">ALREADY THERE</font>
-                  <% } else if (npatt.hasFolder()) { %>
-                  from <% HTMLWriter.writeHtml(out, npatt.getFolderLoc()); %>
+                  <% } else if (nBunch.hasFolder()) { %>
+                  from <% HTMLWriter.writeHtml(out, nBunch.getFolderLoc()); %>
                   <% } %>
                   </form><br/><%
             }
@@ -435,8 +431,8 @@
 <ul>
 <%
     List<String> allTags2 = new Vector<String>();
-    if (npatt.hasTemplate()) {
-        for (PosPat ppp : npatt.getPosPatList()) {
+    if (nBunch.hasTemplate()) {
+        for (PosPat ppp : nBunch.getPosPatList()) {
             String ppp_patt = ppp.getPattern();
             %><li><% HTMLWriter.writeHtml(out, ppp.getSymbol());
             List<NewsBunch>  matches = NewsGroup.findBunchesWithPattern(ppp_patt);

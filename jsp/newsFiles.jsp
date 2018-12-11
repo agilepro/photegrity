@@ -161,10 +161,11 @@
         $scope.refetchData = function() {
             $scope.opResult = $scope.opResult + " *refresh"+$scope.counter++;
             fileFactory.listFiles( function(data) {
-                console.log("DATA", data);
+                console.log("FILE LIST DATA", data);
                 $scope.fileSet = data;
             });
             fileFactory.getBunch( function(data) {
+                console.log("NEW DATA", data);
                 $scope.bunch = data;
                 $scope.divideStates();
             });
@@ -304,6 +305,9 @@
             address = address + "&folder="+encodeURIComponent($scope.folder);
             address = address + "&go=<%=URLEncoder.encode(thisPage, "UTF-8")%>";
             address = address + "&template="+encodeURIComponent($scope.template);
+            if ($scope.bunch.plusOne) {
+                address = address + "&plusOne=true";
+            }
             window.location.assign(address);
 
             /*
@@ -371,7 +375,7 @@
     </li>
     <li>Template: <input type="text" ng-model="template" size="50"/>
 
-                <input type="checkbox" ng-model="plusOneNumber"> Plus One
+                <input type="checkbox" ng-model="bunch.plusOne"> Plus One
                 <button ng-click="randomName()">Randomize</button>
                 <br/>
         <button ng-click="setFilePath('SetPattern')">SetPattern</button>

@@ -290,7 +290,7 @@ public class ImageInfo
         tail = null;
     }
 
-    private String initializeInternals(String relPath) throws Exception
+    private void initializeInternals(String relPath) throws Exception
     {
         if (tail != null) {
             throw new Exception("Hmmm, initializeInternals method is being called twice?");
@@ -304,37 +304,29 @@ public class ImageInfo
                 throw new Exception("Problem with initialization, relPath is null");
             }
 
-            String[] parts = getFileNameParts(fileName);
-
-            String tmpPattern = parts[0];
-            int exclaimPos = tmpPattern.indexOf('!');  //remove the bang if there is one
-            int coverPos = fileName.indexOf(".cover.");  //see if cover
-            int flogoPos = fileName.indexOf(".flogo.");  //see if cover
-            int samplePos = fileName.indexOf(".sample.");  //see if cover
+            FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+            isIndex = ffn.isNegative();
+            
+            //this converts a file name from this form
+            //     !myIndex001.jpg
+            //to this form
+            //     myIndex!001.jpg
+            //if needed.  not sure this is really needed.
+            int exclaimPos = ffn.prePart.indexOf('!');  //remove the bang if there is one
             if (exclaimPos>=0) {
+                System.out.println("CONVERTING file name bang: "+fileName);
                 isIndex = true;
-                tmpPattern = tmpPattern.substring(0,exclaimPos) + tmpPattern.substring(exclaimPos+1);
+                ffn.prePart = ffn.prePart.substring(0,exclaimPos) + ffn.prePart.substring(exclaimPos+1);
+                if (!ffn.numPart.startsWith("!")) {
+                    ffn.numPart = "!"+ffn.numPart;
+                }
             }
-            pp = PosPat.findOrCreate(diskMgr, relPath, tmpPattern);
-
-            value = UtilityMethods.safeConvertInt(parts[1]);
-            if (coverPos>0) {
-                value = -100;
-            }
-            else if (flogoPos>0) {
-                value = -200;
-            }
-            else if (samplePos>0) {
-                value = -300;
-            }
-            else if (isIndex) {
-                value = -value;
-            }
-
-            tail = parts[2];
+            
+            pp = PosPat.findOrCreate(diskMgr, relPath, ffn.prePart);
+            value = ffn.getSequenceNumber();
+            tail = ffn.tailPart;
 
             determineTags();
-            return tmpPattern;
         }
         catch (Exception e) {
             throw new Exception2("Unable to split into patterns ("+relPath+")("+fileName+")", e);
@@ -395,90 +387,7 @@ public class ImageInfo
         }
     }
 
-    /**
-     * Suggest using getFileNameParts unless you really really only
-     * need the pattern part.
-     */
-    public static String patternFromFileName(String fileName) throws Exception
-    {
-        String[] parts = getFileNameParts(fileName);
-        return parts[0];
-    }
 
-    /**
-     * Given a file name, this routine will break it into three parts:
-     * (1) the pattern (possibly including exclamation mark)
-     * (2) the last numeric value, no more than 3 digits,
-     *     and ignoring a hyphen and single digit number that some sites add
-     *     when a image is duplicated.
-     * (3) the tail, everything after the numeric value (including the hyphen
-     *     digit if there was one.
-     *
-     * You can ALWAYS reassemble the original file name by concatenating
-     * the three strings back together again.
-     */
-    public static String[] getFileNameParts(String fileName) {
-
-        String[] parts = new String[3];
-
-        // Now get the pattern from the file name
-        // find the last numeral
-        int pos = fileName.length() - 1;
-        char ch = fileName.charAt(pos);
-
-        //scan from the end of the fileName and look for last numeral
-        while (pos > 0 && (ch < '0' || ch > '9')) {
-            pos--;
-            ch = fileName.charAt(pos);
-        }
-
-        //special case to handle when there are NO numerals in the file
-        //name at all
-        if (pos == 0) {
-            parts[1] = "";  //numeric is blank
-            int dotPos = fileName.indexOf(".");
-            if (dotPos<0) {
-                //here is the pathological case where there is no dot either
-                parts[0] = fileName;
-                parts[2] = "";  //tail is blank
-            }
-            else {
-                parts[0] = fileName.substring(0, dotPos);
-                parts[2] = fileName.substring(dotPos);
-            }
-            return parts;
-        }
-
-
-        // now, attempt to recognize and ignore file names with a hyphen-numeral
-        // at the end. For example, best6789.jpg equals best6789-1.jpg
-        if (pos > 3 && fileName.charAt(pos - 1) == '-') {
-            char tch = fileName.charAt(pos - 2);
-            if (tch >= '0' && tch <= '9') {
-                pos = pos - 2;
-                ch = tch;
-            }
-        }
-
-        int tailBegin = pos + 1;
-
-        int digitLimit = 2; // produces three digits max
-        while (digitLimit > 0 && pos > 0 && ch >= '0' && ch <= '9') {
-            pos--;
-            digitLimit--;
-            ch = fileName.charAt(pos);
-        }
-
-        // special case when there were fewer than 3 digits, have to add one back
-        if (ch < '0' || ch > '9') {
-            pos++;
-        }
-
-        parts[0] = fileName.substring(0, pos);
-        parts[1] = fileName.substring(pos, tailBegin);
-        parts[2] = fileName.substring(tailBegin);
-        return parts;
-    }
 
     public Vector<String> getTagNames()
         throws Exception
@@ -624,10 +533,12 @@ public class ImageInfo
         imagesByPath = null;
         imagesBySize = null;
         imagesByNum  = null;
-        if (imagesByName == null) {
-            imagesByName = new Vector<ImageInfo>();
+        Vector<ImageInfo> newVec = new Vector<ImageInfo>();
+        if (imagesByName != null) {
+            newVec.addAll(imagesByName);
         }
-        imagesByName.addAll(imagesForDisk);
+        newVec.addAll(imagesForDisk);
+        imagesByName = newVec;
         unsorted = true;
     }
 
@@ -1742,7 +1653,7 @@ public class ImageInfo
         wholeDoc.put("fileName", fileName);
         wholeDoc.put("value", value);
         wholeDoc.put("fileSize", fileSize);
-        
+
         JSONArray tags = new JSONArray();
         for (TagInfo ti : tagVec) {
             tags.put(ti.tagName);
@@ -1755,7 +1666,7 @@ public class ImageInfo
         JSONObject wholeDoc = getJSON();
         URL url = new URL("http://bobcat:9200/photos/images/");
         JSONObject response = RemoteJSON.postToRemote(url, wholeDoc);
-        
+
         if (response.has("error")) {
             out.write("ERROR: ");
             response.write(out, 2, 2);

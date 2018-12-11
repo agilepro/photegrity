@@ -2,6 +2,7 @@
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="bogus.DiskMgr"
 %><%@page import="bogus.Exception2"
+%><%@page import="bogus.FracturedFileName"
 %><%@page import="bogus.HashCounter"
 %><%@page import="bogus.PatternInfo"
 %><%@page import="bogus.TagInfo"
@@ -135,8 +136,8 @@
     for (File child : imageFileList)
     {
         String fileName = child.getName();
-        String[] fileNameParts = NewsBunch.getFileNameParts(fileName);
-        int value = UtilityMethods.safeConvertInt(fileNameParts[1]);
+        FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+        int value = UtilityMethods.safeConvertInt(ffn.numPart);
         totalCount++;
 
         //if you have not reached the start image, then skip
@@ -302,10 +303,10 @@
             totalCount++;
             String location = "";
             String fileName = child.getName();
-            String[] fileNameParts = NewsBunch.getFileNameParts(fileName);
-            String pattern = fileNameParts[0];
-            String value = fileNameParts[1];
-            String tail = fileNameParts[2];
+            FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+            String pattern = ffn.prePart;
+            String value = ffn.numPart;
+            String tail = ffn.tailPart;
 
             String encodedName = URLEncoder.encode(child.getName(),"UTF8");
             String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;

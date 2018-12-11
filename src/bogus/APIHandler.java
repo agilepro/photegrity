@@ -112,10 +112,10 @@ public class APIHandler {
 			if (mainGroup.startsWith("b=")) {
 				return handleBunches(mainGroup.substring(2));
 			}
-			throw new Exception("Don't understand GET request for "+mainGroup);
+			throw new JSONException("Don't understand GET request for %s", mainGroup);
 		}
 		catch (Exception e) {
-			throw new Exception("Unable to handle request for "+req.getRequestURL(), e);
+			throw new JSONException("Unable to handle request for %s", e, req.getRequestURL().toString());
 		}
 	}
 	
@@ -151,11 +151,11 @@ public class APIHandler {
 
 		//some internal consistency checks
 		if (!requestURI.startsWith(contextPath)) {
-			throw new Exception("For some reason the requestURI ("+requestURI+") does not start with the contextPath ("+contextPath+")");
+			throw new JSONException("For some reason the requestURI (%s) does not start with the contextPath (%s)",requestURI,contextPath);
 		}
 		int pos = requestURI.indexOf(servletPath);
 		if (pos!=contextPath.length()) {
-			throw new Exception("For some reason the servletPath ("+servletPath+") does not appear in the requestURI ("+requestURI+") in the right place");
+			throw new JSONException("For some reason the servletPath (%s) does not appear in the requestURI (%s) in the right place", servletPath, requestURI);
 		}
 		String pathAfterContext = requestURI.substring(contextPath.length() + servletPath.length() + 1);
 		
@@ -297,7 +297,7 @@ public class APIHandler {
 	    NewsBunch bunch = newsGroup.findBunchByKey(Long.parseLong(bunchKey));
 	    
 	    if (bunch==null) {
-	    	throw new Exception("Unable to find a news bunch with the key: "+bunchKey);
+	    	throw new JSONException("Unable to find a news bunch with the key: %s",bunchKey);
 	    }
 	    
 	    if (isPost) {
@@ -350,7 +350,7 @@ public class APIHandler {
     	        else if ("move".equals(cmd)) {
     	            File sourceFilePath = new File(sourceFolder, fn);
     	            if (!sourceFilePath.exists()) {
-    	                throw new Exception ("Source file does not exist at "+sourceFilePath);
+    	                throw new JSONException ("Source file does not exist at %s", sourceFilePath.toString());
     	            }
     	            String tempFileName = "TMP"+System.currentTimeMillis()+"-"+(counter++)+".jpg";
                     String disk2  = op.getString("disk2");
@@ -363,7 +363,7 @@ public class APIHandler {
     	            File destFolder = dm.getFilePath(path2);
     	            File destFilePath = new File(destFolder, fn2);
                     if (destFilePath.exists()) {
-                        throw new Exception ("Dest file exists before move "+destFilePath);
+                        throw new JSONException ("Dest file exists before move %s",destFilePath.toString());
                     }
                     if (!destFolder.equals(sourceFolder)) {
                         ii.renameFile(tempFileName);
@@ -371,7 +371,7 @@ public class APIHandler {
                     }
     	            ii.renameFile(fn2);
                     if (!destFilePath.exists()) {
-                        throw new Exception ("Dest file does NOT exist after move "+destFilePath);
+                        throw new JSONException ("Dest file does NOT exist after move %s", destFilePath.toString());
                     }
     	            resInts.put("move", "success");
 
@@ -382,7 +382,7 @@ public class APIHandler {
                     System.out.println("BATCH: moved "+fn+ " to " + fn2);
     	        }
     	        else {
-    	            throw new Exception("Do not understand operation: "+cmd);
+    	            throw new JSONException("Do not understand operation: %s",cmd);
     	        }
 	        }
 	        catch (Exception e) {

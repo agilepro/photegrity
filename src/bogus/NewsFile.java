@@ -61,7 +61,7 @@ public class NewsFile {
      * number of that file
      */
     public int getSequenceNumber() {
-        int num = fracName.getNumValue();
+        int num = fracName.getAbsValue();
         if (num == 0) {
             if (fracName.tailPart.contains("cover")) {
                 return -100;
@@ -74,7 +74,7 @@ public class NewsFile {
             }
             return 0;
         }
-        if (fracName.tailPart.endsWith("!")) {
+        if (fracName.isNegative()) {
             return 0 - num;
         }
         return num;
@@ -336,29 +336,15 @@ public class NewsFile {
     	return parts;
     }
     
+   
     
-
-
-    public void renameFileDeluxe(File srcFolder, String srcTemplate, boolean srcPlus,
-                File destFolder, String destTemplate, boolean destPlus) throws Exception {
-
-        if (parts.size() == 0) {
-            //if for some reason there are no articles then we can't get the fingerprint
-            return;
-        }
-
-        FracturedFileName sourceParts = FracturedFileName.parseTemplate(srcTemplate);
-        FracturedFileName destParts = FracturedFileName.parseTemplate(destTemplate);
-        renameFracDeluxe(srcFolder, sourceParts, srcPlus, destFolder, destParts, destPlus);
-    }
-    
-    public void renameFracDeluxe(File srcFolder, FracturedFileName sourceParts, boolean srcPlus,
-                File destFolder, FracturedFileName destParts, boolean destPlus) throws Exception {
+    public void renameFracDeluxe(File srcFolder, FracturedFileName sourceParts, int srcBias,
+                File destFolder, FracturedFileName destParts, int destBias) throws Exception {
         System.out.println("renameFracDeluxe for "+srcFolder+destParts.getBasicName());
         long startTime = System.currentTimeMillis();
         NewsArticle art = parts.get(0);
-        FracturedFileName sourceFilled = art.fillFracturedTemplate(sourceParts);
-        FracturedFileName destFilled = art.fillFracturedTemplate(destParts);
+        FracturedFileName sourceFilled = art.fillFracturedTemplate(sourceParts, srcBias);
+        FracturedFileName destFilled = art.fillFracturedTemplate(destParts, destBias);
 
         String srcExistingName = sourceFilled.existsAs(srcFolder);
         if (srcExistingName==null) {
@@ -419,8 +405,8 @@ public class NewsFile {
             relPath = relPath + "/";
         }
         String patternFromFile = fracName.prePart;
-        int val = fracName.getNumValue();
-        if(fracName.numPart.startsWith("!")) {
+        int val = fracName.getAbsValue();
+        if(fracName.isNegative()) {
             //the number comes with the exclamation point, instead of a negative sign
             val = -val;
         }

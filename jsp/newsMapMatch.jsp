@@ -1,7 +1,9 @@
 <%@page errorPage="error.jsp"
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="bogus.DiskMgr"
+%><%@page import="bogus.FracturedFileName"
 %><%@page import="bogus.ImageInfo"
+%><%@page import="bogus.LocalMapping"
 %><%@page import="bogus.NewsArticle"
 %><%@page import="bogus.NewsBunch"
 %><%@page import="bogus.NewsFile"
@@ -9,9 +11,10 @@
 %><%@page import="bogus.NewsSession"
 %><%@page import="bogus.PatternInfo"
 %><%@page import="bogus.PosPat"
-%><%@page import="bogus.LocalMapping"
 %><%@page import="bogus.UUDecoderStream"
 %><%@page import="bogus.UtilityMethods"
+%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.MemFile"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileOutputStream"
 %><%@page import="java.io.InputStream"
@@ -30,8 +33,6 @@
 %><%@page import="org.apache.commons.net.nntp.ArticlePointer"
 %><%@page import="org.apache.commons.net.nntp.NNTPClient"
 %><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
-%><%@page import="com.purplehillsbooks.streams.MemFile"
-%><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();
@@ -68,15 +69,15 @@
     String  fileName = art.fillTemplate(npatt.getTemplate());
 
 
-    String[] parts  = NewsBunch.getFileNameParts(fileName);
+    FracturedFileName ffn = FracturedFileName.parseFile(fileName);
 
-    String pattern = parts[0];
-    String value = parts[1];
+    String pattern = ffn.prePart;
+    String value = numPart;
     int valueInt = UtilityMethods.safeConvertInt(value);
     if (value.startsWith("!")) {
         valueInt = -valueInt;
     }
-    String tail = parts[2];
+    String tail = tailPart;
     String patternLC = pattern.toLowerCase();
 
 

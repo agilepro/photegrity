@@ -2,6 +2,29 @@ package bogus;
 
 import java.io.File;
 
+
+/**
+ * breaks a file name into parts
+ * 
+ *  AA4XXXX    007   .jpg
+ *  -------    ---   ----
+ *  
+ *  prePart,  numPart, tailPart
+ *  
+ *  The numpart is the LAST number in the file name.  
+ *  This number can be normalized to be three digits
+ *  so the number is from 0 to 999
+ *  
+ *  For negative numbers, us an exclamation point:
+ *  
+ *  JerseyShore   !03  .jpg
+ *  -----------   ---  ----
+ *  
+ *  That would be the value for negative 3, we can't use
+ *  hyphen because hyphens are used often in file names
+ *  just before numbers.  The bang indicates negative.
+ *  
+ */
 public class FracturedFileName {
     
     public String prePart = nullString;
@@ -19,7 +42,7 @@ public class FracturedFileName {
         }
         // Now get the pattern from the file name
         // find the last numeral
-        int pos = fileName.length() - 1;
+        int pos = fileName.length() - 4;
         char ch = fileName.charAt(pos);
         while (pos > 0 && (ch < '0' || ch > '9')) {
             pos--;
@@ -105,19 +128,27 @@ public class FracturedFileName {
         return ret;
     }
     
-    public int getNumValue() {
+    public int getAbsValue() {
         return UtilityMethods.safeConvertInt(numPart);
+    }
+    public boolean isNegative() {
+        return numPart.startsWith("!");
     }
     
     public String getBasicName() {
         return prePart + numPart + tailPart;
     }
     public String getRegularName() {
-        int val = getNumValue();
         if (numPart.length()==0) {
             return prePart + tailPart;
         }
-        return String.format("%s%03d%s", prePart, val, tailPart);
+        int val = getAbsValue();
+        if (isNegative()) {
+            return String.format("%s!%02d%s", prePart, val, tailPart);
+        }
+        else {
+            return String.format("%s%03d%s", prePart, val, tailPart);
+        }
     }
     
     public boolean isEmpty() {
@@ -164,7 +195,7 @@ public class FracturedFileName {
         if (trialFile.exists()) {
             return trialName;
         }
-        int val = getNumValue();
+        int val = getAbsValue();
         if (val>=100) {
             return null;
         }
@@ -183,4 +214,46 @@ public class FracturedFileName {
         }
         return null;
     }
+    
+    public void biasTheNumber(int bias) {
+        if (bias==0) {
+            return;
+        }
+        int val = getAbsValue();
+        if (isNegative()) {
+            numPart = String.format("!%02d", val+bias);
+        }
+        else {
+            numPart = String.format("%03d", val+bias);
+        }
+    }
+    
+    public String toString() {
+        return prePart + numPart + tailPart;
+    }
+    
+    /**
+     * If this is a file in a set of files, this will return the index
+     * number of that file
+     */
+    public int getSequenceNumber() {
+        int num = getAbsValue();
+        if (num == 0) {
+            if (tailPart.contains("cover")) {
+                return -100;
+            }
+            if (tailPart.contains("flogo")) {
+                return -200;
+            }
+            if (tailPart.contains("sample")) {
+                return -300;
+            }
+            return 0;
+        }
+        if (isNegative()) {
+            return 0 - num;
+        }
+        return num;
+    }
+    
 }

@@ -568,7 +568,8 @@ public class PosPat {
             File folder = input;
             String pattern = "";
             if (!input.isDirectory()) {
-                pattern = ImageInfo.patternFromFileName(input.getName());
+                FracturedFileName ffn = FracturedFileName.parseFile(input.getName());
+                pattern = ffn.prePart;
                 folder = input.getParentFile();
             }
             DiskMgr dm = DiskMgr.findDiskMgrFromPath(folder);

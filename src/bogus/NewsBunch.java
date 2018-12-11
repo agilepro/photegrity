@@ -52,7 +52,6 @@ public class NewsBunch {
     public int denominator;
     public int numerator = -1;
     public boolean hasMulti = false;
-    //private String fileTemplate = "";
     private FracturedFileName fracTemplate;
     
     private DiskMgr disk;
@@ -702,13 +701,8 @@ public class NewsBunch {
         int countDown = 0;
         Hashtable<String, NewsFile> files = new Hashtable<String, NewsFile>();
         for (NewsArticle art : getArticles()) {
-            String fileName = art.getFileName();
-            if (fileName.length() == 0) {
-                throw new Exception("Article " + art.articleNo
-                        + " has a null filename, but there is a fileTemplate on the pattern for "+digest);
-            }
-            FracturedFileName ffn = FracturedFileName.parseFile(fileName);
-            
+            FracturedFileName ffn = art.fillFracturedTemplate(fracTemplate, getBias());
+            String fileName = ffn.toString();
             NewsFile file = files.get(fileName);
             if (file == null) {
                 file = new NewsFile(fileName, this);
@@ -816,6 +810,8 @@ public class NewsBunch {
     public void changeLocAndTemplate(String newFolder, String newTemplate, boolean renameFiles,
             Writer out, boolean newPlusOne) throws Exception {
 
+        int newBias = (newPlusOne?1:0);
+        int oldBias = (plusOneNumber?1:0);
         long startTime = System.currentTimeMillis();
         DiskMgr oldDM         = disk;
         File    oldFolderPath = getFolderPath();
@@ -837,7 +833,7 @@ public class NewsBunch {
         FracturedFileName newFracTemplate = FracturedFileName.parseTemplate(newTemplate);
 
         if (dm2 == disk && destPath.equals(pathInDisk) &&
-                newFracTemplate.equals(fracTemplate) && newPlusOne == plusOneNumber) {
+                newFracTemplate.equals(fracTemplate) && newBias == oldBias) {
             // skip this trouble if setting to the same disk/path/name/plus it already at.
             return;
         }
@@ -866,8 +862,8 @@ public class NewsBunch {
                         out.write("</li>");
                         out.flush();
                     }
-                    nf.renameFracDeluxe(oldFolderPath, oldTemplate, plusOneNumber, oldFolderPath,
-                            nonClashTemplate, plusOneNumber);
+                    nf.renameFracDeluxe(oldFolderPath, oldTemplate, oldBias, oldFolderPath,
+                            nonClashTemplate, oldBias);
                 }
                 fracTemplate = nonClashTemplate;
                 oldTemplate = nonClashTemplate;
@@ -883,8 +879,8 @@ public class NewsBunch {
                     out.write("</li>");
                     out.flush();
                 }
-                nf.renameFracDeluxe(oldFolderPath, oldTemplate, plusOneNumber, newFolderPath,
-                        newFracTemplate, newPlusOne);
+                nf.renameFracDeluxe(oldFolderPath, oldTemplate, oldBias, newFolderPath,
+                        newFracTemplate, newBias);
             }
             samplePattern = null;
         }
@@ -1252,87 +1248,11 @@ public class NewsBunch {
         return ret;
     }
 
-    public static String getFilePattern(String fileName) {
+    private static String getFilePattern(String fileName) {
         FracturedFileName ffn = FracturedFileName.parseFile(fileName);
         return ffn.prePart;
     }
 
-    public static String[] getFileNameParts(String fileName) {
-
-        String[] parts = new String[3];
-
-        //if a null string was passed in, remain well behaved
-        if (fileName==null || fileName.length()==0) {
-            parts[0] = "";
-            parts[1] = "";
-            parts[2] = "";
-            return parts;
-        }
-        // Now get the pattern from the file name
-        // find the last numeral
-        int pos = fileName.length() - 1;
-        char ch = fileName.charAt(pos);
-        while (pos > 0 && (ch < '0' || ch > '9')) {
-            pos--;
-            ch = fileName.charAt(pos);
-        }
-
-        //handle the case where no numeral was found at all, we just
-        //split the file extension as the tail, and everything else pattern
-        if (pos==0) {
-            parts[1] = "";
-            pos = fileName.lastIndexOf(".");
-            if (pos>=0) {
-                parts[0] = fileName.substring(0,pos);
-                parts[2] = fileName.substring(pos);
-                return parts;
-            }
-
-            //handle case where there is no period at all
-            parts[0] = fileName;
-            parts[2] = "";
-            return parts;
-        }
-
-        // now, attempt to recognize and ignore file names with a hyphen-numeral
-        // at the end. For example, best6789.jpg equals best6789-1.jpg
-        if (pos > 3) {
-            char tch = fileName.charAt(pos - 2);
-            if (fileName.charAt(pos - 1) == '-' && (tch >= '0' && tch <= '9')) {
-                pos = pos - 2;
-                ch = tch;
-            }
-        }
-
-        int tailBegin = pos + 1;
-
-        int digitLimit = 2; // produces three digits max
-        while (digitLimit > 0 && pos > 0 && ch >= '0' && ch <= '9') {
-            pos--;
-            digitLimit--;
-            ch = fileName.charAt(pos);
-        }
-
-        // special case
-        if (ch < '0' || ch > '9') {
-            pos++;
-        }
-
-        // trim the exclamation mark if this is a negative, note that this
-        // works only if the exclamation is just before the number.
-        // Exclamation in other positions will lead to a separate, unique pattern
-        if (pos > 0) {
-            ch = fileName.charAt(pos - 1);
-            if ('!' == ch) {
-                pos--;
-            }
-        }
-
-        parts[0] = fileName.substring(0, pos);
-        parts[1] = fileName.substring(pos, tailBegin);
-        parts[2] = fileName.substring(tailBegin);
-        return parts;
-    }
 
     public void touch() {
         lastTouch = System.currentTimeMillis();
@@ -1460,6 +1380,12 @@ public class NewsBunch {
         }
         rec.put("template", getTemplate());
         rec.put("plusOne", plusOneNumber);
+        if (plusOneNumber) {
+            rec.put("bias", 1);
+        }
+        else {
+            rec.put("bias", 0);
+        }
         rec.put("isYEnc", isYEnc);
         rec.put("shrinkFiles", shrinkFiles);
         rec.put("seekExtent", seekExtent);
@@ -1497,5 +1423,12 @@ public class NewsBunch {
     	if (objIn.has("state")) {
 	    	changeState(objIn.getInt("state"));
     	}
+    }
+    
+    public int getBias() {
+        if (plusOneNumber) {
+            return 1;
+        }
+        return 0;
     }
 }

@@ -115,7 +115,7 @@ public class NewsArticle {
         }
         File folder = nBunch.getFolderPath();
         FracturedFileName template = FracturedFileName.parseTemplate(nBunch.getTemplate());
-        FracturedFileName filePath = this.fillFracturedTemplate(template);
+        FracturedFileName filePath = this.fillFracturedTemplate(template, nBunch.getBias());
         String foundName = filePath.existsAs(folder);
         if (foundName!=null) {
             return new File(folder, foundName);
@@ -134,7 +134,7 @@ public class NewsArticle {
         }
         File folder = nBunch.getFolderPath();
         FracturedFileName template = FracturedFileName.parseTemplate(nBunch.getTemplate());
-        FracturedFileName realName = this.fillFracturedTemplate(template);
+        FracturedFileName realName = this.fillFracturedTemplate(template, nBunch.getBias());
         return (realName.existsAs(folder)!=null);
     }
 
@@ -371,7 +371,7 @@ public class NewsArticle {
         }
         return fillTemplatePlus(template, special);
     }
-    public String fillTemplatePlus(String template, int specialIndex) throws Exception {
+    private String fillTemplatePlus(String template, int specialIndex) throws Exception {
         if (fPrint == null) {
             getDigest();
         }
@@ -430,7 +430,10 @@ public class NewsArticle {
         }
         return res.toString();
     }
-    public FracturedFileName fillFracturedTemplate(FracturedFileName template) throws Exception {
+    public FracturedFileName fillFracturedTemplate(FracturedFileName template, int bias) throws Exception {
+        if (template==null) {
+            throw new Exception("ProgramLogicError: fillFracturedTemplate called with a null template");
+        }
         FracturedFileName filled = new FracturedFileName();
         filled.prePart = fillTemplate(template.prePart);
         filled.tailPart = fillTemplate(template.tailPart);
@@ -441,6 +444,7 @@ public class NewsArticle {
         else {
             filled.numPart = "";
         }
+        filled.biasTheNumber(bias);
         return filled;
     }
     
@@ -466,14 +470,15 @@ public class NewsArticle {
             throw new Exception(
                     "Cant calculate the file name because pattern object has no file template");
         }
-        return fillTemplate(nBunch.getTemplate());
+        return getFileName();
     }
 
     public String getFileName() throws Exception {
         if (nBunch == null || !nBunch.hasTemplate()) {
             return "";
         }
-        return fillTemplate(nBunch.getTemplate());
+        //return fillTemplate(nBunch.getTemplate());
+        return fillFracturedTemplate(nBunch.getFracTemplate(), nBunch.getBias()).toString();
     }
 
     public String getParam(int index) throws Exception {

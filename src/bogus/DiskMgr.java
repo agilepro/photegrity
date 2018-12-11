@@ -18,6 +18,8 @@ import java.util.Vector;
 
 import javax.servlet.ServletContext;
 
+import com.purplehillsbooks.json.JSONException;
+
 public class DiskMgr {
     public String diskName;
     public String diskNameLowerCase;
@@ -60,7 +62,7 @@ public class DiskMgr {
 
         File f = new File(configPath);
         if (!f.exists()) {
-            throw new Exception("Did not find file '"+f.getAbsolutePath()+"'");
+            throw new JSONException("Did not find file '%s'", f.getAbsolutePath());
         }
         FileInputStream fis = new FileInputStream(f);
         Properties props = new Properties();
@@ -102,8 +104,7 @@ public class DiskMgr {
             diskNameLowerCase = name.toLowerCase();
             mainFolder = new File(archiveBase, diskNameLowerCase);
             if (!mainFolder.exists()) {
-                throw new Exception("Attempt to create a DiskMgr on path that does not exist: ("
-                    +mainFolder.toString()+")");
+                throw new JSONException("Attempt to create a DiskMgr on path that does not exist: (%s)",mainFolder.toString());
             }
 
             diskName = name;
@@ -331,7 +332,7 @@ public class DiskMgr {
                 File mainDir = new File(archiveBase);
                 File[] children = mainDir.listFiles();
                 if (children==null) {
-                    throw new Exception("there is apparently no folder named: "+mainDir);
+                    throw new JSONException("there is apparently no folder named: %s", mainDir.toString());
                 }
 
                 for (File cfile : children) {
@@ -360,7 +361,7 @@ public class DiskMgr {
 
         }
         catch (Exception e) {
-            throw new Exception2("Failure getting the Disk List within archive: " + archiveBase, e);
+            throw new JSONException("Failure getting the Disk List within archive:%s", e, archiveBase);
         }
 
         diskList = tempTable;
@@ -407,7 +408,7 @@ public class DiskMgr {
             }
         }
         catch (Exception e) {
-            throw new Exception2("Unable to scan disk (" + diskName + " @ " + scanFile + ")", e);
+            throw new JSONException("Unable to scan disk (%s @ %s)", e, diskName, scanFile.toString());
         }
     }
 

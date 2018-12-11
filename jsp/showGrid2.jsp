@@ -73,7 +73,9 @@
         $scope.query = "<%JavaScriptWriter.encode(out,query);%>";
         $scope.dataSet = <% grid.write(out, 2, 2); %>;
         $scope.dataSet.cols.sort();
-        $scope.dataSet.rows.sort();
+        $scope.dataSet.rows.sort(function(a,b){
+            return Number(a)-Number(b);
+        });
         $scope.ySize = 6;
         $scope.xSize = 6;
         $scope.pinCols = [];
@@ -316,22 +318,31 @@
    </td></tr>
 </table>
 <div>
-    <button ng-click="setRow(currentRow+1)">Down</button>
-    <button ng-click="setRow(currentRow-1)">Up</button>
+    <table><tr>
+    <td>
     <button ng-click="setCol(currentCol-1)">Left</button>
+    </td><td>
+    <button ng-click="setRow(currentRow-1)">Up</button><br/>
+    <button ng-click="setRow(currentRow+1)">Down</button>
+    </td><td>
     <button ng-click="setCol(currentCol+1)">Right</button>
+    </td><td>
     <button ng-click="togglePin()">
         <span class="glyphicon glyphicon-check" ng-show="onlyPinned"></span>           
         <span class="glyphicon glyphicon-unchecked" ng-hide="onlyPinned"></span>           
         Only Pinned
-    </button>
+    </button><br/>
     <button ng-click="toggleSingleRow()">
         <span class="glyphicon glyphicon-check" ng-show="singleRow"></span>           
         <span class="glyphicon glyphicon-unchecked" ng-hide="singleRow"></span>           
         Single Row
     </button>
+    </td>
+    <td>
     <button ng-show="onlyPinned && pinCols.length==2" ng-click="mergeLeft()">Merge Left</button>
     <button ng-show="onlyPinned && pinCols.length==2" ng-click="mergeRight()">Merge Right</button>
+    </td>
+    </tr></table>
     
 </div>
 <div ng-hide="singleRow">

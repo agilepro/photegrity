@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 
 public class GridData {
@@ -155,11 +156,11 @@ public class GridData {
         }
         int rowNum = getRowNumberForValue(value);
         if (rowNum < 0) {
-            throw new Exception("Was not able to find a row for value = " + value);
+            throw new JSONException("Was not able to find a row for value = {0}", value);
         }
         if (rowNum >= grid.size()) {
-            throw new Exception("Internal consistency error, got row '" + rowNum + "' for value '"
-                    + value + "' but grid has only '" + grid.size() + "' rows");
+            throw new JSONException("Internal consistency error, got row '{0}' for value '{1}' but grid has only '{2}' rows",
+                    rowNum, value, grid.size());
         }
         return grid.elementAt(rowNum);
     }

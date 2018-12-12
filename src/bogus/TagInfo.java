@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 public class TagInfo {
@@ -47,7 +48,7 @@ public class TagInfo {
             return vSubGroups;
         }
         catch (Exception e) {
-            throw new Exception2("Error in getAllGroupsStartingWith(" + start + ")", e);
+            throw new JSONException("Error in getAllGroupsStartingWith({0})", e, start);
         }
     }
 

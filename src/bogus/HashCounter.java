@@ -1,15 +1,16 @@
 package bogus;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.LineNumberReader;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.LineNumberReader;
-import bogus.Exception2;
+
+import com.purplehillsbooks.json.JSONException;
 
 @SuppressWarnings("serial")
 public class HashCounter extends Hashtable<String,Integer>
@@ -34,7 +35,7 @@ public class HashCounter extends Hashtable<String,Integer>
 
             return sortedKeys.elements();
         } catch (Exception e) {
-            throw new Exception2("Failure creating a sorted Enumeration object", e);
+            throw new JSONException("Failure creating a sorted Enumeration object", e);
         }
     }
 
@@ -60,7 +61,7 @@ public class HashCounter extends Hashtable<String,Integer>
             return sortedKeys;
         }
         catch (Exception e) {
-            throw new Exception2("Failure creating a sorted Enumeration object", e);
+            throw new JSONException("Failure creating a sorted Enumeration object", e);
         }
     }
 
@@ -70,8 +71,7 @@ public class HashCounter extends Hashtable<String,Integer>
         if (containsKey(val)) {
             Integer i = get(val);
             if (i == null) {
-                throw new Exception("Strange, map should contain an element for (" + val
-                        + ") but got a null back.");
+                throw new JSONException("Strange, map should contain an element for ({0}) but got a null back.", val);
             }
             int ival = i.intValue();
             if (ival <= 1) {
@@ -125,7 +125,7 @@ public class HashCounter extends Hashtable<String,Integer>
             fw.close();
         }
         catch (Exception e) {
-            throw new Exception2("Unable to write a HashCounter to file (" + summaryFile + "). ", e);
+            throw new JSONException("Unable to write a HashCounter to file ({0})",e,summaryFile);
         }
     }
 
@@ -159,7 +159,7 @@ public class HashCounter extends Hashtable<String,Integer>
             fr.close();
         }
         catch (Exception e) {
-            throw new Exception2("Unable to read a HashCounter from file (" + summaryFile + "). ", e);
+            throw new JSONException("Unable to read a HashCounter from file ({0})",e,summaryFile);
         }
     }
 

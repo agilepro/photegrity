@@ -10,6 +10,8 @@ import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.purplehillsbooks.json.JSONException;
+
 public class UtilityMethods {
 
 	public static String subString(String s, int pos, int len) throws Exception {
@@ -45,7 +47,7 @@ public class UtilityMethods {
 			return result;
 		}
 		catch (Exception e) {
-			throw new Exception2("Error in splitOnDelimiter", e);
+			throw new JSONException("Error in splitOnDelimiter", e);
 		}
 	}
 

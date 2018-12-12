@@ -94,7 +94,7 @@ public class APIHandler {
 		        is.close();
 		    }
 			if (path.length < 1) {
-				throw new Exception("can not understand that request ... path not long enough.");
+				throw new JSONException("can not understand that request ... path not long enough.");
 			}
 			String mainGroup = path[0];
 			
@@ -112,10 +112,10 @@ public class APIHandler {
 			if (mainGroup.startsWith("b=")) {
 				return handleBunches(mainGroup.substring(2));
 			}
-			throw new JSONException("Don't understand GET request for %s", mainGroup);
+			throw new JSONException("Don't understand GET request for {0}", mainGroup);
 		}
 		catch (Exception e) {
-			throw new JSONException("Unable to handle request for %s", e, req.getRequestURL().toString());
+			throw new JSONException("Unable to handle request for {0}", e, req.getRequestURL().toString());
 		}
 	}
 	
@@ -151,11 +151,11 @@ public class APIHandler {
 
 		//some internal consistency checks
 		if (!requestURI.startsWith(contextPath)) {
-			throw new JSONException("For some reason the requestURI (%s) does not start with the contextPath (%s)",requestURI,contextPath);
+			throw new JSONException("For some reason the requestURI ({0}) does not start with the contextPath ({1})",requestURI,contextPath);
 		}
 		int pos = requestURI.indexOf(servletPath);
 		if (pos!=contextPath.length()) {
-			throw new JSONException("For some reason the servletPath (%s) does not appear in the requestURI (%s) in the right place", servletPath, requestURI);
+			throw new JSONException("For some reason the servletPath ({0}) does not appear in the requestURI ({1}) in the right place", servletPath, requestURI);
 		}
 		String pathAfterContext = requestURI.substring(contextPath.length() + servletPath.length() + 1);
 		
@@ -176,7 +176,7 @@ public class APIHandler {
 	public static String[] parseNameValue(String qParam) throws Exception {
 		int pos = qParam.indexOf("=");
 		if (pos<=0) {
-			throw new Exception("name value seems to be improperly formed, no equals symbol between name and value");			
+			throw new JSONException("name value seems to be improperly formed, no equals symbol between name and value");			
 		}
 		String[] ret = new String[2];
 		ret[0] = qParam.substring(0,pos);
@@ -297,7 +297,7 @@ public class APIHandler {
 	    NewsBunch bunch = newsGroup.findBunchByKey(Long.parseLong(bunchKey));
 	    
 	    if (bunch==null) {
-	    	throw new JSONException("Unable to find a news bunch with the key: %s",bunchKey);
+	    	throw new JSONException("Unable to find a news bunch with the key: {0}",bunchKey);
 	    }
 	    
 	    if (isPost) {
@@ -350,7 +350,7 @@ public class APIHandler {
     	        else if ("move".equals(cmd)) {
     	            File sourceFilePath = new File(sourceFolder, fn);
     	            if (!sourceFilePath.exists()) {
-    	                throw new JSONException ("Source file does not exist at %s", sourceFilePath.toString());
+    	                throw new JSONException ("Source file does not exist at {0}", sourceFilePath.toString());
     	            }
     	            String tempFileName = "TMP"+System.currentTimeMillis()+"-"+(counter++)+".jpg";
                     String disk2  = op.getString("disk2");
@@ -363,7 +363,7 @@ public class APIHandler {
     	            File destFolder = dm.getFilePath(path2);
     	            File destFilePath = new File(destFolder, fn2);
                     if (destFilePath.exists()) {
-                        throw new JSONException ("Dest file exists before move %s",destFilePath.toString());
+                        throw new JSONException ("Dest file exists before move {0}",destFilePath.toString());
                     }
                     if (!destFolder.equals(sourceFolder)) {
                         ii.renameFile(tempFileName);
@@ -371,7 +371,7 @@ public class APIHandler {
                     }
     	            ii.renameFile(fn2);
                     if (!destFilePath.exists()) {
-                        throw new JSONException ("Dest file does NOT exist after move %s", destFilePath.toString());
+                        throw new JSONException ("Dest file does NOT exist after move {0}", destFilePath.toString());
                     }
     	            resInts.put("move", "success");
 
@@ -382,7 +382,7 @@ public class APIHandler {
                     System.out.println("BATCH: moved "+fn+ " to " + fn2);
     	        }
     	        else {
-    	            throw new JSONException("Do not understand operation: %s",cmd);
+    	            throw new JSONException("Do not understand operation: {0}",cmd);
     	        }
 	        }
 	        catch (Exception e) {

@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import bogus.Exception2;
+
+import com.purplehillsbooks.json.JSONException;
 
 @SuppressWarnings("serial")
 public class NumericCounter extends Hashtable<Integer,Integer>
@@ -30,7 +31,7 @@ public class NumericCounter extends Hashtable<Integer,Integer>
             return sortedKeys;
         }
         catch (Exception e) {
-            throw new Exception2("Failure creating a sorted Enumeration object", e);
+            throw new JSONException("Failure creating a sorted Enumeration object", e);
         }
     }
 

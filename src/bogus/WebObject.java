@@ -8,6 +8,8 @@ import java.util.Hashtable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 /**
@@ -125,7 +127,7 @@ public class WebObject
             }
         }
         catch (Exception e) {
-            throw new Exception2("Unable to create XPL for the field '"+fieldName+"' on object with key="+key, e);
+            throw new JSONException("Unable to create XPL for the field '{0}' on object with key={1}", e, fieldName, key);
         }
     }
 

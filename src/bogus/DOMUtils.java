@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -23,6 +24,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -32,6 +34,8 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import com.purplehillsbooks.json.JSONException;
 
 /**
  * This class offers a number of helper functions for dealing with XML DOMS By
@@ -209,7 +213,7 @@ public class DOMUtils {
 			return nodeList;
 		}
 		catch (Exception e) {
-			throw new Exception("Error while searching DOM: " + e.getMessage());
+			throw new JSONException("Error while searching DOM", e);
 		}
 	}
 

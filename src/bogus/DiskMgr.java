@@ -62,7 +62,7 @@ public class DiskMgr {
 
         File f = new File(configPath);
         if (!f.exists()) {
-            throw new JSONException("Did not find file '%s'", f.getAbsolutePath());
+            throw new JSONException("Did not find file '{0}'", f.getAbsolutePath());
         }
         FileInputStream fis = new FileInputStream(f);
         Properties props = new Properties();
@@ -104,7 +104,7 @@ public class DiskMgr {
             diskNameLowerCase = name.toLowerCase();
             mainFolder = new File(archiveBase, diskNameLowerCase);
             if (!mainFolder.exists()) {
-                throw new JSONException("Attempt to create a DiskMgr on path that does not exist: (%s)",mainFolder.toString());
+                throw new JSONException("Attempt to create a DiskMgr on path that does not exist: ({0})",mainFolder.toString());
             }
 
             diskName = name;
@@ -167,7 +167,7 @@ public class DiskMgr {
             PosPat.sortIndex();
         }
         catch (Exception e) {
-            throw new Exception2("Can't construct a DiskMgr object for " + name, e);
+            throw new JSONException("Can't construct a DiskMgr object for {0}",e,name);
         }
     }
 
@@ -189,7 +189,7 @@ public class DiskMgr {
     public static DiskMgr getDiskMgr(String name) throws Exception {
         DiskMgr retval = getDiskMgrOrNull(name);
         if (retval == null) {
-            throw new Exception("can not find a disk manager with the name (" + name + ").");
+            throw new JSONException("can not find a disk manager with the name ({0})", name);
         }
         return retval;
     }
@@ -239,7 +239,7 @@ public class DiskMgr {
     // design
     static public void assertNoBackSlash(String testPath) throws Exception {
         if (testPath.indexOf('\\') >= 0) {
-            throw new Exception("Path contains a backslash: " + testPath);
+            throw new JSONException("Path contains a backslash: {0} ", testPath);
         }
     }
 
@@ -249,7 +249,7 @@ public class DiskMgr {
 
     public String convertFullPathToRelativePath(String fullPath) throws Exception {
         if (!fullPath.startsWith(extraPath)) {
-            throw new Exception("Can not find relative path for ("+fullPath+") because it is not on disk at ("+extraPath+")");
+            throw new JSONException("Can not find relative path for ({0}) because it is not on disk at ({1})", fullPath, extraPath);
         }
         String res = fullPath.substring(extraPath.length());
         if (!res.endsWith("/")) {
@@ -321,9 +321,9 @@ public class DiskMgr {
         String[] allPaths = UtilityMethods.splitOnDelimiter(archivePaths, ';');
         String[] allViews = UtilityMethods.splitOnDelimiter(archiveView, ';');
         if (allPaths.length != allViews.length) {
-            throw new Exception(
-                    "'DiskMgr.archivePaths' and 'DiskMgr.archiveView' must have the same number of elements, but it seems that on has "
-                            + allPaths.length + " and the other " + allViews.length);
+            throw new JSONException(
+                    "'DiskMgr.archivePaths' and 'DiskMgr.archiveView' must have the same number of elements, but it seems that one has {0} and the other {1}",
+                        allPaths.length,  allViews.length);
         }
 
         try {
@@ -332,7 +332,7 @@ public class DiskMgr {
                 File mainDir = new File(archiveBase);
                 File[] children = mainDir.listFiles();
                 if (children==null) {
-                    throw new JSONException("there is apparently no folder named: %s", mainDir.toString());
+                    throw new JSONException("there is apparently no folder named: {0}", mainDir.toString());
                 }
 
                 for (File cfile : children) {
@@ -361,7 +361,7 @@ public class DiskMgr {
 
         }
         catch (Exception e) {
-            throw new JSONException("Failure getting the Disk List within archive:%s", e, archiveBase);
+            throw new JSONException("Failure getting the Disk List within archive: {0}", e, archiveBase);
         }
 
         diskList = tempTable;
@@ -408,7 +408,7 @@ public class DiskMgr {
             }
         }
         catch (Exception e) {
-            throw new JSONException("Unable to scan disk (%s @ %s)", e, diskName, scanFile.toString());
+            throw new JSONException("Unable to scan disk ({0} @ {1})", e, diskName, scanFile.toString());
         }
     }
 
@@ -432,7 +432,7 @@ public class DiskMgr {
             }
         }
         catch (Exception e) {
-            throw new Exception2("Unable to scan disk (" + diskName + " @ " + scanFile + ")", e);
+            throw new JSONException("Unable to scan disk ({0} @ {1})", e, diskName, scanFile);
         }
     }
 
@@ -466,7 +466,7 @@ public class DiskMgr {
             writeSummary();
         }
         catch (Exception e) {
-            throw new Exception2("Unable to load the disk '" + diskName + "'", e);
+            throw new JSONException("Unable to load the disk '{0}'", e, diskName);
         }
     }
 
@@ -557,7 +557,7 @@ public class DiskMgr {
             isChanged = false;
         }
         catch (Exception e) {
-            throw new Exception2("Unable to write summary for disk '" + diskName + "':", e);
+            throw new JSONException("Unable to write summary for disk '{0}", e, diskName);
         }
     }
 
@@ -575,17 +575,16 @@ public class DiskMgr {
                 return; // the file is already gone
             }
             if (!theFile.isFile()) {
-                throw new Exception("something wrong, it is not a file at "
-                        + theFile.getAbsolutePath());
+                throw new JSONException("something wrong, it is not a file at {0}",
+                       theFile.getAbsolutePath());
             }
             if (!theFile.delete()) {
-                throw new Exception("OS failed to delete local file "
-                        + theFile.getAbsolutePath());
+                throw new JSONException("OS failed to delete local file {0}",
+                       theFile.getAbsolutePath());
             }
         }
         catch (Exception e) {
-            throw new Exception2("Unable to suppress file disk=" + diskName + ", path=" + path
-                    + ", name=" + name, e);
+            throw new JSONException("Unable to suppress file disk={0}, path={1}, name={2}", e, diskName, path, name);
         }
         isChanged = true;
     }
@@ -594,8 +593,8 @@ public class DiskMgr {
         String fromPathStr = fromPath.getCanonicalPath();
         String containStr  = imageFolder.getCanonicalPath();
         if (!fromPathStr.startsWith(containStr)) {
-            throw new Exception("Initial path MUST start with '" + containStr
-                    + "', instead received: " + fromPathStr);
+            throw new JSONException("Initial path MUST start with '{0}', instead received: {1}", 
+                    containStr, fromPathStr);
         }
     }
 
@@ -676,14 +675,14 @@ public class DiskMgr {
                 throw new Exception("New file did not get created during copy?!?" + toFile);
             }
             if (fromFile.exists()) {
-                throw new Exception("Old file still exists, after move: " + fromFile);
+                throw new JSONException("Old file still exists, after move: {0}", fromFile);
             }
 
             return newToName;
         }
         catch (Exception e) {
-            throw new Exception2("Unable to moveFileTo fromDisk=" + fromDisk.diskName
-                    + ", fromPath=" + fromPath + ", fileName=" + fileName + ", toPath=" + toPath, e);
+            throw new JSONException("Unable to moveFileTo fromDisk={0}, fromPath={1}, fileName={2}, toPath={3}",
+                    e, fromDisk.diskName, fromPath, fileName, toPath);
         }
     }
 
@@ -731,9 +730,9 @@ public class DiskMgr {
         // first find and pull the suffix off
         int lastDotPos = newName.lastIndexOf(".");
         if (lastDotPos < 0) {
-            throw new Exception(
-                    "Unable to find a suitable name because the desired destinationg name does not have any suffix: "
-                            + newName);
+            throw new JSONException(
+                    "Unable to find a suitable name because the desired destinationg name does not have any suffix: {0}",
+                    newName);
         }
         String suffix = newName.substring(lastDotPos);
         String front = newName.substring(0, lastDotPos);
@@ -791,7 +790,7 @@ public class DiskMgr {
 
         File fromFile = new File(path, oldName);
         if (!fromFile.exists()) {
-            throw new Exception("Can not rename a file that does not exist: " + fromFile.getPath());
+            throw new JSONException("Can not rename a file that does not exist: {0}", fromFile.getPath());
         }
 
         File toFile = new File(path, newName);
@@ -802,9 +801,9 @@ public class DiskMgr {
             // file is precisely the same file as the one being renamed.
 
             if (!oldName.equalsIgnoreCase(newName)) {
-                throw new Exception(
-                        "Can not rename a file because a file already exists with that name: "
-                                + toFile.getPath());
+                throw new JSONException(
+                        "Can not rename a file because a file already exists with that name: {0}",
+                        toFile.getPath());
             }
         }
     }

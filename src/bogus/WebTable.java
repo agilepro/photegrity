@@ -1,6 +1,5 @@
 package bogus;
 
-import bogus.DOMUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Collections;
@@ -8,8 +7,11 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.purplehillsbooks.json.JSONException;
 
 /**
 * This is a base class for an object which could be a wikitable row
@@ -162,7 +164,7 @@ public class WebTable
         try {
             WebColumn wc = getColumn(oldName);
             if (wc==null) {
-                throw new Exception("There is no column named '"+oldName+"'.");
+                throw new JSONException("There is no column named '{0}'.", oldName);
             }
             newName = WebColumn.cleanColumnName(newName);
             if (oldName.equals(newName)) {
@@ -177,7 +179,7 @@ public class WebTable
             }
         }
         catch (Exception e) {
-            throw new Exception2("Can't change column '"+oldName+"' to '"+newName+"' in table '"+schemaName+"'.", e);
+            throw new JSONException("Can't change column '{0}' to '{1}' in table '{2}'.", e, oldName, newName, schemaName);
         }
     }
 
@@ -194,7 +196,7 @@ public class WebTable
             }
         }
         catch (Exception e) {
-            throw new Exception2("Can't regenerate key values in table '"+schemaName+"'.", e);
+            throw new JSONException("Can't regenerate key values in table '{0}'.", e, schemaName);
         }
     }
 

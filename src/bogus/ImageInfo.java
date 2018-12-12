@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 
 public class ImageInfo
@@ -69,7 +70,7 @@ public class ImageInfo
             initializeInternals(relativePath);
         }
         catch (Exception e) {
-            throw new Exception2("Unable to create image info for "+filePath, e);
+            throw new JSONException("Unable to create image info for {0}",e,filePath);
         }
     }
 
@@ -329,7 +330,7 @@ public class ImageInfo
             determineTags();
         }
         catch (Exception e) {
-            throw new Exception2("Unable to split into patterns ("+relPath+")("+fileName+")", e);
+            throw new JSONException("Unable to split into patterns ({0})({1})",e,relPath,fileName);
         }
     }
 
@@ -400,7 +401,7 @@ public class ImageInfo
             return tagNames;
         }
         catch (Exception ex) {
-            throw new Exception2("getTagNames failed",ex);
+            throw new JSONException("getTagNames failed",ex);
         }
     }
 
@@ -424,7 +425,7 @@ public class ImageInfo
             return result;
         }
         catch (Exception e) {
-            throw new Exception2("Error in splitString", e);
+            throw new JSONException("Error in splitString", e);
         }
     }
 
@@ -466,7 +467,7 @@ public class ImageInfo
             }
         }
         catch (Exception e) {
-            throw new Exception2("Failure saving image info to allNames.txt", e);
+            throw new JSONException("Failure saving image info to allNames.txt", e);
         }
     }
 
@@ -559,20 +560,20 @@ public class ImageInfo
     {
         try {
             if (disk == null) {
-                throw new Exception2("findImage was passed a null disk name");
+                throw new JSONException("findImage was passed a null disk name");
             }
             if (originalFullPath == null) {
-                throw new Exception2("findImage was passed a null originalFullPath");
+                throw new JSONException("findImage was passed a null originalFullPath");
             }
             DiskMgr dm = DiskMgr.getDiskMgr(disk);
             if (!dm.isLoaded) {
-                throw new Exception2("the disk ("+disk+") is not loaded, can not find images on it");
+                throw new JSONException("the disk ({0}) is not loaded, can not find images on it",disk);
             }
             String relPath = dm.convertFullPathToRelativePath(originalFullPath);
             return findImage2(disk, relPath, name);
         }
         catch (Exception e) {
-            throw new Exception2("Unable to find an image (disk="+disk+")(originalFullPath="+originalFullPath+")(name="+name+")", e);
+            throw new JSONException("Unable to find an image (disk={0})(originalFullPath={1})(name={2})", e, disk, originalFullPath,name);
         }
     }
 
@@ -650,16 +651,16 @@ public class ImageInfo
     {
         try {
             if (disk == null) {
-                throw new Exception2("findImage was passed a null disk name");
+                throw new JSONException("findImage was passed a null disk name");
             }
             if (relPath == null) {
-                throw new Exception2("findImage was passed a null relPath");
+                throw new JSONException("findImage was passed a null relPath");
             }
             if (name == null) {
-                throw new Exception2("findImage was passed a null file name");
+                throw new JSONException("findImage was passed a null file name");
             }
             if (relPath.length()>0 && !relPath.endsWith("/")) {
-                throw new Exception2("relPath must either be a null string, or it must end with a slash!  instead got: "+relPath);
+                throw new JSONException("relPath must either be a null string, or it must end with a slash!  instead got: {0}",relPath);
             }
             Vector<ImageInfo> vFiles = getImagesByName();
 
@@ -671,7 +672,7 @@ public class ImageInfo
 
             //if the file name is greater than all files in the list, handle that
             if (pos>=vFiles.size()) {
-                throw new Exception2("the name ("+name+") is greater than all files in the index, nothing with that name");
+                throw new JSONException("the name ({0}) is greater than all files in the index, nothing with that name",name);
             }
 
             int traceCount =  15;
@@ -707,7 +708,7 @@ public class ImageInfo
             throw new Exception("Searched through to end and not found \n "+trace.toString());
         }
         catch (Exception e) {
-            throw new Exception2("Unable to find an image with disk="+disk+", relPath="+relPath+", name="+name, e);
+            throw new JSONException("Unable to find an image with disk={0}, relPath={1}, name={2}", e, disk, relPath, name);
         }
     }
 
@@ -717,16 +718,16 @@ public class ImageInfo
         {
             try {
                 if (disk == null) {
-                    throw new Exception2("findImage was passed a null disk name");
+                    throw new JSONException("findImage was passed a null disk name");
                 }
                 if (relPath == null) {
-                    throw new Exception2("findImage was passed a null relPath");
+                    throw new JSONException("findImage was passed a null relPath");
                 }
                 if (pattern == null) {
-                    throw new Exception2("findImage was passed a null file name");
+                    throw new JSONException("findImage was passed a null file name");
                 }
                 if (relPath.length()>0 && !relPath.endsWith("/")) {
-                    throw new Exception2("relPath must either be a null string, or it must end with a slash!  instead got: "+relPath);
+                    throw new JSONException("relPath must either be a null string, or it must end with a slash!  instead got: {0} ",relPath);
                 }
                 Vector<ImageInfo> vFiles = getImagesByName();
 
@@ -738,7 +739,7 @@ public class ImageInfo
 
                 //if the file name is greater than all files in the list, handle that
                 if (pos>=vFiles.size()) {
-                    throw new Exception2("the pattern ("+pattern+") is greater than all files in the index, nothing with that name");
+                    throw new JSONException("the pattern ({0}) is greater than all files in the index, nothing with that name", pattern);
                 }
 
                 StringBuffer trace = new StringBuffer();
@@ -771,7 +772,7 @@ public class ImageInfo
                 throw new Exception("Searched through to end and not found \n "+trace.toString());
             }
             catch (Exception e) {
-                throw new Exception2("Unable to find an image with disk="+disk+", relPath="+relPath+", pattern="+pattern, e);
+                throw new JSONException("Unable to find an image with disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
             }
         }
 
@@ -780,16 +781,16 @@ public class ImageInfo
         {
             try {
                 if (disk == null) {
-                    throw new Exception2("findAllMatching was passed a null disk name");
+                    throw new JSONException("findAllMatching was passed a null disk name");
                 }
                 if (relPath == null) {
-                    throw new Exception2("findAllMatching was passed a null relPath");
+                    throw new JSONException("findAllMatching was passed a null relPath");
                 }
                 if (pattern == null) {
-                    throw new Exception2("findAllMatching was passed a null file name");
+                    throw new JSONException("findAllMatching was passed a null file name");
                 }
                 if (relPath.length()>0 && !relPath.endsWith("/")) {
-                    throw new Exception2("for findAllMatching relPath must either be a null string, or it must end with a slash!  instead got: "+relPath);
+                    throw new JSONException("for findAllMatching relPath must either be a null string, or it must end with a slash!  instead got: {0}",relPath);
                 }
                 Vector<ImageInfo> vFiles = new Vector<ImageInfo> ();
                 for (ImageInfo ii : getImagesByName()){
@@ -801,7 +802,7 @@ public class ImageInfo
                 return vFiles;
             }
             catch (Exception e) {
-                throw new Exception2("Error trying to find image for disk="+disk+", relPath="+relPath+", pattern="+pattern, e);
+                throw new JSONException("Error trying to find image for disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
             }
         }
 
@@ -809,15 +810,15 @@ public class ImageInfo
     {
         try {
             if (key == null) {
-                throw new Exception2("findImage was passed a null key");
+                throw new JSONException("findImage was passed a null key");
             }
             int colonPos = key.indexOf(':');
             if (colonPos < 0) {
-                throw new Exception("Can't find a colon in key: '"+key+"'");
+                throw new JSONException("Can't find a colon in key: '{0}'",key);
             }
             int slashPos = key.lastIndexOf('/');
             if (slashPos < 0) {
-                throw new Exception("Can't find a slash in key: '"+key+"'");
+                throw new JSONException("Can't find a slash in key: '{0}'",key);
             }
             String disk    = key.substring(0, colonPos);
             String relPath = key.substring(colonPos+1, slashPos+1);
@@ -826,7 +827,7 @@ public class ImageInfo
 
             int last = vFiles.size();
             if (last == 0) {
-                throw new Exception("Searched and not found because there are no images loaded, starting point :"+name);
+                throw new JSONException("Searched and not found because there are no images loaded, starting point :{0}",name);
             }
             int pos = findFirstImageWithName(vFiles, name);
 
@@ -862,7 +863,7 @@ public class ImageInfo
             throw new Exception("Searched and not found, starting point: "+startName);
         }
         catch (Exception e) {
-            throw new Exception2("Unable to find an image with key="+key, e);
+            throw new JSONException("Unable to find an image with key={0}",e,key);
         }
     }
 
@@ -914,7 +915,7 @@ public class ImageInfo
             return vPatterns;
         }
         catch(Exception e) {
-            throw new Exception2("Error in getAllPatternsStartingWith("+start+")",e);
+            throw new JSONException("Error in getAllPatternsStartingWith({0})",e,start);
         }
     }
 
@@ -935,7 +936,7 @@ public class ImageInfo
             return res;
         }
         catch(Exception e) {
-            throw new Exception2("Error in getImagesMatchingPattern("+searchPatt+")",e);
+            throw new JSONException("Error in getImagesMatchingPattern({0})",e, searchPatt);
         }
     }
 
@@ -983,7 +984,7 @@ public class ImageInfo
             return vPatterns;
         }
         catch(Exception e) {
-            throw new Exception2("Error in queryImages("+start+")",e);
+            throw new JSONException("Error in queryImages({0})",e,start);
         }
     }
 
@@ -1036,7 +1037,7 @@ public class ImageInfo
             unPlugImage();
 
         } catch (Exception e) {
-            throw new Exception2("Unable to suppress image "+fPath+"/"+fileName,e);
+            throw new JSONException("Unable to suppress image {0}/{1}", e, fPath, fileName);
         }
     }
 
@@ -1541,7 +1542,7 @@ public class ImageInfo
             return vImages;
         }
         catch(Exception e) {
-            throw new Exception2("Error in queryImages("+query+")",e);
+            throw new JSONException("Error in queryImages({0})",e, query);
         }
     }
 

@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import bandaid.Thumbnail;
-
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 import com.purplehillsbooks.streams.MemFile;

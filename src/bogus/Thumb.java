@@ -13,8 +13,6 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import bandaid.Thumbnail;
-
 @SuppressWarnings("serial")
 public class Thumb extends javax.servlet.http.HttpServlet {
 

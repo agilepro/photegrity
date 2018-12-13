@@ -66,7 +66,7 @@ public class WebTable
                 Element child = e1.nextElement();
                 WebColumn wc = WebColumn.parseXML(child);
                 if (wc.dataType==0) {
-                    throw new Exception("some how the type is not set");
+                    throw new JSONException("some how the type is not set");
                 }
                 wt.addColumn(wc);
             }

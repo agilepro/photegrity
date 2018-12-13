@@ -5,6 +5,8 @@ import java.io.Reader;
 import org.apache.commons.net.nntp.ArticleInfo;
 import org.apache.commons.net.nntp.NNTPClient;
 
+import com.purplehillsbooks.json.JSONException;
+
 /**
  * represents a session with a news server
  */
@@ -50,11 +52,10 @@ public class NewsSession {
 		    client.connect(server);
 		}
 		catch (Exception e) {
-		    throw new Exception("Attempt to connect to server: "+server, e);
+		    throw new JSONException("Attempt to connect to server: {0}", e, server);
 		}
 		if (!client.authenticate(user, pass)) {
-			throw new Exception("Unable to authenticate the new named '" + user
-					+ "' on the server '" + server + "'.  Do you have the correct password?");
+			throw new JSONException("Unable to authenticate the new named '{0}' on the server '{1}'.  Do you have the correct password?", user, server);
 		}
 		isConnected = true;
 	}
@@ -74,15 +75,15 @@ public class NewsSession {
 	 */
 	public synchronized void internalSetGroup(String groupName) throws Exception {
 		if (!isConnected) {
-			throw new Exception(
+			throw new JSONException(
 					"internalSelectArticle was called but the session is not connected!");
 		}
 		if (groupName.equals(currentGroup)) {
 			return; // already set, silently ignore
 		}
 		if (!client.selectNewsgroup(groupName)) {
-			throw new Exception("Unable to set the news session to a news group named '"
-					+ groupName + "'.");
+			throw new JSONException("Unable to set the news session to a news group named '{0}'",
+					groupName);
 		}
 		currentGroup = groupName;
 	}
@@ -92,7 +93,7 @@ public class NewsSession {
 	 */
 	boolean internalSelectArticle(long articleNo, ArticleInfo ptr) throws Exception {
 		if (!isConnected) {
-			throw new Exception(
+			throw new JSONException(
 					"internalSelectArticle was called but the session is not connected!");
 		}
 		return true;
@@ -100,25 +101,23 @@ public class NewsSession {
 
 	public synchronized Reader getArticleHeader(long articleNo) throws Exception {
 		if (!isConnected) {
-			throw new Exception("getArticleHeader was called but the session is not connected!");
+			throw new JSONException("getArticleHeader was called but the session is not connected!");
 		}
 		Reader msgReader = client.retrieveArticleHeader(articleNo);
 		if (msgReader == null) {
-			throw new Exception(
-					"NNTPClient.retrieveArticleHeader returned a null value for article "
-							+ articleNo);
+			throw new JSONException(
+					"NNTPClient.retrieveArticleHeader returned a null value for article {0}", articleNo);
 		}
 		return msgReader;
 	}
 
 	public synchronized Reader getArticleBody(long articleNo) throws Exception {
 		if (!isConnected) {
-			throw new Exception("getArticleBody was called but the session is not connected!");
+			throw new JSONException("getArticleBody was called but the session is not connected!");
 		}
 		Reader msgReader = client.retrieveArticle(articleNo);
 		if (msgReader == null) {
-			throw new Exception("NNTPClient.retrieveArticle returned a null value for article "
-					+ articleNo);
+			throw new JSONException("NNTPClient.retrieveArticle returned a null value for article {0}", articleNo);
 		}
 		return msgReader;
 	}

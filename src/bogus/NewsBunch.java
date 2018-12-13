@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.CSVHelper;
 import com.purplehillsbooks.streams.HTMLWriter;
@@ -694,7 +695,7 @@ public class NewsBunch {
     public List<NewsFile> getFiles() throws Exception {
         System.out.println("getFiles  called on "+digest);
         if (fracTemplate == null || fracTemplate.isEmpty()) {
-            throw new Exception("sorry, can't collect files until the file template is set for the bunch "+digest);
+            throw new JSONException("sorry, can't collect files until the file template is set for the bunch {0}",digest);
         }
         int countTotal = 0;
         int countComplete = 0;
@@ -819,7 +820,7 @@ public class NewsBunch {
         sites = null;  //in case anything changed, will force recalc
         int colonPos = newFolder.indexOf(":");
         if (colonPos <= 0) {
-            throw new Exception("changeLocAndTemplate requires a location with disk manager name followed by colon");
+            throw new JSONException("changeLocAndTemplate requires a location with disk manager name followed by colon");
         }
 
         String disk2 = newFolder.substring(0, colonPos);
@@ -1027,7 +1028,7 @@ public class NewsBunch {
             }
             int colonPos = newFolder.indexOf(":");
             if (colonPos <= 0) {
-                throw new Exception("changeFolder requires a disk manager name followed by colon");
+                throw new JSONException("changeFolder requires a disk manager name followed by colon");
             }
             String disk2 = newFolder.substring(0, colonPos);
             String destPath = newFolder.substring(colonPos + 1);

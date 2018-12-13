@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
@@ -22,11 +23,11 @@ public class NewsActionDownloadPattern extends NewsAction {
         seeker = _seeker;
         pattern = _pattern;
         if (!seeker.hasFolder()) {
-            throw new Exception(
+            throw new JSONException(
                     "must set the file storage folder on the NewsPattern in order to retrieve all message bodies.");
         }
         if (!seeker.hasTemplate()) {
-            throw new Exception(
+            throw new JSONException(
                     "must set the file name template on the NewsPattern in order to retrieve all message bodies.");
         }
         seeker.isDownloading = true;
@@ -63,7 +64,7 @@ public class NewsActionDownloadPattern extends NewsAction {
 
         out.write("\n");
         if (!seeker.hasFolder()) {
-            throw new Exception(
+            throw new JSONException(
                     "must set the file storage folder on the NewsPattern in order to retrieve all message bodies.");
         }
         int scheduleCount = 0;

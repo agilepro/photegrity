@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.streams.HTMLWriter;
 
 @SuppressWarnings("serial")
@@ -34,7 +35,7 @@ public class SmartPage extends javax.servlet.http.HttpServlet {
 
             String servletPath = req.getServletPath();
             if (servletPath == null) {
-                throw new Exception("Hmmmmmmm, no servlet path???");
+                throw new JSONException("Hmmmmmmm, no servlet path???");
             }
 
             int depth = 0;

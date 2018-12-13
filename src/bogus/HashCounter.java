@@ -88,8 +88,7 @@ public class HashCounter extends Hashtable<String,Integer>
         if (containsKey(val)) {
             Integer i = get(val);
             if (i == null) {
-                throw new Exception("Strange, map should contain an element for (" + val
-                        + ") but got a null back.");
+                throw new JSONException("Strange, map should contain an element for ({0}) but got a null back.", val);
             }
             put(val, new Integer(i.intValue() + 1));
         }

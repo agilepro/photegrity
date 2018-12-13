@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import org.apache.commons.net.nntp.NewsgroupInfo;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.streams.CSVHelper;
 
 /**
@@ -85,9 +86,9 @@ public class NewsGroup {
     public synchronized void openNewsGroupFile(File propertyFile, boolean doConnect) throws Exception {
 
         if (!propertyFile.exists()) {
-            throw new Exception(
-                    "openNewsGroupFile requires a properties file:  this one does not exist: "
-                            + propertyFile);
+            throw new JSONException(
+                    "openNewsGroupFile requires a properties file:  this one does not exist: {0}",
+                    propertyFile);
         }
 
         connect = doConnect;
@@ -215,12 +216,10 @@ public class NewsGroup {
         session.connect();
         NewsgroupInfo[] ngiList = session.client.listNewsgroups(groupName);
         if (ngiList.length == 0) {
-            throw new Exception("Can't find a news group with the name (" + groupName
-                    + ") on that server!");
+            throw new JSONException("Can't find a news group with the name ({0}) on that server!", groupName);
         }
         if (ngiList.length > 1) {
-            throw new Exception("Found more than one news group with the name (" + groupName
-                    + ") on that server!  Are there wild cards in the name given?");
+            throw new JSONException("Found more than one news group with the name ({0}) on that server!  Are there wild cards in the name given?", groupName);
         }
 
         NewsgroupInfo ngi = ngiList[0];
@@ -256,7 +255,7 @@ public class NewsGroup {
         if (nae != null) {
             if (!nae.okToTryAgainNow()) {
                 // don't try again for an hour after an error
-                throw new Exception("Article "+articleNo+" recently errored (1 hour), too soon to try again");
+                throw new JSONException("Article {0} recently errored (1 hour), too soon to try again", articleNo);
             }
         }
 
@@ -267,7 +266,7 @@ public class NewsGroup {
         }
         catch (Exception e) {
             registerError(articleNo, e);
-            throw new Exception("Unable to get article '" + articleNo + "'", e);
+            throw new JSONException("Unable to get article '{0}'", e, articleNo);
         }
         if (nae != null) {
             // if previously had an error, then clear that out since we have the
@@ -497,7 +496,7 @@ public class NewsGroup {
         while (values != null) {
             long mem = Runtime.getRuntime().freeMemory();
             if (mem<20000000) {
-                throw new Exception("Not enough memory to read this news file at line "+count+" ("+mem+")");
+                throw new JSONException("Not enough memory to read this news file at line {0} ({1})", count, mem);
             }
             NewsArticle art = NewsArticle.createFromLine(this, values);
             if (art != null) {
@@ -572,7 +571,7 @@ public class NewsGroup {
      */
     public synchronized NewsBunch getBunch(String digest, String from) throws Exception {
         if (digest == null) {
-            throw new Exception("null value passed for patter in getPattern");
+            throw new JSONException("null value passed for patter in getPattern");
         }
         String seed = digest;
         if (from!=null) {
@@ -602,7 +601,7 @@ public class NewsGroup {
         if (foundBunch != null) {
             return foundBunch;
         }
-        throw new Exception("There is no bunch with the key "+key);
+        throw new JSONException("There is no bunch with the key {0}",key);
     }
     
     /**
@@ -699,8 +698,7 @@ public class NewsGroup {
         long newPos = stepSize * step + half + firstArticle;
 
         if (newPos > lastArticle) {
-            throw new Exception("Calculation is incorrect ... position is " + newPos
-                    + " but last article is " + lastArticle + ".");
+            throw new JSONException("Calculation is incorrect ... position is {0} but last article is {1}.", newPos, lastArticle);
         }
 
         // failcount is incremented here, which is preserved if there is an

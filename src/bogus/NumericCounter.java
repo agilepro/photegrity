@@ -42,8 +42,7 @@ public class NumericCounter extends Hashtable<Integer,Integer>
         if (containsKey(key)) {
             Integer i = get(val);
             if (i == null) {
-                throw new Exception("Strange, map should contain an element for (" + val
-                        + ") but got a null back.");
+                throw new JSONException("Strange, map should contain an element for ({0}) but got a null back.", val);
             }
             int ival = i.intValue();
             if (ival <= 1) {
@@ -60,8 +59,7 @@ public class NumericCounter extends Hashtable<Integer,Integer>
         if (containsKey(key)) {
             Integer i = get(key);
             if (i == null) {
-                throw new Exception("Strange, map should contain an element for (" + val
-                        + ") but got a null back.");
+                throw new JSONException("Strange, map should contain an element for ({0}) but got a null back.", val);
             }
             put(key, new Integer(i.intValue() + 1));
         }

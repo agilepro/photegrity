@@ -87,7 +87,7 @@ public class DiskMgr {
     }
     public static void assertInitialized() throws Exception {
         if (!isInitialized()) {
-            throw new Exception("Program Logic Error: DiskMgr class is not initialized at this time.");
+            throw new JSONException("Program Logic Error: DiskMgr class is not initialized at this time.");
         }
     }
 
@@ -97,7 +97,7 @@ public class DiskMgr {
         try {
             if (archivePaths == null) {
                 //not globally initialized yet
-                throw new Exception(
+                throw new JSONException(
                         "variable 'DiskMgr.archivePaths' must be set before doing any operations on disks.");
             }
 
@@ -306,11 +306,11 @@ public class DiskMgr {
 
         //not initialized, so initialize this now
         if (archivePaths == null) {
-            throw new Exception(
+            throw new JSONException(
                     "variable 'DiskMgr.archivePaths' must be set before doing any operations on disks.");
         }
         if (archiveView == null) {
-            throw new Exception(
+            throw new JSONException(
                     "variable 'DiskMgr.archiveView' must be set before doing any operations on disks.");
         }
 
@@ -421,7 +421,7 @@ public class DiskMgr {
             }
 
             if (!scanFile.isDirectory()) {
-                throw new Exception("scanDiskOneFolder must be passed a folder (directory)");
+                throw new JSONException("scanDiskOneFolder must be passed a folder (directory)");
             }
             for (File child : scanFile.listFiles()) {
                  String childName = child.getName();
@@ -603,7 +603,7 @@ public class DiskMgr {
 
     public static void copyFile(File source, File dest) throws Exception {
         if (!source.exists()) {
-            throw new Exception("The source file does not exist: " + source.toString());
+            throw new JSONException("The source file does not exist: {0}.",source);
         }
         if (dest.exists()) {
             dest.delete();
@@ -649,9 +649,9 @@ public class DiskMgr {
             File toFile = new File(toPath, newToName);
             File fromFile = new File(fPath, fileName);
             if (toFile.exists()) {
-                throw new Exception(
-                    "New logic of findSuitableName should assure that the destination file does not exist:"
-                            +toFile);
+                throw new JSONException(
+                    "New logic of findSuitableName should assure that the destination file does not exist:{0}",
+                            toFile);
             }
 
             toPath.mkdirs();
@@ -672,7 +672,7 @@ public class DiskMgr {
             }
 
             if (!toFile.exists()) {
-                throw new Exception("New file did not get created during copy?!?" + toFile);
+                throw new JSONException("New file did not get created during copy?!? {0}",toFile);
             }
             if (fromFile.exists()) {
                 throw new JSONException("Old file still exists, after move: {0}", fromFile);

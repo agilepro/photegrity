@@ -3,12 +3,17 @@
  */
 package bogus;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
-import bogus.UtilityMethods;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.purplehillsbooks.json.JSONException;
 
 @SuppressWarnings("serial")
 public class ShowImage extends javax.servlet.http.HttpServlet {
@@ -21,7 +26,7 @@ public class ShowImage extends javax.servlet.http.HttpServlet {
             DiskMgr.assertInitialized();
             HttpSession session = req.getSession();
             if (session.getAttribute("userName") == null) {
-                throw new Exception("Not logged in");
+                throw new JSONException("Not logged in");
             }
 
             out = resp.getOutputStream();

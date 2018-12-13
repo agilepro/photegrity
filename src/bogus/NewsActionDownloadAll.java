@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
@@ -24,7 +25,7 @@ public class NewsActionDownloadAll extends NewsAction {
             storeFile.mkdirs();
         }
         if (!storeFile.exists()) {
-            throw new Exception("unable to create the folder: "+storeFile);
+            throw new JSONException("unable to create the folder: {0}",storeFile);
         }
         if (!seeker.hasTemplate()) {
             seeker.createFolderIfReasonable();
@@ -64,7 +65,7 @@ public class NewsActionDownloadAll extends NewsAction {
 
         out.write("\n");
         if (!seeker.hasFolder()) {
-            throw new Exception(
+            throw new JSONException(
                     "must set the file storage folder on the NewsPattern in order to retrieve all message bodies.");
         }
         int scheduleCount = 0;

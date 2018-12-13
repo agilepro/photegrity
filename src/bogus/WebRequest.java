@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -163,7 +164,7 @@ public class WebRequest {
 
             if (w==null) {
                 System.out.println("PROGRAM LOGIC ERROR: a null writer object was passed into streamException!!!!");
-                throw new Exception("a null writer object was passed into streamException");
+                throw new JSONException("a null writer object was passed into streamException");
             }
 
             JSONObject responseBody = JSONException.convertToJSON(e, request.getRequestURI());

@@ -21,6 +21,8 @@ import javax.imageio.ImageIO;
 
 import org.imgscalr.Scalr;
 
+import com.purplehillsbooks.json.JSONException;
+
 public class Thumbnail {
 
 	public static synchronized void scalePhoto(File inFileName, OutputStream mainOut,
@@ -30,7 +32,7 @@ public class Thumbnail {
 			scalePhoto(fis, mainOut, thumbWidth, thumbHeight, quality);
 		}
 		catch (Exception e) {
-			throw new Exception("Unable to read file " + inFileName, e);
+			throw new JSONException("Unable to read file {0}", e, inFileName);
 		}
 		finally {
 			fis.close();
@@ -40,17 +42,17 @@ public class Thumbnail {
 	public static synchronized void scalePhoto(InputStream inStream, OutputStream mainOut,
 			int thumbWidth, int thumbHeight, int quality) throws Exception {
 		if (thumbWidth < 0) {
-			throw new Exception("a width of '" + thumbWidth + "' makes no sense");
+			throw new JSONException("a width of '{0}' makes no sense", thumbWidth);
 		}
 		if (thumbHeight < 0) {
-			throw new Exception("a height of '" + thumbHeight + "' makes no sense");
+			throw new JSONException("a height of '{0}' makes no sense", thumbHeight);
 		}
 		try {
 			// load image from INFILE
 			BufferedImage image = javax.imageio.ImageIO.read(inStream);
 
 			if (image == null) {
-				throw new Exception("Unable to read the the input stream");
+				throw new JSONException("Unable to read the the input stream");
 			}
 
 			// determine thumbnail size from WIDTH and HEIGHT
@@ -58,8 +60,7 @@ public class Thumbnail {
 			int imageWidth = image.getWidth(null);
 			int imageHeight = image.getHeight(null);
 			if (imageWidth < 0 || imageHeight < 0) {
-				throw new Exception("Image appears damaged with width of '" + imageWidth
-						+ "' and height of '" + imageHeight + "'");
+				throw new JSONException("Image appears damaged with width of '{0}' and height of '{1}'", imageWidth, imageHeight);
 			}
 			if (thumbWidth <= 0) {
 				thumbWidth = imageWidth;
@@ -91,7 +92,7 @@ public class Thumbnail {
 			out.close();
 		}
 		catch (Exception e) {
-			throw new Exception("Unable to resize image to " + thumbWidth + " by " + thumbHeight, e);
+			throw new JSONException("Unable to resize image to {0} by {1}", e, thumbWidth, thumbHeight);
 		}
 	}
 
@@ -207,21 +208,19 @@ public class Thumbnail {
 	public static void main(String[] args) throws Exception {
 		try {
 			if (args.length > 4 || args.length < 2) {
-				throw new Exception(
+				throw new JSONException(
 						"Usage: java Thumbnail INFILE OUTFILE [WIDTH] [QUALITY]");
 			}
 			String inFileName = args[0];
 			File inFile = new File(inFileName);
 			if (!inFile.exists()) {
-				throw new Exception("File '" + inFileName + "' does not exist.");
+				throw new JSONException("File '{0}' does not exist.", inFileName);
 			}
 			String outFileName = args[1];
 			File outFile = new File(outFileName);
 			if (outFile.exists()) {
-				throw new Exception(
-						"File '"
-								+ outFileName
-								+ "' already exists -- this program does not write over existing files.  Remove it first.");
+				throw new JSONException(
+						"File '{0}' already exists -- this program does not write over existing files.  Remove it first.", outFileName);
 			}
 
 			int thumbWidth = 225;

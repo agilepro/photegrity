@@ -2,6 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
@@ -64,7 +65,7 @@ public class NewsActionLoadHeaders extends NewsAction {
                 out.write(UtilityMethods.getErrorString(e));
                 // if we get an exception, skip this, but go on to next.
                 if (errorCount++ > 50) {
-                    throw new Exception("Unable to get articles, see most recent exception", e);
+                    throw new JSONException("Unable to get articles, see most recent exception", e);
                 }
             }
             if (na != null) {

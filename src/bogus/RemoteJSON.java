@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.purplehillsbooks.json.JSONArray;
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.json.JSONTokener;
 
@@ -58,8 +59,7 @@ public class RemoteJSON {
                     reason.append("; ");
                 }
             }
-            throw new Exception("Unable to get remote information ("+responseCode
-                    +": "+url+") because: "+reason.toString());
+            throw new JSONException("Unable to get remote information ({0}: {1}) because: {2}", responseCode, url, reason);
         }
         return retrievedObj;
     }
@@ -106,19 +106,19 @@ public class RemoteJSON {
                     for (int i=0; i<len; i++) {
                         String oneMsg = errorMsgs.getString(i);
                         if (lastExp==null) {
-                            lastExp = new Exception(oneMsg);
+                            lastExp = new JSONException(oneMsg);
                         }
                         else {
-                            lastExp = new Exception(oneMsg, lastExp);
+                            lastExp = new JSONException(oneMsg, lastExp);
                         }
                     }
-                    throw new Exception("RemoteProjectException: ("+responseCode+"): ", lastExp);
+                    throw new JSONException("RemoteProjectException: ("+responseCode+"): ", lastExp);
                 }
             }
             return resp;
         }
         catch (Exception e) {
-            throw new Exception("Unable to call the server site located at "+url, e);
+            throw new JSONException("Unable to call the server site located at {0}", e, url);
         }
     }
 

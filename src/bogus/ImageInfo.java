@@ -251,8 +251,7 @@ public class ImageInfo
             return;
         }
         else {
-            throw new Exception("I don't understand how to sort by '"+order
-                 +"'.  Please request a sort by path, size, num, rand, name, or none.");
+            throw new JSONException("I don't understand how to sort by '{0}'.  Please request a sort by path, size, num, rand, name, or none.", order);
         }
         Collections.sort(images, sc);
     }
@@ -294,15 +293,14 @@ public class ImageInfo
     private void initializeInternals(String relPath) throws Exception
     {
         if (tail != null) {
-            throw new Exception("Hmmm, initializeInternals method is being called twice?");
+            throw new JSONException("Hmmm, initializeInternals method is being called twice?");
         }
         try {
             if (diskMgr == null) {
-                throw new Exception("diskMgr member is null, on image "
-                                    +fileName+", relPath="+relPath);
+                throw new JSONException("diskMgr member is null, on image {0}, relPath={1}",fileName,relPath);
             }
             if (relPath == null) {
-                throw new Exception("Problem with initialization, relPath is null");
+                throw new JSONException("Problem with initialization, relPath is null");
             }
 
             FracturedFileName ffn = FracturedFileName.parseFile(fileName);
@@ -415,8 +413,7 @@ public class ImageInfo
             for (int i=0; i<(expected-1); i++) {
                 int nextpos = start.indexOf("\t", pos);
                 if (nextpos < 0) {
-                    throw new Exception("Did not find the tab number "
-                            +i+" in ("+start+") at pos="+pos);
+                    throw new JSONException("Did not find the tab number {0} in ({1}) at pos={2}", i, start, pos);
                 }
                 result[i] = start.substring(pos, nextpos);
                 pos = nextpos + 1;
@@ -666,7 +663,7 @@ public class ImageInfo
 
             int last = vFiles.size();
             if (last == 0) {
-                throw new Exception("Searched and not found because there are no images loaded, starting point :"+name);
+                throw new JSONException("Searched and not found because there are no images loaded, starting point :{0}",name);
             }
             int pos = findFirstImageWithName(vFiles, name);
 
@@ -683,7 +680,7 @@ public class ImageInfo
                 ImageInfo previous = vFiles.elementAt(pos-1);
                 trace.append("prev: F("+previous.fileName+")D("+previous.diskMgr.diskName+")P("+previous.getRelativePath()+") \n");
                 if (previous.fileName.equalsIgnoreCase(name)) {
-                    throw new Exception("findFirstImageWithName failed to find the first index with name ("+name+") \n "+trace.toString());
+                    throw new JSONException("findFirstImageWithName failed to find the first index with name ({0}) \n {1}",name,trace);
                 }
             }
 
@@ -696,7 +693,7 @@ public class ImageInfo
 
                 //if the file has a name greater than searching for, we are done
                 if (comp<0) {
-                    throw new Exception("Searched and not found \n "+trace.toString());
+                    throw new JSONException("Searched and not found \n {0}",trace);
                 }
                 if (disk.equalsIgnoreCase(ii.diskMgr.diskName) &&
                         relPath.equalsIgnoreCase(ii.getRelativePath()) &&
@@ -705,7 +702,7 @@ public class ImageInfo
                 }
                 pos++;
             }
-            throw new Exception("Searched through to end and not found \n "+trace.toString());
+            throw new JSONException("Searched through to end and not found \n {0}",trace);
         }
         catch (Exception e) {
             throw new JSONException("Unable to find an image with disk={0}, relPath={1}, name={2}", e, disk, relPath, name);
@@ -733,7 +730,7 @@ public class ImageInfo
 
                 int last = vFiles.size();
                 if (last == 0) {
-                    throw new Exception("Searched and not found because there are no images loaded, starting point :"+pattern);
+                    throw new JSONException("Searched and not found because there are no images loaded, starting point :{0}",pattern);
                 }
                 int pos = findFirstImageWithName(vFiles, pattern);
 
@@ -749,7 +746,7 @@ public class ImageInfo
                     ImageInfo previous = vFiles.elementAt(pos-1);
                     trace.append("prev: F("+previous.fileName+")D("+previous.diskMgr.diskName+")P("+previous.getRelativePath()+") \n");
                     if (pattern.equalsIgnoreCase(previous.pp.getPattern())) {
-                        throw new Exception("findFirstImageWithName failed to find the first index with name ("+pattern+") \n "+trace.toString());
+                        throw new JSONException("findFirstImageWithName failed to find the first index with name ({0}) \n {1} ",pattern,trace);
                     }
                 }
 
@@ -769,7 +766,7 @@ public class ImageInfo
                     }
                     pos++;
                 }
-                throw new Exception("Searched through to end and not found \n "+trace.toString());
+                throw new JSONException("Searched through to end and not found \n {0}",trace);
             }
             catch (Exception e) {
                 throw new JSONException("Unable to find an image with disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
@@ -860,7 +857,7 @@ public class ImageInfo
                 }
                 pos++;
             }
-            throw new Exception("Searched and not found, starting point: "+startName);
+            throw new JSONException("Searched and not found, starting point: {0}",startName);
         }
         catch (Exception e) {
             throw new JSONException("Unable to find an image with key={0}",e,key);
@@ -1065,10 +1062,10 @@ public class ImageInfo
         throws Exception
     {
         if (dm2==null) {
-            throw new Exception("Null dm passed to moveImage!");
+            throw new JSONException("Null dm passed to moveImage!");
         }
         if (!dm2.isLoaded) {
-            throw new Exception("You can't move to a disk ("+dm2.diskName+") that is not loaded...");
+            throw new JSONException("You can't move to a disk ({0}) that is not loaded...",dm2.diskName);
         }
         dm2.assertOnDisk(destFolder);
         String newFolderPath = dm2.getRelativePath(destFolder);
@@ -1077,7 +1074,7 @@ public class ImageInfo
         try {
             deleteThumbnails();
             if (!oldPath.exists()) {
-                throw new Exception("Image does not exist before move: "+oldPath);
+                throw new JSONException("Image does not exist before move: {0}", oldPath);
             }
             if (dm2!=diskMgr || !destFolder.equals(oldPath))
             {
@@ -1102,18 +1099,17 @@ public class ImageInfo
                 }
                 //check that old one is gone
                 if (oldPath.exists()) {
-                    throw new Exception("Image still exists in old location after move from "
-                                +oldPath+" to "+destFolder);
+                    throw new JSONException("Image still exists in old location after move from {0} to {1}",oldPath,destFolder);
                 }
             }
 
             File newFilePath = getFilePath();
             if (!newFilePath.exists()) {
-                throw new Exception("new image path does not exist after move: "+newFilePath);
+                throw new JSONException("new image path does not exist after move: {0}",newFilePath);
             }
         }
         catch (Exception e) {
-            throw new Exception("Unable to move image from ("+oldPath+") to ("+destFolder+")", e);
+            throw new JSONException("Unable to move image from ({0}) to ({1})",e, oldPath, destFolder);
         }
     }
 
@@ -1309,7 +1305,7 @@ public class ImageInfo
     public String getRelPath()
         throws Exception
     {
-        if (diskMgr == null) {throw new Exception("diskMgr is null");}
+        if (diskMgr == null) {throw new JSONException("diskMgr is null");}
 
         StringBuffer result = new StringBuffer(diskMgr.diskName);
         result.append("/");
@@ -1325,19 +1321,19 @@ public class ImageInfo
         try {
 
             if (query.length()<4) {
-                throw new Exception("query is too short, must be letter, an open paren, at least one value char, and a close paren");
+                throw new JSONException("query is too short, must be letter, an open paren, at least one value char, and a close paren");
             }
 
             int pos = 0;
             char sel = query.charAt(0);
 
             if (query.charAt(1) != '(') {
-                throw new Exception("error with query, second character must be an open paren");
+                throw new JSONException("error with query, second character must be an open paren");
             }
 
             pos = query.indexOf(')');
             if (pos<0) {
-                throw new Exception("Error, can not find the closing paren char");
+                throw new JSONException("Error, can not find the closing paren char");
             }
 
             String val = query.substring(2, pos);
@@ -1362,26 +1358,26 @@ public class ImageInfo
                 case 's':
                     int numval = Integer.parseInt(val);
                     if (numval<1) {
-                        throw new Exception("memory banks are numbered 1 thru "+MEMORY_SIZE+", and '"+numval+"' is too small.");
+                        throw new JSONException("memory banks are numbered 1 thru {0}, and '{1}' is too small.", MEMORY_SIZE, numval);
                     }
                     if (numval>MEMORY_SIZE) {
-                        throw new Exception("memory banks are numbered 1 thru "+MEMORY_SIZE+", and '"+numval+"' is too large.");
+                        throw new JSONException("memory banks are numbered 1 thru {0}, and '{1}' is too large.", MEMORY_SIZE, numval);
                     }
                     vImages.addAll(ImageInfo.memory[numval-1]);
                     break;
                 default:
-                    throw new Exception("query elements must begin with a 'g', 'p', or 's'");
+                    throw new JSONException("query elements must begin with a 'g', 'p', or 's'");
             }
 
             int startPos = pos+1;
             while (startPos<query.length()) {
                 sel = query.charAt(startPos);
                 if (query.charAt(startPos+1) != '(') {
-                    throw new Exception("error with query, second character must be an open paren at position "+(startPos+1));
+                    throw new JSONException("error with query, second character must be an open paren at position {0}",(startPos+1));
                 }
                 pos = query.indexOf(')', startPos+2);
                 if (pos<0) {
-                    throw new Exception("Error, can not find the closing paren char after position "+(startPos+2));
+                    throw new JSONException("Error, can not find the closing paren char after position {0}",(startPos+2));
                 }
                 val = query.substring(startPos+2, pos);
                 Vector<ImageInfo> oldGrp = vImages;
@@ -1498,7 +1494,7 @@ public class ImageInfo
                     case 'n':   //number range
                         int commapos = val.indexOf(",");
                         if (commapos < 0) {
-                            throw new Exception("The 'n' query must have a lower integer, a comma, then an upper number to form a number range");
+                            throw new JSONException("The 'n' query must have a lower integer, a comma, then an upper number to form a number range");
                         }
                         String lower = val.substring(0, commapos);
                         String higher = val.substring(commapos+1);
@@ -1530,7 +1526,7 @@ public class ImageInfo
                         }
                         break;
                     default:
-                        throw new Exception("secondary query elements must begin with a 'g' for tag, "
+                        throw new JSONException("secondary query elements must begin with a 'g' for tag, "
                             +"'d' for NOT tag, 'p' for pattern contains, 'b' for pattern not contains, "
                             +"'s' pattern starts,  or 'e' for pattern exact, 't' for duplicate size, "
                             +"'i' for index, and '!' for NOT index, 'n' for numeric range, 'u' for number of tags,"

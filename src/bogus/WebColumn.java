@@ -1,8 +1,9 @@
 package bogus;
 
-import bogus.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.purplehillsbooks.json.JSONException;
 
 /**
  * This is a definition of a column. This is an element of a schema, so a
@@ -71,8 +72,7 @@ public class WebColumn {
 		if (!colName.equalsIgnoreCase(newName)) {
 			WebColumn other = table.getColumn(newName);
 			if (other != null) {
-				throw new Exception("Can not rename column '" + colName + "' to '" + newName
-						+ "' because there already exists a column with that name!");
+				throw new JSONException("Can not rename column '{0}' to '{1}' because there already exists a column with that name!", colName, newName);
 			}
 		}
 		colName = newName;
@@ -129,7 +129,7 @@ public class WebColumn {
 				return;
 			}
 		}
-		throw new Exception("Not able to find a data type '" + newType + "'.");
+		throw new JSONException("Not able to find a data type '{0}'", newType);
 	}
 
 	public static WebColumn parseXML(Element parent) throws Exception {
@@ -142,8 +142,8 @@ public class WebColumn {
 		if (dataTypeStr != null) {
 			wc.setDataTypeByString(dataTypeStr.trim());
 			if (wc.dataType == 0) {
-				throw new Exception("Tried to set type to '" + dataTypeStr + "' and got "
-						+ wc.dataType);
+				throw new JSONException("Tried to set type to '{0}' and got {1}",
+						dataTypeStr, wc.dataType);
 			}
 		}
 		else {

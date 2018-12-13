@@ -7,6 +7,8 @@ package bogus;
 
 import java.util.Hashtable;
 
+import com.purplehillsbooks.json.JSONException;
+
 /**
  * This class help to support user authentication failure counting and lockout
  * timing. It maintains a hashtable of login attempt counts along with
@@ -52,8 +54,8 @@ public class LoginAttemptRecord {
 		}
 
 		// now complain about it
-		Exception me = new Exception("You have reached the login attempt limit of " + loginLimit
-				+ ". You will be locked out for " + loginLockoutMinutes + " minutes.");
+		Exception me = new JSONException("You have reached the login attempt limit of {0}. You will be locked out for {1} minutes.",
+		        loginLimit,loginLockoutMinutes);
 		throw me;
 	}
 

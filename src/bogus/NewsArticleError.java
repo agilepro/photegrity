@@ -4,6 +4,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.streams.CSVHelper;
 
 /**
@@ -54,7 +55,8 @@ public class NewsArticleError {
     public void assertOK() throws Exception {
         long embargoStart = System.currentTimeMillis() - TIMEOUT_ONE_HOUR;
         if (lastErrorTime > embargoStart) {
-            throw new Exception("Article " + articleNo + " has failed "+errorCount+" times, try again in "+ ((lastErrorTime-embargoStart)/60000) +" minutes");
+            throw new JSONException("Article {0} has failed {1} times, try again in {2} minutes",
+                    articleNo, errorCount, ((lastErrorTime-embargoStart)/60000));
         }
     }
     

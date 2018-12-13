@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
@@ -22,22 +23,7 @@ public class NewsActionSeekABit extends NewsAction {
 
     public NewsActionSeekABit(NewsBunch _seeker) throws Exception {
         seeker = _seeker;
-        /*
-        if (!seeker.hasTemplate()) {
-            String temp = seeker.getTemplate();
-            if (!temp.endsWith(".jpg")) {
-                throw new Exception("file template must end with .jpg: got ("+temp+")");
-            }
-            seeker.changeTemplate(temp, false);
-        }
-        if (!seeker.hasFolder()) {
-            seeker.changeFolder(seeker.getFolderLoc(), false);
-            File storeFile = seeker.getFolderPath();
-            if (!storeFile.exists()) {
-                storeFile.mkdirs();
-            }
-        }
-        */
+
         String template = seeker.getTemplate();
         if (!template.endsWith(".jpg")) {
             throw new Exception("template needs to end with jpg");
@@ -139,9 +125,9 @@ public class NewsActionSeekABit extends NewsAction {
         List<NewsArticle> artlist = seeker.getArticles();
         if (startInt == 0) {
             if (artlist.size() == 0) {
-                throw new Exception(
-                        "See Group only works when there is at least one article with that digest ("
-                                + seeker.tokenFill() + ").");
+                throw new JSONException(
+                        "See Group only works when there is at least one article with that digest ({0}).",
+                                seeker.tokenFill());
             }
             Random rand = new Random();
             int randomArticlePosition = rand.nextInt(artlist.size());
@@ -178,9 +164,8 @@ public class NewsActionSeekABit extends NewsAction {
         long seekPos = startInt;
         if (seekPos < ng.firstArticle || seekPos > ng.lastArticle) {
             // should only happen if news group is corrupt
-            throw new Exception("Strange situation the starting point (" + seekPos
-                    + ") is not between start (" + ng.firstArticle + ") and end (" + ng.lastArticle
-                    + ") of newsgroup.");
+            throw new JSONException("Strange situation the starting point ({0}) is not between start ({1}) and end ({2}) of newsgroup.", 
+                    seekPos, ng.firstArticle, ng.lastArticle);
         }
         out.flush();
         while (missCount < 16 && seekPos > ng.firstArticle && seekPos < ng.lastArticle) {

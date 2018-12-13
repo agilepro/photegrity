@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
@@ -42,7 +43,7 @@ public class NewsActionShrink extends NewsAction {
 		        ImageInfo ii = groupImages.get(position);
 		        position++;
 		        if (ii == null) {
-		            throw new Exception ("null image file where lastnum="+position);
+		            throw new JSONException ("null image file where lastnum={0}",position);
 		        }
                 out.write("\nShrinking: ");
 		        HTMLWriter.writeHtml(out, ii.getRelativePath());

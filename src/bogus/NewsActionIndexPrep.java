@@ -2,6 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 
 /**
@@ -28,7 +29,7 @@ public class NewsActionIndexPrep extends NewsAction {
             out.flush();
         }
         catch (Exception e) {
-            throw new Exception ("failure while preparing the index", e);
+            throw new JSONException ("failure while preparing the index", e);
         }
 	}
 

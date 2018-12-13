@@ -2,6 +2,7 @@ package bogus;
 
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 
@@ -41,7 +42,7 @@ public class NewsActionSpectrum extends NewsAction {
                 out.write(": ");
                 HTMLWriter.writeHtml(out, UtilityMethods.getErrorString(e));
                 if (++totalFails > 20) {
-                    throw new Exception("too many failures.", e);
+                    throw new JSONException("too many failures.", e);
                 }
             }
             out.flush();

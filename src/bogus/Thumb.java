@@ -13,6 +13,8 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.purplehillsbooks.json.JSONException;
+
 @SuppressWarnings("serial")
 public class Thumb extends javax.servlet.http.HttpServlet {
 
@@ -76,7 +78,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             if (!file.renameTo(newName)) {
                 Thread.sleep(1000);
                 if (!file.renameTo(newName)) {
-                    throw new Exception("oops, failed three times to " + context + ": " + newName);
+                    throw new JSONException("oops, failed three times to {0}: {1}", context, newName);
                 }
             }
         }
@@ -89,7 +91,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             }
         }
         if (!fullFile.exists()) {
-            throw new Exception("Error, attempting to make a thumbnail from a file that does not exist!: "+fullFile);
+            throw new JSONException("Error, attempting to make a thumbnail from a file that does not exist!: {0}", fullFile);
         }
 
         // only one file operation run at a time
@@ -110,7 +112,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             Thumbnail.makeSquareFile(fullFile, thumbFile, thumbSize, 50);
 
             if (!thumbFile.exists()) {
-                throw new Exception("Hey, just created file and does not exist: "+thumbFile);
+                throw new JSONException("Hey, just created file and does not exist: {0}",thumbFile);
             }
             if (thumbFile.length() < 1000) {
                 //something went wrong, get rid of garbage
@@ -119,7 +121,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
         }
 
         if (!thumbFile.exists()) {
-            throw new Exception("Hey, failed tomake thumb: "+thumbFile+", from file: "+fullFile);
+            throw new JSONException("Hey, failed to make thumb: {0}, from file: {1}", thumbFile, fullFile);
         }
 
 

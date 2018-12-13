@@ -3,6 +3,7 @@ package bogus;
 import java.io.File;
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 
 /**
@@ -36,19 +37,19 @@ public class NewsActionDiscard extends NewsAction {
 	        out.write("\nDISCARD: Backing Up Data to "+backupFolder);
 	        File errFile = new File(container, ng.groupName + ".err2");
 	        if (!errFile.exists()) {
-	        	throw new Exception("Don't understand why the error file does not exist: "+errFile);
+	        	throw new JSONException("Don't understand why the error file does not exist: {0}",errFile);
 	        }
 	        File newsFile = new File(container, ng.groupName + ".news");
 	        if (!newsFile.exists()) {
-	        	throw new Exception("Don't understand why the news file does not exist: "+newsFile);
+	        	throw new JSONException("Don't understand why the news file does not exist: {0}",newsFile);
 	        }
 	        File pattFile = new File(container, ng.groupName + ".patt");
 	        if (!pattFile.exists()) {
-	        	throw new Exception("Don't understand why the bunches file does not exist: "+pattFile);
+	        	throw new JSONException("Don't understand why the bunches file does not exist: {0}",pattFile);
 	        }
 	        File localMapFile = new File(container, "newsLocalMap.csv");
 	        if (!localMapFile.exists()) {
-	        	throw new Exception("Don't understand why the pattern map file does not exist: "+localMapFile);
+	        	throw new JSONException("Don't understand why the pattern map file does not exist: {0}",localMapFile);
 	        }
 	       
 	        File errFileBack = new File(backupFolder, ng.groupName + ".err2");
@@ -71,7 +72,7 @@ public class NewsActionDiscard extends NewsAction {
 	        out.flush();
     	}
     	catch (Exception e) {
-    		throw new Exception("Problem occurred discarding news articles "+rangeStart+" to "+rangeEnd, e);
+    		throw new JSONException("Problem occurred discarding news articles {0} to {1}", e, rangeStart, rangeEnd);
     	}
     }
 

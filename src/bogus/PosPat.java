@@ -10,6 +10,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
+
 /**
  * Images are grouped into 'pospat' group, that is a particular pattern in a
  * particular location on the disk. This object keeps statistics about that
@@ -90,13 +92,13 @@ public class PosPat {
     public static PosPat getPosPatFromSymbol(String symbol) throws Exception {
     	int colonPos = symbol.indexOf(':');
     	if (colonPos<=0) {
-    		throw new Exception("improperly formed symbol does not have disk name before colon: ("+symbol+")");
+    		throw new JSONException("improperly formed symbol does not have disk name before colon: ({0})",symbol);
     	}
     	DiskMgr dm = DiskMgr.getDiskMgr(symbol.substring(0, colonPos));
     	String rest = symbol.substring(colonPos+1);
     	int slashPos = rest.lastIndexOf('/')+1;
     	if (slashPos<=0) {
-    		throw new Exception("improperly formed symbol does not have slash before pattern: ("+symbol+")");
+    		throw new JSONException("improperly formed symbol does not have slash before pattern: ({0})",symbol);
     	}
     	String localPath = rest.substring(0, slashPos);
     	String pattern = rest.substring(slashPos);
@@ -206,7 +208,7 @@ public class PosPat {
         if(pos>0) {
             PosPat doubleCheck = ppIndex.get(pos-1);
             if ( doubleCheck.pattern.equalsIgnoreCase(_pattern) ) {
-                throw new Exception("findFirstEntryWithPattern did not succeed in finding the first entry with pattern ("+_pattern+")");
+                throw new JSONException("findFirstEntryWithPattern did not succeed in finding the first entry with pattern ({0})",_pattern);
             }
         }
 
@@ -220,7 +222,7 @@ public class PosPat {
                 return insertWithoutSorting(_dm, _localPath, _pattern, pos);
             }
             if (compPatt>0) {
-                throw new Exception("Should never happen, got a pattern '"+pp.pattern+"' that is lower than '"+_pattern+"'");
+                throw new JSONException("Should never happen, got a pattern '{0}' that is lower than '{1}'", pp.pattern, _pattern);
             }
             //for everything else (comp==0) below, means that the patterns equals
 
@@ -286,14 +288,14 @@ public class PosPat {
         if ( doubleCheck.diskMgr.diskName.equalsIgnoreCase(_dm.diskName)
                 && doubleCheck.localPath.equalsIgnoreCase(_localPath)
                 && doubleCheck.pattern.equalsIgnoreCase(_pattern) ) {
-            throw new Exception("Attempt to insert BEFORE an element that is identical");
+            throw new JSONException("Attempt to insert BEFORE an element that is identical");
         }
         if (pos>0) {
             doubleCheck = ppIndex.get(pos-1);
             if ( doubleCheck.diskMgr.diskName.equalsIgnoreCase(_dm.diskName)
                     && doubleCheck.localPath.equalsIgnoreCase(_localPath)
                     && doubleCheck.pattern.equalsIgnoreCase(_pattern) ) {
-                throw new Exception("Attempt to insert AFTER an element that is identical");
+                throw new JSONException("Attempt to insert AFTER an element that is identical");
             }
         }
 
@@ -340,7 +342,7 @@ public class PosPat {
     public static synchronized void removeImage(ImageInfo ii) throws Exception {
         PosPat pp = findExisting(ii.diskMgr, ii.getRelativePath(), ii.getPattern());
         if (pp==null) {
-            throw new Exception("Why remove an image that is not in the index!: "+ii.getPatternSymbol());
+            throw new JSONException("Why remove an image that is not in the index!: {0}",ii.getPatternSymbol());
         }
         for (String aGroup : ii.getTagNames()) {
             pp.removeTag(aGroup);
@@ -563,7 +565,7 @@ public class PosPat {
     public static PosPat getPosPatFromPath(File input) throws Exception {
         try {
             if (!input.exists()) {
-                throw new Exception("Input file must exist");
+                throw new JSONException("Input file must exist");
             }
             File folder = input;
             String pattern = "";
@@ -574,14 +576,14 @@ public class PosPat {
             }
             DiskMgr dm = DiskMgr.findDiskMgrFromPath(folder);
             if (dm==null) {
-                throw new Exception("Unable to locate a DiskManager for the path "+folder.toString());
+                throw new JSONException("Unable to locate a DiskManager for the path {0}", folder);
             }
             String localPath = dm.getOldRelativePathWithoutSlash(folder);
             PosPat res = findOrCreate(dm, localPath, pattern);
             return res;
         }
         catch (Exception e) {
-            throw new Exception("Unable to create a PosPath object for "+input.toString());
+            throw new JSONException("Unable to create a PosPath object for {0}",input);
         }
     }
 

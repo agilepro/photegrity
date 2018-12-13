@@ -186,7 +186,7 @@ public class WebObject
         throws Exception
     {
         if (compValue==null) {
-            throw new Exception("Program logic error.  Attempt to find an object with a null key value.");
+            throw new JSONException("Program logic error.  Attempt to find an object with a null key value.");
         }
         if (key==null) {
             return false;  //there is no key
@@ -198,7 +198,7 @@ public class WebObject
         throws Exception
     {
         if (compValue==null) {
-            throw new Exception("Program logic error.  Attempt to compare field "+fieldName+" with a null value.");
+            throw new JSONException("Program logic error.  Attempt to compare field {0} with a null value.", fieldName);
         }
         return compValue.equalsIgnoreCase(getFieldValue(fieldName));
     }
@@ -207,7 +207,7 @@ public class WebObject
         throws Exception
     {
         if (compValue==null) {
-            throw new Exception("Program logic error.  Attempt to compare field "+fieldName+" with a null value.");
+            throw new JSONException("Program logic error.  Attempt to compare field {0} with a null value.", fieldName);
         }
         return compValue.compareToIgnoreCase(getFieldValue(fieldName));
     }

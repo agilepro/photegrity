@@ -19,8 +19,7 @@ public class UtilityMethods {
 			return s.substring(pos, len);
 		}
 		catch (Exception e) {
-			throw new Exception("Substring exception: [" + s + "] (len " + s.length() + ") at "
-					+ pos + " for len " + len + "; " + e.getMessage());
+			throw new JSONException("Substring exception: [{0}] (len {1}) at {2} for len {3}", e, s, s.length(), pos, len);
 		}
 	}
 
@@ -89,8 +88,7 @@ public class UtilityMethods {
 			throws Exception {
 		String val = defParam(request, paramName, null);
 		if (val == null || val.length() == 0) {
-			throw new Exception("Page " + pageName + " requires a parameter named '" + paramName
-					+ "'. ");
+			throw new JSONException("Page {0} requires a parameter named '{1}'", pageName, paramName);
 		}
 		return val.trim();
 	}
@@ -219,10 +217,10 @@ public class UtilityMethods {
     public static void copyFileContents(File oldFilePath, File newFilePath) throws Exception {
     	try {
 	    	if (!oldFilePath.exists()) {
-	    		throw new Exception("The source file does not exist: "+oldFilePath);
+	    		throw new JSONException("The source file does not exist: {0}",oldFilePath);
 	    	}
 	    	if (newFilePath.exists()) {
-	    		throw new Exception("The destination file already exists: "+newFilePath);
+	    		throw new JSONException("The destination file already exists: {0}",newFilePath);
 	    	}
 	        FileInputStream fis = new FileInputStream(oldFilePath);
 	        FileOutputStream fos = new FileOutputStream(newFilePath);
@@ -236,7 +234,7 @@ public class UtilityMethods {
 	        fos.close();
     	}
     	catch (Exception e) {
-    		throw new Exception("Can not copy file "+oldFilePath+" to "+newFilePath, e);
+    		throw new JSONException("Can not copy file {0} to {1}", e, oldFilePath, newFilePath);
     	}
     }
     

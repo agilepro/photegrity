@@ -7,7 +7,11 @@
 package bogus;
 
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import com.purplehillsbooks.json.JSONException;
 
 
 public class YEnc
@@ -67,7 +71,7 @@ public class YEnc
                 for (int i = 0; i < inSize; i++) {
                     int ch = ((int)inBuffer[i])&0xFF;
                     if (ch<0) {
-                        throw new Exception("calculation incorrect, did not get unsigned value");
+                        throw new JSONException("calculation incorrect, did not get unsigned value");
                     }
                     if (escape) {
                         outBuffer[outSize++] = (byte)((ch - 106 + 256)&0xFF);
@@ -86,7 +90,7 @@ public class YEnc
             }
         }
         catch (Exception ioe)  {
-            throw new Exception("Unable to complete the YEnc decoding", ioe);
+            throw new JSONException("Unable to complete the YEnc decoding", ioe);
         }
         return true;
     }
@@ -249,7 +253,7 @@ public class YEnc
         int c1 = lin.read();
         if (c1<0) {
             if (c1<-1) {
-                throw new Exception("Calculation error, got a value less than negative 1");
+                throw new JSONException("Calculation error, got a value less than negative 1");
             }
             inputDone = true;
             return false;
@@ -265,7 +269,7 @@ public class YEnc
         while(inSize<maxLineLen) {
             if (c1<0) {
                 if (c1<-1) {
-                    throw new Exception("Calculation error, got a value less than negative 1");
+                    throw new JSONException("Calculation error, got a value less than negative 1");
                 }
                 inputDone = true;
                 return (inSize>0);

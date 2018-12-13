@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
+import com.purplehillsbooks.json.JSONException;
+
 /**
  * represents a single file from a collection of news articles
  */
@@ -147,7 +149,7 @@ public class NewsFile {
     public NewsArticle getPartOrFail(int num) throws Exception {
         if (parts.size() == 0) {
             // this should never happen
-            throw new Exception("This NewsFile object has no articles at all in it");
+            throw new JSONException("This NewsFile object has no articles at all in it");
         }
         int expect = partsExpected();
 
@@ -158,8 +160,7 @@ public class NewsFile {
         }
 
         if (num > expect) {
-            throw new Exception("Can not provide part #" + num + " when the file only has "
-                    + expect + " parts.");
+            throw new JSONException("Can not provide part #{0} when the file only has {1} parts.", num, expect);
         }
         for (NewsArticle art : parts) {
             int partNo = art.getMultiFileNumerator();
@@ -167,8 +168,7 @@ public class NewsFile {
                 return art;
             }
         }
-        throw new Exception("Strange, did not find a part " + num + " even though there are "
-                + parts.size() + " parts.");
+        throw new JSONException("Strange, did not find a part {0} even though there are {1} parts.", num, parts.size());
     }
 
     public NewsArticle getPartOrNull(int num) throws Exception {
@@ -221,16 +221,16 @@ public class NewsFile {
      */
     public void assertComplete() throws Exception {
         if (parts.size() == 0) {
-        	throw new Exception("There are no parts at all for this file.");
+        	throw new JSONException("There are no parts at all for this file.");
         }
         NewsArticle art0 = parts.get(0);
         int num = art0.getMultiFileDenominator();
         if (parts.size() < num) {
-        	throw new Exception("There are only "+parts.size()+" parts, expected "+num+" for this file.");
+        	throw new JSONException("There are only {0} parts, expected {1} for this file.",parts.size(),num);
         }
         for (int i = 0; i < num; i++) {
             if (getPartOrNull(i + 1) == null) {
-                throw new Exception("File part "+(i + 1)+" is missing from "+num+".");
+                throw new JSONException("File part {0} is missing from {1}.", (i + 1), num);
             }
         }
     }
@@ -257,7 +257,7 @@ public class NewsFile {
             content.delete();
         }
         if (content.exists()) {
-            throw new Exception("For some reason unable to delete file: " + content.toString());
+            throw new JSONException("For some reason unable to delete file: {0}",content);
         }
     }
 
@@ -327,7 +327,7 @@ public class NewsFile {
             return art.articleNo;
         }
         // this only happens on an empty file, which should be qutie rare
-        throw new Exception(
+        throw new JSONException(
                 "This file does not have any associated articles, and so can't return any article numbers.");
     }
 
@@ -362,17 +362,17 @@ public class NewsFile {
 
         DiskMgr dm2 = DiskMgr.findDiskMgrFromPath(destPath);
         if (dm2==null) {
-            throw new Exception("Not able to find a DM for: ("+destPath+")");
+            throw new JSONException("Not able to find a DM for: ({0})",destPath);
         }
 
         moveFileContents(srcPath, destPath);
 
         // check to see if it really happened
         if (srcPath.exists()) {
-            throw new Exception("expected source file to be gone, but it is not: " + srcPath);
+            throw new JSONException("expected source file to be gone, but it is not: {0} ",srcPath);
         }
         if (!destPath.exists()) {
-            throw new Exception("expected to rename but destination does not exist: " + destPath);
+            throw new JSONException("expected to rename but destination does not exist: {0}", destPath);
         }
         System.out.println("renameFracDeluxe finished in "+(System.currentTimeMillis()-startTime)+"ms");
     }
@@ -422,8 +422,7 @@ public class NewsFile {
         List<ImageInfo> images = ImageInfo.findAllMatching(disk.diskName, relPath, patternFromFile, val);
         if (images.size()==0) {
             if (fail) {
-                throw new Exception("Unable to find an image for "+disk.diskName+":"
-                            +relPath+patternFromFile+"[val="+val+" or "+fracName.numPart+"]");
+                throw new JSONException("Unable to find an image for {0}:{1}{2}[val={3} or {4}]",disk.diskName,relPath,patternFromFile,fracName.numPart);
             }
             return null;
         }
@@ -450,24 +449,21 @@ public class NewsFile {
         
         if (!oldFolderPath.exists()) {
             // we probably should not be here since there is nothing to move.
-            throw new Exception("moveFile was called when the source folder (" + oldFolderPath
-                    + ") does not exist .. probably an error");
+            throw new JSONException("moveFile was called when the source folder ({0}) does not exist .. probably an error", oldFolderPath);
         }
         if (!newFolderPath.exists()) {
             // we probably should not be here since the place to move to has not
             // been created
-            throw new Exception("moveFile was called when the destination folder (" + newFolderPath
-                    + ") does not exist .. probably an error");
+            throw new JSONException("moveFile was called when the destination folder ({0}) does not exist .. probably an error", newFolderPath);
         }
         if (oldFolderPath.equals(newFolderPath)) {
-            throw new Exception("Apparently we are trying to move to old location: "
-                    + newFolderPath);
+            throw new JSONException("Apparently we are trying to move to old location: {0}",newFolderPath);
         }
 
         File oldFilePath = fracName.getBestPath(oldFolderPath);
         File newFilePath = fracName.getBestPath(newFolderPath);
         if (!oldFilePath.exists()) {
-        	throw new Exception("the source file "+oldFilePath+" does not exist, so there is no file to move! "+oldFilePath);
+        	throw new JSONException("the source file {0} does not exist, so there is no file to move!",oldFilePath);
         }
         if (newFilePath.exists()) {
         	//so ... don't move it, just remove the old one
@@ -479,10 +475,10 @@ public class NewsFile {
         
         // check to see if it really happened
         if (oldFilePath.exists()) {
-            throw new Exception("expected source file to be gone, but it is not: " + oldFilePath);
+            throw new JSONException("expected source file to be gone, but it is not: {0}",oldFilePath);
         }
         if (!newFilePath.exists()) {
-            throw new Exception("expected to rename but destination does not exist: " + newFilePath);
+            throw new JSONException("expected to rename but destination does not exist: {0}",newFilePath);
         }
     }
     

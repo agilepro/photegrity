@@ -31,7 +31,7 @@ public class TagInfo {
     public static Vector<TagInfo> getAllTagsStartingWith(String start) throws Exception {
         try {
             if (start == null) {
-                throw new Exception(
+                throw new JSONException(
                         "a null string value was passed as the start parameter to getAllGroupsStartingWith.");
             }
 
@@ -54,10 +54,10 @@ public class TagInfo {
 
     private TagInfo(String tname) throws Exception {
         if (tname == null) {
-            throw new Exception("Attempt to create a tag with a null name -- not allowed");
+            throw new JSONException("Attempt to create a tag with a null name -- not allowed");
         }
         if (tname.length() == 0) {
-            throw new Exception("Attempt to create a tag with a 0 length name -- not allowed");
+            throw new JSONException("Attempt to create a tag with a 0 length name -- not allowed");
         }
         tagName = tname;
         tagNameLC = tname.toLowerCase();

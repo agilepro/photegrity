@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import org.apache.commons.net.nntp.ArticleInfo;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.CSVHelper;
 import com.purplehillsbooks.streams.MemFile;
@@ -57,7 +58,7 @@ public class NewsArticle {
 
     public NewsArticle(NewsGroup newGroup, long articleNumber, String _subject, String _from, String _date) throws Exception {
         if (newGroup == null) {
-            throw new Exception(
+            throw new JSONException(
                     "Received a null newGroupName parameter to the NewsGroup constructor.");
         }
         group = newGroup;
@@ -72,10 +73,10 @@ public class NewsArticle {
         group.setGroupOnSession();
         ArticleInfo pointer = new ArticleInfo();
         if (!NewsGroup.connect) {
-            throw new Exception("Can't setSessionForThisArticle because not connected.");
+            throw new JSONException("Can't setSessionForThisArticle because not connected.");
         }
         if (!NewsGroup.session.internalSelectArticle(articleNo, pointer)) {
-            throw new Exception("unable to access article " + articleNo);
+            throw new JSONException("unable to access article " + articleNo);
         }
     }
 
@@ -101,9 +102,8 @@ public class NewsArticle {
             String f = getHeaderFrom();
             nBunch = group.getBunch(d,f);
             if (nBunch == null) {
-                throw new Exception(
-                        "For unknown reason, can not get a NewsBunch object for digest (" + d
-                                + "," + f + ")");
+                throw new JSONException(
+                        "For unknown reason, can not get a NewsBunch object for digest ({0},{1})", d, f);
             }
         }
         return nBunch;
@@ -152,7 +152,7 @@ public class NewsArticle {
     public static String[] parseHeader(long artNo) throws Exception {
         System.out.println("HEADER - start "+artNo+" - "+(System.currentTimeMillis()%10000));
         if (!NewsGroup.connect) {
-            throw new Exception("Can't get the article when not connect.");
+            throw new JSONException("Can't get the article when not connect.");
         }
         Reader msgReader = NewsGroup.session.getArticleHeader(artNo);
         String[] parsedValues = readHeader(msgReader);
@@ -432,7 +432,7 @@ public class NewsArticle {
     }
     public FracturedFileName fillFracturedTemplate(FracturedFileName template, int bias) throws Exception {
         if (template==null) {
-            throw new Exception("ProgramLogicError: fillFracturedTemplate called with a null template");
+            throw new JSONException("ProgramLogicError: fillFracturedTemplate called with a null template");
         }
         FracturedFileName filled = new FracturedFileName();
         filled.prePart = fillTemplate(template.prePart);
@@ -463,11 +463,11 @@ public class NewsArticle {
 
     public String getFileNameOrFail() throws Exception {
         if (nBunch == null) {
-            throw new Exception(
+            throw new JSONException(
                     "Cant calculate the file name because this article does not have associated pattern object");
         }
         if (!nBunch.hasTemplate()) {
-            throw new Exception(
+            throw new JSONException(
                     "Cant calculate the file name because pattern object has no file template");
         }
         return getFileName();
@@ -555,7 +555,7 @@ public class NewsArticle {
 
     public InputStream getBodyContent() throws Exception {
         if (buffer == null) {
-            throw new Exception(
+            throw new JSONException(
                     "body has not been read yet.  Do that before calling getBodyContent.");
         }
         return new BodyContentInputStream(buffer.getInputStream());
@@ -564,7 +564,7 @@ public class NewsArticle {
     
     public Reader getHeaderFromBody() throws Exception {
         if (buffer == null) {
-            throw new Exception(
+            throw new JSONException(
                     "body has not been read yet.  Do that before calling getBodyContent.");
         }
         return new BodyHeaderReader(buffer.getReader());
@@ -621,7 +621,7 @@ public class NewsArticle {
 
     public void streamDecodedContent(OutputStream os) throws Exception {
         if (buffer == null) {
-            throw new Exception(
+            throw new JSONException(
                     "body has not been read yet.  Do that before calling streamDecodedContent.");
         }
         
@@ -654,7 +654,7 @@ public class NewsArticle {
         else {
             File f = getFilePath();
             if (f == null) {
-                throw new Exception(
+                throw new JSONException(
                         "No body content in memory, and can not stream from disk because the storage path or name template has not been set.");
             }
             InputStream is = new FileInputStream(f);
@@ -670,12 +670,12 @@ public class NewsArticle {
 
     public void storeBufferToDisk() throws Exception {
         if (buffer == null) {
-            throw new Exception(
+            throw new JSONException(
                     "ProgramLogicError: Can not store buffer to disk when there is no buffer!");
         }
         File f = getFilePath();
         if (f == null) {
-            throw new Exception(
+            throw new JSONException(
                     "Can not store this buffer to disk because the storage path or name template has not been set.");
         }
         if (f.exists()) {

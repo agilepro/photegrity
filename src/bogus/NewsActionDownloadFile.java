@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.HTMLWriter;
 import com.purplehillsbooks.streams.MemFile;
@@ -57,9 +58,8 @@ public class NewsActionDownloadFile extends NewsAction {
             }
             File folder = bunch.getFolderPath();
             if (!folder.exists()) {
-                throw new Exception(
-                        "Can not retrieve this file. The folder to store in does not exist: ("
-                                + bunch.getFolderPath() + ")  Create before downloading file.");
+                throw new JSONException(
+                        "Can not retrieve this file. The folder to store in does not exist: ({0})  Create before downloading file.", bunch.getFolderPath());
             }
             File theFilePath = newsFile.getFilePath();
             if (theFilePath.exists()) {

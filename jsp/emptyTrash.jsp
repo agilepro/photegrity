@@ -45,28 +45,31 @@
 
     int lastNum = 0;
 
-    while (e.hasMoreElements())
-    {
+    while (e.hasMoreElements()) {
         ImageInfo ii = (ImageInfo)e.nextElement();
-        if (ii == null)
-        {
+        if (ii == null) {
             throw new Exception ("null image file where lastnum="+lastNum);
         }
-        if (!ii.isTrashed)
-        {
+        if (!ii.isTrashed){
             continue;
         }
-        if (ii.isTrashed)
-        {
-            out.write("\n<li> ");
-            HTMLWriter.writeHtml(out, ii.getFilePath().toString());
-            out.flush();
-            if (ii.isNullImage()) {
-                out.write("NULL");
-            }
-            else {
-                ii.suppressImage();
-            }
+        File fullPath = ii.getFilePath();
+        if (!fullPath.exists()) {
+            out.write("\n<li> ~missing~ before delete: "+fullPath+"</li>");
+        }
+        out.write("\n<li> ");
+        HTMLWriter.writeHtml(out, ii.getFilePath().toString());
+        out.flush();
+        if (ii.isNullImage()) {
+            out.write("NULL");
+        }
+        else {
+            System.out.println("Calling suppressImage");
+            ii.suppressImage();
+            System.out.println("Returned from suppressImage");
+            if (fullPath.exists()) {
+                out.write("\n<li> ~failed~ to delete: "+fullPath+"</li>");
+            }            
         }
     }
 

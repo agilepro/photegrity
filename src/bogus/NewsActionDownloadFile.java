@@ -118,7 +118,7 @@ public class NewsActionDownloadFile extends NewsAction {
                     if (!art.confirmHeadersFromBody()) {
                         out.write("\n    HEADERS CHANGED! " + art.getHeaderSubject());
                         out.flush();
-                        throw new Exception("HEADERS CHANGED "+ art.articleNo + "|" + art.getHeaderSubject());
+                        throw new JSONException("HEADERS CHANGED {0}|{1}", art.articleNo, art.getHeaderSubject());
                     }
                 }
                 else {

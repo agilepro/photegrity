@@ -567,10 +567,9 @@ public class DiskMgr {
      * directory, or else make an entry in the supp.txt file in order to hide it
      * from future manipulations.
      */
-    public void suppressFile(File path, String name) throws Exception {
-        assertOnDisk(path);
+    public void suppressFile(File theFile) throws Exception {
+        assertOnDisk(theFile);
         try {
-            File theFile = new File(path, name);
             if (!theFile.exists()) {
                 return; // the file is already gone
             }
@@ -582,9 +581,14 @@ public class DiskMgr {
                 throw new JSONException("OS failed to delete local file {0}",
                        theFile.getAbsolutePath());
             }
+            System.out.println("DELETED FILE: "+theFile);
+            if (theFile.exists()) {
+                throw new JSONException("Unable to delete Local file {0}",
+                        theFile.getAbsolutePath());
+            }
         }
         catch (Exception e) {
-            throw new JSONException("Unable to suppress file disk={0}, path={1}, name={2}", e, diskName, path, name);
+            throw new JSONException("Unable to suppress file disk={0}, fullpath={1}", e, diskName, theFile);
         }
         isChanged = true;
     }
@@ -666,7 +670,7 @@ public class DiskMgr {
             fis.close();
             fos.close();
 
-            fromDisk.suppressFile(fPath, fileName);
+            fromDisk.suppressFile(fromFile);
             if (isLoaded) {
                 isChanged = true;
             }

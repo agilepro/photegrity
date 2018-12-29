@@ -237,7 +237,7 @@
     <table>
     <tr></td>Pattern</td></tr>
     <%
-    Vector<PosPat> bunchPosPats = bunch.getPosPatList();
+    List<PosPat> bunchPosPats = bunch.getPosPatList();
     PosPat.sortByPattern(bunchPosPats);
     for (PosPat ppp : bunchPosPats) {
         String ppp_patt = ppp.getPattern();

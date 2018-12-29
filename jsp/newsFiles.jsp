@@ -413,7 +413,7 @@
         <input type="checkbox" ng-model="showDownloaded"> Show Down
     <li>
     Pattern:  <%
-    Vector<PosPat> bunchPosPats = bunch.getPosPatList();
+    List<PosPat> bunchPosPats = bunch.getPosPatList();
     PosPat.sortByPattern(bunchPosPats);
     for (PosPat ppp : bunchPosPats) {
         String ppp_patt = ppp.getPattern();

@@ -1,7 +1,6 @@
 <%@page errorPage="error.jsp"
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="bogus.DiskMgr"
-%><%@page import="bogus.Exception2"
 %><%@page import="bogus.TagInfo"
 %><%@page import="bogus.ImageInfo"
 %><%@page import="bogus.PatternInfo"

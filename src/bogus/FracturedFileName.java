@@ -37,7 +37,11 @@ public class FracturedFileName {
         FracturedFileName ffn = new FracturedFileName();
 
         //if a null string was passed in, remain well behaved
-        if (fileName==null || fileName.length()==0) {
+        if (fileName==null) {
+            return ffn;
+        }
+        if (fileName.length()<4) {
+            ffn.prePart = fileName;
             return ffn;
         }
         // Now get the pattern from the file name

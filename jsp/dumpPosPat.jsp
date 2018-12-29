@@ -6,6 +6,7 @@
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Enumeration"
+%><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
 %><%@page import="bogus.PosPat"
 %><%@page import="bogus.ImageInfo"
@@ -64,7 +65,7 @@ Start: <input name="start" value="<%=start%>">
 <table>
 <%
 
-    Vector<PosPat> vFiles = PosPat.getAllEntries();
+    List<PosPat> vFiles = PosPat.getAllEntries();
     int cx=-1;
     int count = 0;
     String lastPat = "zyzy";

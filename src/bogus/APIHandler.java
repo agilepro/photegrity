@@ -341,7 +341,7 @@ public class APIHandler {
     	        DiskMgr dm = DiskMgr.getDiskMgr(disk);
 	            File sourceFolder = dm.getFilePath(path);
     	        if ("del".equals(cmd)) {
-    	            dm.suppressFile(sourceFolder, fn);
+    	            dm.suppressFile(new File(sourceFolder, fn));
     	            resInts.put("del", "success");
     	            sourceToClean = sourceFolder;
     	            sourceDM = dm;

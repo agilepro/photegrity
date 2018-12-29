@@ -2,7 +2,6 @@
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="bogus.DiskMgr"
 %><%@page import="bogus.ImageInfo"
-%><%@page import="bogus.Exception2"
 %><%@page import="bogus.UtilityMethods"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileInputStream"
@@ -15,6 +14,7 @@
 %><%@page import="java.util.Properties"
 %><%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONException"
 %><%
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();
@@ -133,7 +133,7 @@
             }
         }
         catch (Exception e) {
-            throw new Exception2("Unable to scan directory ("+startDir+")",e);
+            throw new JSONException("Unable to scan directory ({0})",e,startDir);
         }
     }
 
@@ -168,7 +168,7 @@
             }
         }
         catch (Exception e) {
-            throw new Exception2("Unable to scan directory ("+startDir+")",e);
+            throw new JSONException("Unable to scan directory ({0})",e,startDir);
         }
     }
 

@@ -26,7 +26,7 @@ public class NewsActionSeekABit extends NewsAction {
 
         String template = seeker.getTemplate();
         if (!template.endsWith(".jpg")) {
-            throw new Exception("template needs to end with jpg");
+            throw new JSONException("template needs to end with jpg: {0}", template);
         }
         seeker.isSeeking = true;
         seeker.pState = NewsBunch.STATE_GETABIT;
@@ -216,7 +216,7 @@ public class NewsActionSeekABit extends NewsAction {
                 if (errorCount++ > 5) {
                     seeker.pState = NewsBunch.STATE_ERROR;
                     seeker.failureMessage = e;
-                    throw new Exception("Too many errors", e);
+                    throw new JSONException("Too many errors", e);
                 }
             }
             if (System.currentTimeMillis() > deadline) {

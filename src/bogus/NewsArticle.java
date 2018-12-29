@@ -51,10 +51,9 @@ public class NewsArticle {
 
     private static String[] options = { "Subject:", "From:", "Date:" };
 
-    //private String[] optionValue = new String[3];
-    String headerSubject;
-    String headerFrom;
-    String headerDate;
+    private String headerSubject;
+    private String headerFrom;
+    private String headerDate;
 
     public NewsArticle(NewsGroup newGroup, long articleNumber, String _subject, String _from, String _date) throws Exception {
         if (newGroup == null) {
@@ -603,6 +602,7 @@ public class NewsArticle {
         }
         if (buffer == null) {
         	getMsgBody();
+        	confirmHeadersFromBody();
         }
         InputStream is = getBodyContent();
         StringBuffer firstTwenty = new StringBuffer(22);
@@ -771,7 +771,10 @@ public class NewsArticle {
         jo.put("from", this.getHeaderFrom());
         jo.put("date", this.getHeaderDate());
         jo.put("subject", this.getHeaderSubject());
-        jo.put("dig", this.getHeaderSubject());
+        jo.put("dig", this.getDigest()); 
+        jo.put("bunch", nBunch.getJSON()); 
+        jo.put("isDownloading", this.isDownloading);
+        jo.put("headersChanged", this.headersChanged);
         jo.put("fileName", this.getFileName());
         jo.put("viz", this.isOnDisk());
         File filePathX = this.getFilePath();

@@ -89,7 +89,7 @@
     }
 
     //find the offset in the master pattern list
-    Vector<PosPat> allPatts = PosPat.getAllEntries();
+    List<PosPat> allPatts = PosPat.getAllEntries();
 
     int min = 0;
     int max = allPatts.size();

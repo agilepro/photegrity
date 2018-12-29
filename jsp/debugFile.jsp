@@ -55,7 +55,8 @@
         throw new Exception("The page newsMatch.jsp requires an article number with header that have been downloaded.");
     }
     NewsArticle art = (NewsArticle) newsGroup.getArticleOrNull(artnoInt);
-    NewsBunch npatt = newsGroup.getBunch(art.getDigest(), art.getHeaderFrom());
+    String expectedDigest = art.getDigest();
+    NewsBunch npatt = newsGroup.getBunch(expectedDigest, art.getHeaderFrom());
     NewsFile nf = npatt.getFileForArticle(art);
 
     String thisUrl = "debugFile.jsp?artno="+artnoInt;
@@ -69,6 +70,12 @@
 <html>
 <body>
 <h3>Debug NewsFile</h3>
+
+<style>
+.spacey tr td {
+    padding:3px;
+}
+</style>
 
 <table>
 
@@ -85,18 +92,29 @@
 <tr><td>Mapped: </td><td><b><%if (nf.isMapped()) {%>Mapped<%}else{%>NOT Mapped<%}%></b></td></tr>
 <tr><td>Bunch Numerator: </td><td><b><%=npatt.numerator%></b></td></tr>
 
+</table>
+
+<table class="spacey">
 <%
     int count = 0;
     for (NewsArticle nart: nf.getArticles()) {
 
         %><tr><td>Art <%=count++%></td>
-            <td><a href="newsOne.jsp?artno=<%=nart.getNumber()%>"><%=nart.getNumber()%></a> -
-            <a href="newsDump.jsp?artno=<%=nart.getNumber()%>&high=<%=encodedHeaderSubj%>">Dump</a>
-            <%=nart.getMultiFileNumerator()%>,
-            <%=nart.getMultiFileDenominator()%>
-            <% if (nart.canServeContent()) { %>[Downloaded]<% } else { %>[Empty]<% } %> -
-            <%HTMLWriter.writeHtml(out, nart.getHeaderSubject() ); %>
-            </td></tr><%
+            <td><a href="newsOne.jsp?artno=<%=nart.getNumber()%>"><%=nart.getNumber()%></a></td>
+            <td><a href="newsDump.jsp?artno=<%=nart.getNumber()%>&high=<%=encodedHeaderSubj%>">Dump</a></td>
+            <td><%=nart.getMultiFileNumerator()%></td>
+            <td><%=nart.getMultiFileDenominator()%></td>
+            <td><% if (nart.canServeContent()) { %>[Downloaded]<% } else { %>[Empty]<% } %></td>
+            <td><%HTMLWriter.writeHtml(out, nart.getHeaderSubject() ); %></td>
+            </tr><%
+            
+            if (nart.headersChanged) {
+                %>
+                <tr><td colspan="8"><pre>
+                    <%nart.getJSON().write(out,2,2);%>
+                </pre></td></tr>
+                <%
+            }
     }
 
 %>

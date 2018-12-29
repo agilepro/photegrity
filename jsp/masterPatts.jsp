@@ -8,6 +8,7 @@
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Arrays" %>
 <%@page import="java.util.Enumeration" %>
+<%@page import="java.util.List" %>
 <%@page import="java.util.Vector" %>
 <%@page import="bogus.PatternInfo" %>
 <%@page import="bogus.TagInfo" %>
@@ -29,7 +30,7 @@
         return;
     }
 
-    Vector<PosPat> allPatts = PosPat.getAllEntries();
+    List<PosPat> allPatts = PosPat.getAllEntries();
     int listMax = allPatts.size();
 
     int n = UtilityMethods.defParamInt(request, "n", 0);
@@ -40,7 +41,7 @@
         int max = listMax;
         while (max - min > 1) {
             int middle = (max+min)/2;
-            String item = allPatts.elementAt(middle).getPattern();
+            String item = allPatts.get(middle).getPattern();
             if (search.compareToIgnoreCase(item) > 0) {
                 min = middle;
             }
@@ -80,7 +81,7 @@
         int innerlast = n+pageLength;
         %><td><ul><%
         while (n<innerlast && n<listMax) {
-            String g = (String) allPatts.elementAt(n).getPattern();
+            String g = (String) allPatts.get(n).getPattern();
             if (!alreadyPrinted.equals(g)) {
             %>
             <li> <a href="pattern2.jsp?g=<%=URLEncoder.encode(g,"UTF8")%>"><%=g%></a></li><%

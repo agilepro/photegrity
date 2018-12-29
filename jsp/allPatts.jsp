@@ -166,6 +166,12 @@
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
     <TITLE>P <%=dispMin%>/<%=sortedPatterns.size()%> <%= query %></TITLE>
+    
+    <style>
+    .spacy tr td {
+        padding:3px;
+    }
+    </style>
 </head>
 
 <script>
@@ -247,7 +253,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
     }
 %>
 <img src="bar.jpg" border="0">
-<table>
+<table class="spacy">
 <%
     int row = 0;
     int count = 0;

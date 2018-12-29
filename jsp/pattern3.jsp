@@ -45,7 +45,7 @@
     Hashtable allPaths = new Hashtable();
     HashCounter pathCount = new HashCounter();
     List<PosPat> vPatterns = PosPat.getAllEntries();
-    Vector<PosPat> foundPatts = new Vector<PosPat>();
+    List<PosPat> foundPatts = new Vector<PosPat>();
 
     String lastPatt = "\r";  //impossible match
     int limit = 30;

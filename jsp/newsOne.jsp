@@ -117,7 +117,16 @@ Get: </td><td><form action="newsFetch.jsp">
 <li> Template: <% HTMLWriter.writeHtml(out, npatt.getTemplate() ); %> </li>
 <li> FolderLoc: <% HTMLWriter.writeHtml(out, npatt.getFolderLoc() ); %> </li>
 <li> Filled: <% HTMLWriter.writeHtml(out, art.getFileName()); %> </li>
+<% if (art.headersChanged) {%>
+<li> Changed: <span style=color:red;font-weight: bold;">The HEADER is wrong somehow!</span> </li>
+
+<% } %>
 </ul>
+
+<pre>
+<% art.getJSON().write(out, 2, 2); %>
+</pre>
+
 <hr/>
 <%
          if (art.buffer==null) {

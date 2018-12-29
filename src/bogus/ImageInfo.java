@@ -1021,10 +1021,12 @@ public class ImageInfo
     {
         //TODO: replace this with a File object
         File fPath = this.getFilePath();
+        System.out.println("SUPPRESSING Image: "+fPath);
+        
         try {
             PosPat.removeImage(this);
 
-            diskMgr.suppressFile(fPath, fileName);
+            diskMgr.suppressFile(fPath);
             deleteThumbnails();
 
             for (TagInfo tag : tagVec) {

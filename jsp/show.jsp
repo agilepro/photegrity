@@ -132,11 +132,15 @@
     int colNum = 9999;
     int nextStart = 0;
     int lastSize = -1;
+    int minValue = 999;
 
     while (e2.hasMoreElements())
     {
         totalCount++;
         ImageInfo ii = (ImageInfo)e2.nextElement();
+        if (ii.value<minValue) {
+            minValue = ii.value;
+        }
         String location = "";
         if (!ii.isNullImage())
         {
@@ -511,29 +515,33 @@
     </form>
 </tr>
 </table>
-<table width="600">
-    <form method="GET" action="show.jsp">
-        <tr width="600"><td width="600">
-            <input type="hidden" name="o" value="<%=order%>">
-            <input type="submit" value="Search:">
-            <input type="text" size="80" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
-            <input type="text" size="5" name="min" value="<%=dispMin%>">
-        </td></tr>
-    </form>
-    <form method="GET" action="renumberIndices.jsp">
-        <tr width="600"><td width="600">
-            <input type="submit" value="Renumber Indices">
-            <input type="hidden" size="80" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
-            <input type="hidden" name="doubleCheck" value="ok">
-        </td></tr>
-    </form>
-    <form method="GET" action="threeDigitNumbers.jsp">
-        <tr width="600"><td width="600">
-            <input type="submit" value="Three Digit Numbers">
-            <input type="hidden" size="80" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
-        </td></tr>
-    </form>
-
+<table width="600"><tr>
+    <td><form method="GET" action="show.jsp">
+        <input type="hidden" name="o" value="<%=order%>">
+        <input type="submit" value="Search:">
+        <input type="text" size="80" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
+        <input type="text" size="5" name="min" value="<%=dispMin%>">
+    </form></td></tr>
+</table>
+<table>
+    <tr><td><form method="GET" action="renumberIndices.jsp">
+        <input type="submit" value="Renumber Indices">
+        <input type="hidden" size="80" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
+        <input type="hidden" name="doubleCheck" value="ok">
+    </form></td>
+    <td><form method="GET" action="threeDigitNumbers.jsp">
+        <input type="submit" value="Three Digit Numbers">
+        <input type="hidden" size="80" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
+    </form></td>
+    <td><form method="GET" action="normalizeValues.jsp">
+        <input type="submit" value="Normalize Minus <%=minValue%>">
+        <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
+        <input type="hidden" name="min" value="<%=minValue%>">
+    </form></td>
+    
+</tr>    
+</table>
+<table>
 <tr><td>
 <form action="setPict.jsp" method="get">
   <input type="submit" value="Set">

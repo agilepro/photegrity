@@ -159,7 +159,7 @@ $scope.dataSet = {
         $scope.dataSet.rows.sort(function(a,b){
             return Number(a)-Number(b);
         });
-        $scope.ySize = 6;
+        $scope.ySize = 5;
         $scope.xSize = 6;
         $scope.pinCols = [];
         $scope.pinMap = {};
@@ -172,9 +172,11 @@ $scope.dataSet = {
         $scope.singleRow = false;
         $scope.currentRow = 0;
         $scope.currentCol = 0;
+        $scope.imageCount = {};
         $scope.dataSet.cols.forEach( function(colName) {
             $scope.pinMap[colName] = "unpinned";
             $scope.biasMap[colName] = 0;
+            $scope.imageCount[colName] = Object.keys($scope.dataSet.grid[colName]).length;
         });
         var rowPoz = 0;
         
@@ -482,7 +484,9 @@ $scope.dataSet = {
         }
         
     });
-
+    bunchApp.filter('encodeURIComponent', function() {
+        return window.encodeURIComponent;<!--  www . jav  a  2 s . c o m-->
+    });
 </script>
 </head>
 
@@ -608,7 +612,8 @@ $scope.dataSet = {
         <td>
         </td>
         <td ng-repeat="col in showCols">
-            <a href="show.jsp?q={{query}}e({{stripPath(col)}})" target="_blank">S</a>
+            <a href="show.jsp?q={{query+'e('+stripPath(col)+')'| encodeURIComponent}}" target="_blank">S</a>
+            ({{imageCount[col]}})
         </td>
     </tr>
 </table>

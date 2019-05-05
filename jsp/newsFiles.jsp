@@ -138,7 +138,9 @@
     fileApp.factory('fileFactory', function($http) {
         return {
             listFiles: function(callback) {
-                $http.get('listFiles.jsp?d=<%=URLEncoder.encode(dig,"UTF-8")%>&f=<%=URLEncoder.encode(f,"UTF-8")%>')
+                var url = 'listFiles.jsp?d=<%=URLEncoder.encode(dig,"UTF-8")%>&f=<%=URLEncoder.encode(f,"UTF-8")%>';
+                console.log("URL",url);
+                $http.get(url)
                 .success(callback)
                 .error( function(data) {
                     alert(JSON.stringify(data,null,2));

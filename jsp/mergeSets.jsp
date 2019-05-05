@@ -91,6 +91,7 @@
         $scope.singleRow = false;
         $scope.currentRow = 0;
         $scope.currentCol = 0;
+        $scope.resultData = [];
         $scope.dataSet.cols.forEach( function(colName) {
             $scope.pinMap[colName] = "unpinned";
             $scope.biasMap[colName] = 0;
@@ -113,47 +114,53 @@
             if (!foundItem) {
                 foundItem = {};
                 foundItem.value = searchValue;
+                foundItem.result = "";
                 $scope.showset.push(foundItem);
             }
             return foundItem;
         }
         function fillItems() {
-            Object.keys($scope.col1full).forEach( function(key) {
-                imgItem = $scope.col1full[key];
-                var itemVal = imgItem.value;
-                if (itemVal<0) {
-                    //preserve negative values without bias1
-                    var theItem = findItem(itemVal);
-                    theItem.img1 = imgItem;
-                    theItem.include1 = true;
-                    return;
-                }
-                var seekVal = itemVal - $scope.bias1;
-                if (seekVal>=0) {
-                    //note that values that go negative due to bias are forgotten
-                    var theItem = findItem(seekVal);
-                    theItem.img1 = imgItem;
-                    theItem.include1 = true;
-                }
-            });
-            Object.keys($scope.col2full).forEach( function(key) {
-                imgItem = $scope.col2full[key];
-                var itemVal = imgItem.value;
-                if (itemVal<0) {
-                    //preserve negative values without bias1
-                    var theItem = findItem(itemVal);
-                    theItem.img2 = imgItem;
-                    theItem.include2 = true;
-                    return;
-                }
-                var seekVal = itemVal - $scope.bias2;
-                if (seekVal>=0) {
-                    //note that values that go negative due to bias are forgotten
-                    var theItem = findItem(seekVal);
-                    theItem.img2 = imgItem;
-                    theItem.include2 = true;
-                }
-            });
+            if ($scope.col1full) {
+                Object.keys($scope.col1full).forEach( function(key) {
+                    imgItem = $scope.col1full[key];
+                    var itemVal = imgItem.value;
+                    if (itemVal<0) {
+                        //preserve negative values without bias1
+                        var theItem = findItem(itemVal);
+                        theItem.img1 = imgItem;
+                        theItem.include1 = true;
+                        return;
+                    }
+                    var seekVal = itemVal - $scope.bias1;
+                    if (seekVal>=0) {
+                        //note that values that go negative due to bias are forgotten
+                        var theItem = findItem(seekVal);
+                        theItem.img1 = imgItem;
+                        theItem.include1 = true;
+                    }
+                });
+            }
+            
+            if ($scope.col2full) {
+                Object.keys($scope.col2full).forEach( function(key) {
+                    imgItem = $scope.col2full[key];
+                    var itemVal = imgItem.value;
+                    if (itemVal<0) {
+                        //preserve negative values without bias1
+                        var theItem = findItem(itemVal);
+                        theItem.img2 = imgItem;
+                        theItem.include2 = true;
+                        return;
+                    }
+                    var seekVal = itemVal - $scope.bias2;
+                    if (seekVal>=0) {
+                        //note that values that go negative due to bias are forgotten
+                        var theItem = findItem(seekVal);
+                        theItem.img2 = imgItem;
+                        theItem.include2 = true;
+                    }
+                });
+            }
 
             $scope.showset.sort( function(a,b) {
                 return (a.value-b.value);
@@ -257,11 +264,12 @@
                 }
             });
             
+            //var fobj = {list: [batch[0]]};
             var fobj = {list: batch};
             console.log("READY TO SEND! ", fobj);
             var promise = $http.post("api/batchUpdate", fobj);
             promise.success( function(data) {
-                console.log("SUCCESS! ", data);
+                processResults(data);
             } );
             promise.error( function(data, status, headers, config) {
                 console.log("the POST failed: "+JSON.stringify(data,null,2));
@@ -289,6 +297,7 @@
             op.fn2 = makeFileName(pattern, number, tail)
             op.cmd = "move";
             console.log(": Moving: "+image.fileName+" to "+op.fn2);
+            console.log(":   full request: ",op);
             return op;
         }
         function makeFileName(pattern, number, tail) {
@@ -310,7 +319,36 @@
             }
             return pattern+numStr+tail;
         }
-
+        
+        function processResults(data) {
+            console.log("PROCESSING RESULTS: ", data);
+            var list = data.list;
+            list.forEach( function(item) {
+                var src = item.src;
+                var found = false;
+                var op = "UNKNOWN";
+                if (item.del) {
+                    op = "DELETED";
+                }
+                if (item.move) {
+                    op = "MOVED";
+                }
+                $scope.showset.forEach( function(showItem) {
+                    if (!showItem.img1) {
+                        return;
+                    }
+                    if (src.fn == showItem.img1.fileName) {
+                        showItem.result = op;
+                        found = true;
+                        console.log("    MARKED "+op, item);
+                    }
+                });
+                if (!found) {
+                    console.log("DID NOT FIND :", item);
+                }
+            });
+        }
+        
     });
 
 </script>
@@ -386,6 +424,9 @@
            -------------------
            <div ng-hide="item.img2.isDefault">
            {{item.img2.disk}}:{{item.img2.path}}{{item.img2.fileName}}<br/>
+           </div>
+           <div style="color:red">
+           {{item.result}}
            </div>
         </td>
 

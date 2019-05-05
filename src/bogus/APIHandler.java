@@ -349,19 +349,23 @@ public class APIHandler {
     	        }
     	        else if ("move".equals(cmd)) {
     	            File sourceFilePath = new File(sourceFolder, fn);
+                    String path2  = op.getString("path2");
+                    String fn2    = op.getString("fn2");
+                    String disk2  = op.getString("disk2");
+                    DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
+    	            File destFolder = dm2.getFilePath(path2);
+    	            File destFilePath = new File(destFolder, fn2);
+                    if (destFilePath.equals(sourceFilePath)) {
+                        throw new JSONException("Move command used, but source and dest are the same!  source:{0},  dest:{1}",
+                            sourceFilePath.toString(),destFilePath.toString());
+                    }
     	            if (!sourceFilePath.exists()) {
     	                throw new JSONException ("Source file does not exist at {0}", sourceFilePath.toString());
     	            }
     	            String tempFileName = "TMP"+System.currentTimeMillis()+"-"+(counter++)+".jpg";
-                    String disk2  = op.getString("disk2");
-                    DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
                     
     	            ImageInfo ii = new ImageInfo(sourceFilePath, dm);
-    	            
-                    String path2  = op.getString("path2");
-                    String fn2    = op.getString("fn2");
-    	            File destFolder = dm.getFilePath(path2);
-    	            File destFilePath = new File(destFolder, fn2);
+                    
                     if (destFilePath.exists()) {
                         throw new JSONException ("Dest file exists before move {0}",destFilePath.toString());
                     }
@@ -388,6 +392,7 @@ public class APIHandler {
 	        catch (Exception e) {
 	            resInts.put("error", JSONException.convertToJSON(e, "can't process "+i));
 	            System.out.println("BATCH: error "+e.toString());
+	            System.out.println(op.toString(2));
 	        }
 	        outList.put(resInts);
 	    }

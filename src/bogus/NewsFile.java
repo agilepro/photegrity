@@ -551,10 +551,28 @@ public class NewsFile {
             if (ffn.prePart.equalsIgnoreCase(childParts.prePart)) {
                 int fileNum = safeConvertBang(ffn.numPart);
                 int childNum = safeConvertBang(childParts.numPart);
-                if (fileNum==childNum && fileNum!=0) {
-                    //don't do this for the zero, which includes cover, sample, etc
-                    //also avoids bad matches in cases where there is no number
-                    bestFit = aChild;
+                if (fileNum!=childNum) {
+                    //if the numbers don't match then it is not a match
+                }
+                else if (fileNum!=0) {
+                    //when the number is not zero, we can ignore extra
+                    //things that appear in the file between the number
+                    //and the suffix, so simply compare the suffix.
+                    if (ffn.tailPart.equalsIgnoreCase(childParts.tailPart)) {
+                        bestFit = aChild;
+                    }
+                    else if (childParts.tailPart.toLowerCase().endsWith(ffn.tailPart.toLowerCase())) {
+                        //we assume here that the tail of the actual file might contain 
+                        //extra things, but not fewer things
+                        bestFit = aChild;
+                    }
+                }
+                else {
+                    //when the number is zero, then the entire tail must match
+                    //so that 'sample' and 'cover' are identified correctly
+                    if (ffn.tailPart.equalsIgnoreCase(childParts.tailPart)) {
+                        bestFit = aChild;
+                    }
                 }
             }
         }

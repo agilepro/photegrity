@@ -12,6 +12,7 @@
 %><%@page import="bogus.UtilityMethods"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.JavaScriptWriter"
 %><%
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();
@@ -96,7 +97,30 @@
 
 %>
 <HTML>
-<HEAD><TITLE>I <%=offset%>, '<%HTMLWriter.writeHtml(out, fileName); %>'</TITLE></HEAD>
+<HEAD><TITLE>I <%=offset%>, '<%HTMLWriter.writeHtml(out, fileName); %>'</TITLE>
+
+<style>
+.spacey tr td {
+    padding:5px;
+    background-color: white;
+}
+</style>
+<script>
+function copyThePath() {
+  /* Get the text field */
+  var copyText = document.getElementById("filepath");
+
+  /* Select the text field */
+  copyText.select();
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+
+  /* Alert the copied text */
+  //alert("Copied the text: " + copyText.value);
+} 
+</script>
+</HEAD>
 <BODY BGCOLOR="#FDF5E6">
 <table><tr>
    <td>
@@ -257,7 +281,7 @@ NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHt
 </tr>
 </table>
 
-<table>
+<table class="spacey">
 <col width="100">
 <col width="600">
 
@@ -320,7 +344,10 @@ NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHt
 </tr>
 <tr>
     <td>getFilePath():</td>
-    <td><%HTMLWriter.writeHtml(out, ii.getFilePath().toString());%></td>
+    <td><input type="text" id="filepath" style="width:100%"
+        value="<%HTMLWriter.writeHtml(out, ii.getFilePath().toString());%>"></input><br/>
+        <button onClick="copyThePath()">Copy</button> 
+    </td>
 </tr>
 <tr>
     <td>getFullPath():</td>

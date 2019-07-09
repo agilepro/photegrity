@@ -214,7 +214,16 @@
     }%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
-<HEAD><TITLE>Show <%=dispMin%> / <%=recordCount%></TITLE></HEAD>
+<HEAD><TITLE>Show <%=dispMin%> / <%=recordCount%></TITLE>
+<style>
+.thumbnail {
+    border:0;
+    min-width:100px;
+    min-height:100px;
+}
+</style>
+
+</HEAD>
 <BODY BGCOLOR="#FDF5FF">
 <table width="600"><tr><td>
 
@@ -350,7 +359,7 @@
                 out.write("<td>");
 %>
                 <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" border="0"></a>
+                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" class="thumbnail" ></a>
                 </td><td><a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">S</a><br/>
                 <a href="selectImage.jsp?<%=stdParams%>&a=supp" target="suppwindow">
                     <img border=0 src="addicon.gif" border="0"></a><br/>
@@ -366,7 +375,7 @@
                 %>
                 <td>
                 <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" border="0"></a>
+                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" class="thumbnail" ></a>
                 </td>
                 <td>
                 <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">S</a><br/>
@@ -391,9 +400,9 @@
                 %>
                 <td>
                 <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" border="0"></a>
+                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" class="thumbnail"></a>
                 </td><td>
-                <font size="-4" color="#99CC99"><%=ii.value%></font><br/>
+                <font size="-4" ><%=ii.value%></font><br/>
                 <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">
                        S</a><br/>
                 <a href="manage.jsp?q=<%=queryOrderNoMin%>&min=<%=totalCount%>">
@@ -414,7 +423,7 @@
                 <td bgcolor="#FFCCAA"><%=ii.diskMgr.diskName%></td>
                 <td>
                 <a href="deleteOne.jsp?<%=stdParams%>&go=<%=URLEncoder.encode(thisPage,"UTF-8")%>">
-                <img border=0 src="<%=trashIcon%>" border="0"></a>
+                <img src="<%=trashIcon%>" border="0"></a>
                 </td>
                 <td>(<%
                     if (ii.fileSize>250000) {

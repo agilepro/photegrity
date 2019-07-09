@@ -362,13 +362,13 @@ public class APIHandler {
     	            if (!sourceFilePath.exists()) {
     	                throw new JSONException ("Source file does not exist at {0}", sourceFilePath.toString());
     	            }
+                    if (destFilePath.exists()) {
+                        throw new JSONException ("Dest file exists before move {0}",destFilePath.toString());
+                    }
     	            String tempFileName = "TMP"+System.currentTimeMillis()+"-"+(counter++)+".jpg";
                     
     	            ImageInfo ii = new ImageInfo(sourceFilePath, dm);
                     
-                    if (destFilePath.exists()) {
-                        throw new JSONException ("Dest file exists before move {0}",destFilePath.toString());
-                    }
                     if (!destFolder.equals(sourceFolder)) {
                         ii.renameFile(tempFileName);
                         ii.moveImage(dm2, destFolder);

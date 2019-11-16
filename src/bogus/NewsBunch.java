@@ -133,6 +133,7 @@ public class NewsBunch {
 
         //check to see if there is a YEnc indicator in the subject line
         isYEnc =  (_bunch.toLowerCase().indexOf("yenc")>0);
+        shrinkFiles = !ng.defaultUncompressed;
     }
     
     public static NewsBunch copyCreate(NewsBunch oldOne, String from) throws Exception  {
@@ -267,7 +268,7 @@ public class NewsBunch {
     	if (newState==NewsBunch.STATE_DOWNLOAD) {
     		NewsActionSeekBunch nasp = new NewsActionSeekBunch(this);
             nasp.addToFrontOfHigh();
-            NewsActionDownloadAll nada = new NewsActionDownloadAll(this);
+            NewsActionDownloadAll nada = new NewsActionDownloadAll(this, newsGroup.downloadPartialFiles);
             nada.addToFrontOfMid();
         }
 

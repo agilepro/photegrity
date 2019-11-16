@@ -22,11 +22,13 @@ public class NewsActionDownloadFile extends NewsAction {
     private int workingPart;
     private int workingTotal;
     private boolean cancelable;
+    private boolean allowPartial;
 
-    public NewsActionDownloadFile(NewsFile _file, boolean _cancelable) throws Exception {
+    public NewsActionDownloadFile(NewsFile _file, boolean _cancelable, boolean _allowPartial) throws Exception {
         newsFile = _file;
         sequenceNum = _file.getSequenceNumber();
         bunch = _file.getNewsBunch();
+        allowPartial = _allowPartial;
         cancelable = _cancelable;
         _file.markDownloading();
         bunch.touch();
@@ -75,7 +77,9 @@ public class NewsActionDownloadFile extends NewsAction {
             }
 
             //throws an exception explaining if not complete
-            newsFile.assertComplete();
+            if (!allowPartial) {
+                newsFile.assertComplete();
+            }
 
             int numParts = newsFile.partsExpected();
             if (numParts <= 0) {
@@ -111,7 +115,13 @@ public class NewsActionDownloadFile extends NewsAction {
                 long startTime = System.currentTimeMillis();
                 out.write("\n    Part " + (i + 1) + "/" + numParts);
                 out.flush();
-                NewsArticle art = newsFile.getPartOrFail(i + 1);
+                NewsArticle art = newsFile.getPartOrNull(i + 1);
+                if (art==null) {
+                    if (!allowPartial) {
+                        throw new Exception("Unable to find part "+i+", but allowPartial is false");
+                    }
+                    continue;
+                }
                 if (art.buffer == null) {
                     out.write(" downloading: ");
                     art.getMsgBody();

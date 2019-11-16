@@ -64,7 +64,7 @@
         return;
     }
 
-    NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, false);
+    NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, false, newsGroup.downloadPartialFiles);
     nadf.addToFrontOfHigh();
 
 %>

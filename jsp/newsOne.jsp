@@ -105,7 +105,14 @@ Get: </td><td><form action="newsFetch.jsp">
 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out,thisPage);%>">
 <input type="hidden" name="count" value="20">
 <input type="submit" name="xxx" value="-20">
-</form></td></tr></table>
+</form></td>
+<td>
+            <form action="newsOneAction.jsp" method="get">
+                <input type="hidden" name="artno" value="<%=artnoInt%>">
+                <input type="submit" name="action" value="Forget Article">
+            </form>
+</td>
+</tr></table>
 <ul>
 <li> Article No: <%= artnoInt %>
     <a href="newsGaps.jsp?limit=100&begin=<%= artnoInt %>&thresh=10&step=10">Gaps</a>

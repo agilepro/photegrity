@@ -237,7 +237,7 @@
                 if (npatt.pState != NewsBunch.STATE_DOWNLOAD_DONE &&
                     npatt.pState != NewsBunch.STATE_DOWNLOAD) {
                     npatt.pState = NewsBunch.STATE_DOWNLOAD;
-                    NewsActionDownloadAll nasp = new NewsActionDownloadAll(npatt);
+                    NewsActionDownloadAll nasp = new NewsActionDownloadAll(npatt, newsGroup.downloadPartialFiles);
                     nasp.addToFrontOfLow();
                     out.write(" DOWNLOAD ");
                 }

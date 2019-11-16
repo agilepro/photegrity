@@ -131,7 +131,7 @@
             setDefaults(bunch, request);
             NewsActionSeekBunch nasp = new NewsActionSeekBunch(bunch);
             nasp.addToFrontOfHigh();
-            NewsActionDownloadAll nada = new NewsActionDownloadAll(bunch);
+            NewsActionDownloadAll nada = new NewsActionDownloadAll(bunch, newsGroup.downloadPartialFiles);
             nada.addToFrontOfMid();
             response.sendRedirect(newsPage);
             return;
@@ -150,7 +150,7 @@
 
             List<NewsFile> fileList = bunch.getFiles();
             NewsFile nf = fileList.get(0);
-            String pattern = ImageInfo.patternFromFileName(nf.getFileName());
+            String pattern = ""; //ImageInfo.patternFromFileName(nf.getFileName());
             if (pattern.endsWith("!")) {
                 pattern = pattern.substring(0,pattern.length()-1);
             }
@@ -174,7 +174,7 @@
         if ("GetFile".equals(cmd)) {
             String fileName = UtilityMethods.reqParam(request, "", "fileName");
             NewsFile nf = bunch.getFileByName(fileName);
-            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, false);
+            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, false, newsGroup.downloadPartialFiles);
             nadf.addToFrontOfHigh();
             response.sendRedirect(go);
             return;

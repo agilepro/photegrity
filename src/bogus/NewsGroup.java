@@ -18,6 +18,7 @@ import java.util.Vector;
 import org.apache.commons.net.nntp.NewsgroupInfo;
 
 import com.purplehillsbooks.json.JSONException;
+import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.CSVHelper;
 
 /**
@@ -42,6 +43,9 @@ public class NewsGroup {
     public int phase = 0;
     public int step = 0;
     public int failCount = 0;
+    
+    public boolean defaultUncompressed = false;
+    public boolean downloadPartialFiles = false;
 
     //private List<NewsArticle> articles;
     private Hashtable<Long, NewsArticle> index;
@@ -769,5 +773,29 @@ public class NewsGroup {
             GapRecord.recordGap(gapList, gapSize, lastGapStart);
         }
         return gapList;
+    }
+    
+    public JSONObject newsInfoJSON() throws Exception {
+        JSONObject newsInfo = new JSONObject();
+        newsInfo.put("groupName", this.groupName);
+        newsInfo.put("diskName", this.defaultDiskMgr.diskName);
+        newsInfo.put("windowSize", this.displayWindow);
+        newsInfo.put("windowMin", this.lowestToDisplay);
+        newsInfo.put("firstArticle", this.firstArticle);
+        newsInfo.put("lastArticle", this.lastArticle);
+        newsInfo.put("articleCount", this.articleCount);
+        newsInfo.put("fetched", this.getIndexSize());
+        newsInfo.put("lowestFetched", this.lowestFetched);
+        newsInfo.put("highestToDisplay", this.lowestFetched+this.displayWindow);
+        newsInfo.put("highestFetched", this.highestFetched);
+        newsInfo.put("totalRawBytes", Stats.getTotalRawBytes());
+        newsInfo.put("totalRawBytes", Stats.getTotalRawBytes());
+        newsInfo.put("totalFinishedBytes", Stats.getTotalFinishedBytes());
+        newsInfo.put("totalFiles", Stats.getTotalFiles());
+        newsInfo.put("downloadRate", this);
+        newsInfo.put("actionCount", NewsAction.getActionCount());
+        newsInfo.put("defaultUncompressed", this.defaultUncompressed);
+        newsInfo.put("downloadPartialFiles", this.downloadPartialFiles);
+        return newsInfo;
     }
 }

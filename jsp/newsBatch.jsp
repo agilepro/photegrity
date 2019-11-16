@@ -133,7 +133,7 @@
             }
             else if ("download".equals(batchop)) {
                 oneBunch.pState = NewsBunch.STATE_DOWNLOAD;
-                NewsActionDownloadAll nasp = new NewsActionDownloadAll(oneBunch);
+                NewsActionDownloadAll nasp = new NewsActionDownloadAll(oneBunch, newsGroup.downloadPartialFiles);
                 nasp.addToFrontOfLow();
                 rows.put(tokPattern+" downloading");
             }

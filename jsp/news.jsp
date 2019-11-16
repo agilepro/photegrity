@@ -176,24 +176,7 @@
     long downloadRate = Stats.getTotalFinishedBytes()/duration;
     String go="news.jsp?search="+URLEncoder.encode(search,"UTF-8");
 
-    JSONObject newsInfo = new JSONObject();
-    newsInfo.put("groupName", newsGroup.groupName);
-    newsInfo.put("diskName", newsGroup.defaultDiskMgr.diskName);
-    newsInfo.put("windowSize", newsGroup.displayWindow);
-    newsInfo.put("windowMin", newsGroup.lowestToDisplay);
-    newsInfo.put("firstArticle", newsGroup.firstArticle);
-    newsInfo.put("lastArticle", newsGroup.lastArticle);
-    newsInfo.put("articleCount", newsGroup.articleCount);
-    newsInfo.put("fetched", newsGroup.getIndexSize());
-    newsInfo.put("lowestFetched", newsGroup.lowestFetched);
-    newsInfo.put("highestToDisplay", newsGroup.lowestFetched+newsGroup.displayWindow);
-    newsInfo.put("highestFetched", newsGroup.highestFetched);
-    newsInfo.put("totalRawBytes", Stats.getTotalRawBytes());
-    newsInfo.put("totalRawBytes", Stats.getTotalRawBytes());
-    newsInfo.put("totalFinishedBytes", Stats.getTotalFinishedBytes());
-    newsInfo.put("totalFiles", Stats.getTotalFiles());
-    newsInfo.put("downloadRate", downloadRate);
-    newsInfo.put("actionCount", NewsAction.getActionCount());
+    JSONObject newsInfo = newsGroup.newsInfoJSON();
 
 %>
 <html ng-app="bunchApp">
@@ -253,6 +236,15 @@
                                        +'&filePath='+encodeURIComponent(filePath)
                                        +'&batchop='+command;
                 console.log("BATCH: "+url);
+                var promise = $http.get(url);
+                promise.error(function(msg){
+                    alert("BATCH error: "+msg);
+                });
+                return promise;
+            },
+            newsGroupCommand: function(command) {
+                var url = 'newsGroupCommand.jsp?command='+encodeURIComponent(command);
+                console.log("NEWS GROUP COMMAND: "+url);
                 var promise = $http.get(url);
                 promise.error(function(msg){
                     alert("BATCH error: "+msg);
@@ -802,7 +794,23 @@
               alert("batch operation successful "+JSON.stringify(data,null,2));
               $scope.rereadData();
           });
-      }
+      };
+      $scope.toggleUncompress = function() {
+          console.log("Toggle uncomplerr");
+          bunchFactory.newsGroupCommand("toggleCompress")
+          .success( function(data) {
+              $scope.newsInfo = data;
+              $scope.rereadData();
+          });
+      };
+      $scope.togglePartial = function() {
+          console.log("Toggle partial files");
+          bunchFactory.newsGroupCommand("togglePartial")
+          .success( function(data) {
+              $scope.newsInfo = data;
+              $scope.rereadData();
+          });
+      }      
       
     });
 
@@ -874,6 +882,10 @@ Step: <input name="step" type="text" size="5"  ng-model="fetch.step">
   <li>Total Finished Bytes:{{newsInfo.totalFinishedBytes|number}}</li>
   <li>Total Files: {{newsInfo.totalFiles|number}}</li>
   <li>Download Rate: {{newsInfo.downloadRate|number}} bytes/second</li>
+  <li>defaultUncompressed: {{newsInfo.defaultUncompressed}} 
+      <button ng-click="toggleUncompress()"> +/- </button></li>
+  <li>downloadPartialFiles: {{newsInfo.downloadPartialFiles}} 
+      <button ng-click="togglePartial()"> +/- </button></li>
   <li>Test link: <a href="listBunches.jsp?filter={{encodeURIComponent(filter)}}&window={{windowSize}}&min={{windowStart}}">click</a>
 </ul>
 <button ng-click="scheduledSave()">Scheduled Save</button>

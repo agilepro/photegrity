@@ -100,7 +100,15 @@ public class NewsActionDownloadFile extends NewsAction {
             boolean combineFirstForUUDecode = false;
             
             {
-            	NewsArticle art = newsFile.getPartOrFail(1);
+                //could get this from any random part, but start looking at the beginning
+            	int firstPart = 1;
+            	NewsArticle art = null;
+            	while ((art=newsFile.getPartOrNull(firstPart))==null) {
+            	    firstPart++;
+            	    if (firstPart>numParts) {
+            	        throw new Exception("Strange, tried ALL the parts and none seem to be present.  Exiting");
+            	    }
+            	}
             	art.getMsgBody();
             	int encoding = art.getEncodingType();
             	if (encoding!=NewsArticle.YENC_ENCODING) {
@@ -124,7 +132,19 @@ public class NewsActionDownloadFile extends NewsAction {
                 }
                 if (art.buffer == null) {
                     out.write(" downloading: ");
-                    art.getMsgBody();
+                    try {
+                        art.getMsgBody();
+                    }
+                    catch (Exception e) {
+                        //just swallow this if doing partials....
+                        if (allowPartial) {
+                            continue;
+                        }
+                        else {
+                            throw e;
+                        }
+                    }
+                    
                     if (!art.confirmHeadersFromBody()) {
                         out.write("\n    HEADERS CHANGED! " + art.getHeaderSubject());
                         out.flush();

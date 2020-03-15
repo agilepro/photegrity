@@ -17,11 +17,9 @@ import com.purplehillsbooks.streams.HTMLWriter;
 public class NewsActionDownloadAll extends NewsAction {
     NewsBunch seeker;
     Vector<String> alreadyTried = new Vector<String>();
-    private boolean allowPartial;
 
-    public NewsActionDownloadAll(NewsBunch _seeker, boolean _allowPartial) throws Exception {
+    public NewsActionDownloadAll(NewsBunch _seeker) throws Exception {
         seeker = _seeker;
-        allowPartial = _allowPartial;
         File storeFile = seeker.getFolderPath();
         if (!storeFile.exists()) {
             storeFile.mkdirs();
@@ -41,7 +39,7 @@ public class NewsActionDownloadAll extends NewsAction {
      * Convenient static method creates and queues an instance
      */
     public static void start(NewsBunch _seeker, NewsGroup ng) throws Exception {
-        NewsActionDownloadAll nada = new NewsActionDownloadAll(_seeker, ng.downloadPartialFiles);
+        NewsActionDownloadAll nada = new NewsActionDownloadAll(_seeker);
         nada.addToFrontOfMid();
     }
 
@@ -105,7 +103,7 @@ public class NewsActionDownloadAll extends NewsAction {
             int gotcha = rand.nextInt(filteredSet.size());
             NewsFile nf = filteredSet.remove(gotcha);
 
-            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, true, allowPartial);
+            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, true);
             nadf.addToFrontOfLow();
             alreadyTried.add(nf.getFileName());
             scheduleCount++;

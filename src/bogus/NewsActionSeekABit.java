@@ -152,7 +152,7 @@ public class NewsActionSeekABit extends NewsAction {
 
     private void startFileDownload(NewsFile nf) throws Exception {
         if (!nf.isMarkedDownloading() && !nf.isDownloaded()) {
-            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, false, false);
+            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, false);
             nadf.addToFrontOfHigh();  //high priority to get these quicker than other scans
         }
     }

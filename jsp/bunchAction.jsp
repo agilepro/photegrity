@@ -154,7 +154,7 @@
             setDefaults(bunch, request);
             NewsActionSeekBunch nasp = new NewsActionSeekBunch(bunch);
             nasp.addToFrontOfHigh();
-            NewsActionDownloadAll nada = new NewsActionDownloadAll(bunch, newsGroup.downloadPartialFiles);
+            NewsActionDownloadAll nada = new NewsActionDownloadAll(bunch);
             nada.addToFrontOfMid();
             out.write("All files will be downloaded.");
             return;

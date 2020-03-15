@@ -18,6 +18,7 @@ import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.CSVHelper;
 import com.purplehillsbooks.streams.MemFile;
+import com.purplehillsbooks.streams.NullWriter;
 import com.purplehillsbooks.streams.StreamHelper;
 
 /**
@@ -569,21 +570,24 @@ public class NewsArticle {
         return new BodyHeaderReader(buffer.getReader());
     }
     
-    public boolean confirmHeadersFromBody() throws Exception {
+    public boolean confirmHeadersFromBody(Writer out) throws Exception {
         String[] vals = readHeader(getHeaderFromBody());
         boolean ok = true;
         if (!headerSubject.equals(vals[0])) {
-            headerSubject = vals[0];
+            out.write("\n*** HEADERS changed, fetched body will be ignored");
+            out.write("\n*** Expecting: "+headerSubject);
+            out.write("\n*** BODY had: "+vals[0]);
+            //headerSubject = vals[0];
             headersChanged = true;
             ok = false;
         }
         if (!headerFrom.equals(vals[1])) {
-            headerFrom = vals[1];
+            //headerFrom = vals[1];
             headersChanged = true;
             ok = false;
         }
         if (!headerDate.equals(vals[2])) {
-            headerDate = vals[2];
+            //headerDate = vals[2];
             headersChanged = true;
             ok = false;
         }
@@ -602,7 +606,7 @@ public class NewsArticle {
         }
         if (buffer == null) {
         	getMsgBody();
-        	confirmHeadersFromBody();
+        	confirmHeadersFromBody(new NullWriter());
         }
         InputStream is = getBodyContent();
         StringBuffer firstTwenty = new StringBuffer(22);

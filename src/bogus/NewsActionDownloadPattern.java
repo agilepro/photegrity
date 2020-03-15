@@ -39,7 +39,7 @@ public class NewsActionDownloadPattern extends NewsAction {
      * Convenient static method creates and queues an instance
      */
     public static void start(NewsBunch _seeker) throws Exception {
-        NewsActionDownloadAll nada = new NewsActionDownloadAll(_seeker, false);
+        NewsActionDownloadAll nada = new NewsActionDownloadAll(_seeker);
         nada.addToFrontOfMid();
     }
 
@@ -110,7 +110,7 @@ public class NewsActionDownloadPattern extends NewsAction {
             int gotcha = rand.nextInt(filteredSet.size());
             NewsFile nf = filteredSet.remove(gotcha);
 
-            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, true, false);
+            NewsActionDownloadFile nadf = new NewsActionDownloadFile(nf, true);
             nadf.addToFrontOfLow();
             alreadyTried.add(nf.getFileName());
             scheduleCount++;

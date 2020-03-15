@@ -375,7 +375,7 @@
         }
     %>
     </li>
-    <li>Template: <input type="text" ng-model="template" size="50"/>
+    <li>Template: <input type="text" ng-model="template" size="100"/>
 
                 <input type="checkbox" ng-model="bunch.plusOne"> Plus One
                 <button ng-click="randomName()">Randomize</button>
@@ -477,7 +477,7 @@
     </td>
     <td>{{rec.bestName}}</td>
     <td>
-        <img ng-show="rec.needSave && !rec.isDownloading && rec.isComplete"
+        <img ng-show="rec.needSave && !rec.isDownloading"
              ng-click="fetchFile(rec.fileName)" src="downicon.gif">
         <a ng-show="rec.isDownloading" ng-click="refetchData()"><img src="downloading.png"></a>
         <a href="/photo/photo/{{rec.bestPath}}" ng-show="rec.fileExists"

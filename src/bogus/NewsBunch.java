@@ -268,7 +268,7 @@ public class NewsBunch {
     	if (newState==NewsBunch.STATE_DOWNLOAD) {
     		NewsActionSeekBunch nasp = new NewsActionSeekBunch(this);
             nasp.addToFrontOfHigh();
-            NewsActionDownloadAll nada = new NewsActionDownloadAll(this, newsGroup.downloadPartialFiles);
+            NewsActionDownloadAll nada = new NewsActionDownloadAll(this);
             nada.addToFrontOfMid();
         }
 

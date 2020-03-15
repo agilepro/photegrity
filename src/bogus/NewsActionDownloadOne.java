@@ -35,7 +35,7 @@ public class NewsActionDownloadOne extends NewsAction {
                 out.write(" downloading... ");
                 out.flush();
                 art.getMsgBody();
-                art.confirmHeadersFromBody();
+                art.confirmHeadersFromBody(out);
             }
             if (art.getMultiFileDenominator() > 1) {
                 out.write(" can't store part of a multipart");

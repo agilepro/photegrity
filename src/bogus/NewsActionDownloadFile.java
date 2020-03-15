@@ -22,13 +22,11 @@ public class NewsActionDownloadFile extends NewsAction {
     private int workingPart;
     private int workingTotal;
     private boolean cancelable;
-    private boolean allowPartial;
 
-    public NewsActionDownloadFile(NewsFile _file, boolean _cancelable, boolean _allowPartial) throws Exception {
+    public NewsActionDownloadFile(NewsFile _file, boolean _cancelable) throws Exception {
         newsFile = _file;
         sequenceNum = _file.getSequenceNumber();
         bunch = _file.getNewsBunch();
-        allowPartial = _allowPartial;
         cancelable = _cancelable;
         _file.markDownloading();
         bunch.touch();
@@ -46,6 +44,7 @@ public class NewsActionDownloadFile extends NewsAction {
             }
             return;
         }
+        boolean allowPartial = NewsGroup.getCurrentGroup().downloadPartialFiles;
 
         //update the file name and location in case it has changed
         newsFile.refreshMapping();
@@ -131,7 +130,7 @@ public class NewsActionDownloadFile extends NewsAction {
                     continue;
                 }
                 if (art.buffer == null) {
-                    out.write(" downloading: ");
+                    out.write("("+art.articleNo+") downloading: ");
                     try {
                         art.getMsgBody();
                     }
@@ -145,8 +144,7 @@ public class NewsActionDownloadFile extends NewsAction {
                         }
                     }
                     
-                    if (!art.confirmHeadersFromBody()) {
-                        out.write("\n    HEADERS CHANGED! " + art.getHeaderSubject());
+                    if (!art.confirmHeadersFromBody(out)) {
                         out.flush();
                         throw new JSONException("HEADERS CHANGED {0}|{1}", art.articleNo, art.getHeaderSubject());
                     }

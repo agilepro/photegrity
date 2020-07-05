@@ -37,13 +37,16 @@
         gData = new GridData();
         session.setAttribute("gData", gData);
     }
-
-
+    gData.setQuery(gData.getQuery());
+    gData.reindex(); 
+    Vector<ImageInfo> row = gData.getRow(0);
+    
     //Make a vector of Vectors
     JSONObject grid = gData.getJSON();
 
 
-    int r = 1;
+    int r = UtilityMethods.defParamInt(request, "r", 1);
+    int c = UtilityMethods.defParamInt(request, "c", 0);
     String query = gData.getQuery();
     String queryOrder = "startGrid.jsp?q="+URLEncoder.encode(query,"UTF8");
     String queryOrderRow = queryOrder+"&r="+r;
@@ -170,8 +173,8 @@ $scope.dataSet = {
         $scope.rowNameToPos = {};
         $scope.onlyPinned = false;
         $scope.singleRow = false;
-        $scope.currentRow = 0;
-        $scope.currentCol = 0;
+        $scope.currentRow = <%=r%>;
+        $scope.currentCol = <%=c%>;
         $scope.imageCount = {};
         $scope.dataSet.cols.forEach( function(colName) {
             $scope.pinMap[colName] = "unpinned";
@@ -371,7 +374,7 @@ $scope.dataSet = {
             $scope.currentRow = rowTarget;
             $scope.showRows = finalList;
         }
-        $scope.setRow(0);
+        $scope.setRow($scope.currentRow);
         $scope.setCol = function(colTarget) {
             if ($scope.onlyPinned) {
                 $scope.showCols = $scope.pinCols;
@@ -407,7 +410,15 @@ $scope.dataSet = {
             $scope.showCols = finalList;
             $scope.setRow($scope.currentRow);
         }
-        $scope.setCol(0);
+        $scope.setCol($scope.currentCol);
+        $scope.setColByName = function(newName) {
+            for (var i=0; i<$scope.dataSet.cols.length; i++) {
+                if (newName == $scope.dataSet.cols[i]) {
+                    $scope.setCol(i);
+                    console.log("Found", newName, i);
+                }
+            }
+        }
         $scope.pin = function(colTarget) {
             var isPinned = $scope.pinCols.includes(colTarget);
             
@@ -483,6 +494,11 @@ $scope.dataSet = {
             }
         }
         
+        $scope.refresh = function() {
+            var newLoc = "showGrid2.jsp?r="+$scope.currentRow+"&c="+$scope.currentCol;
+            window.location = newLoc;
+        }
+        
     });
     bunchApp.filter('encodeURIComponent', function() {
         return window.encodeURIComponent;<!--  www . jav  a  2 s . c o m-->
@@ -530,7 +546,8 @@ $scope.dataSet = {
       <a href="showRow.jsp?r=<%=r%>">Row</a>
    </td><td>
       <a href="showGrid.jsp?r=<%=r%>">Grid1</a>
-      {{currentRow}} - {{allRows[currentRow]}}
+      ({{currentRow}} - {{allRows[currentRow]}}) 
+      ({{currentCol}} - {{allRows[currentRow]}}) 
    </td></tr>
 </table>
 <div>
@@ -560,6 +577,10 @@ $scope.dataSet = {
     <td>
     <button ng-show="onlyPinned && pinCols.length==2" ng-click="mergeLeft()">Merge Left</button>
     <button ng-show="onlyPinned && pinCols.length==2" ng-click="mergeRight()">Merge Right</button>
+    </td>
+    <td>
+    <button ng-hide="onlyPinned && pinCols.length==2" ng-click="refresh()">Refresh</button>
+    </br>{{currentRow}}-{{currentCol}}
     </td>
     </tr></table>
     
@@ -626,7 +647,8 @@ $scope.dataSet = {
                 <button ng-click="pin(col)">
                <span class="glyphicon glyphicon-check" ng-show="pinMap[col]=='pinned'"></span>           
                <span class="glyphicon glyphicon-unchecked" ng-hide="pinMap[col]=='pinned'"></span>           
-               pin</button>{{image.value}}<br/>
+               pin</button>{{image.value}} 
+               <button ng-click="setColByName(col)">X</button><br/>
                 <a href="photo/{{image.disk}}/{{image.path}}/{{image.fileName}}" target="photo">
                     <img ng-show="image.isDefault" style="opacity:0.2" 
                          src="thumb/100/{{image.disk}}/{{image.path}}/{{image.fileName}}"/>

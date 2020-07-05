@@ -37,7 +37,7 @@
     String query = UtilityMethods.defParam(request, "query", "");
 
     boolean wasConnected = false; //newsSession.isConnected;
-%>
+%> 
 <html>
 <body>
 <h3>News Gaps <a href="main.jsp"><img src="home.gif" border="0"></a></h3>

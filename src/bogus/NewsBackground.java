@@ -8,29 +8,65 @@ import java.util.Date;
 
 public class NewsBackground extends Thread {
     private Writer out;
-    public static NewsBackground singleton;
+    public static NewsBackground singleton = null;
     public static NewsAction lastActive;
+    public File logFolder;
     public File logFile;
     long lastSaveTime = System.currentTimeMillis();
+    boolean timeToStop = false;
+    boolean hasStopped = false;
 
-    public NewsBackground(File containingFolder) throws Exception {
-        logFile = new File(containingFolder, "NewsProcessing" + System.currentTimeMillis()
-                + ".log");
-        FileOutputStream fos = new FileOutputStream(logFile);
-        out = new OutputStreamWriter(fos, "UTF-8");
-        out.write("Start Background Processing "+new Date()+"\n");
+    private NewsBackground(File containingFolder) throws Exception {
+        setLoggingFile(containingFolder);
     }
 
     public static void startNewsThread(File containingFolder) throws Exception {
-
-        singleton = new NewsBackground(containingFolder);
-        singleton.start();
+        if (singleton==null) {
+            singleton = new NewsBackground(containingFolder);
+            singleton.start();
+        }
+        else {
+            singleton.setLoggingFile(containingFolder);
+        }
+        System.out.println("NEWS THREAD: running: "+singleton.logFile);
+    }
+    
+    public void setLoggingFile(File containingFolder) throws Exception {
+        if (containingFolder.equals(logFolder)) {
+            return;  //nothing to do
+        }
+        Writer oldOutput = out;
+        File oldLogFile = logFile;
+        
+        logFolder = containingFolder;
+        logFile = new File(containingFolder, "NewsProcessing" + System.currentTimeMillis() + ".log");
+        
+        FileOutputStream fos = new FileOutputStream(logFile);
+        out = new OutputStreamWriter(fos, "UTF-8");
+        out.write("Start Background Processing "+new Date()+"\n");
+        
+        if (oldOutput!=null) {
+            oldOutput.write("\n\nTERMINATING logging here at "+new Date());
+            oldOutput.write("\nLogging will continue at "+logFile+"\n");
+            oldOutput.flush();
+            oldOutput.close();
+            out.write("Previous log file (closed): "+oldLogFile+"\n");
+        }
     }
 
     public void run() {
+        try {
+            out.write("STARTING PROCESSING TO File:"+singleton.logFile);
+            out.write("\n"+(new Date()).toString()+"\n");
+        }
+        catch (Exception e) {
+            //nothing to do here, log file could not be written, something badly wrong?
+            System.out.println("Unable to write to file: "+singleton.logFile);
+            return;
+        }
         NewsSession newsSession = null;
         int sequentialErrorCount = 0;
-        while (this == singleton) {
+        while (!timeToStop && this == singleton) {
             try {
                 NewsGroup newsGroup = NewsGroup.getCurrentGroup();
                 NewsAction act = NewsAction.pullFromQueueOrNull();
@@ -109,13 +145,14 @@ public class NewsBackground extends Thread {
             }
         }
         try {
-            out.write("\n\nGAVE UP PROCESSING TO THREAD:"+singleton.logFile+"\n");
+            out.write("\n\nGAVE UP PROCESSING TO THREAD:"+singleton.logFile);
+            out.write("\n"+(new Date()).toString()+"\n");
             out.flush();
             out.close();
         }
         catch (Exception cantreportthiseither) {
             // nothing we can do here we are shutting down
         }
+        hasStopped = true;
     }
-
 }

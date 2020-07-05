@@ -366,12 +366,12 @@ public class NewsArticle {
 
     public String fillTemplate(String template) throws Exception {
         int special = -2;
-        if (nBunch.plusOneNumber) {
+        if (nBunch.fileNumOffset != 0) {
             special = nBunch.getSpecialTokenIndex();
         }
-        return fillTemplatePlus(template, special);
+        return fillTemplatePlus(template, special, nBunch.fileNumOffset);
     }
-    private String fillTemplatePlus(String template, int specialIndex) throws Exception {
+    private String fillTemplatePlus(String template, int specialIndex, int bias) throws Exception {
         if (fPrint == null) {
             getDigest();
         }
@@ -408,7 +408,7 @@ public class NewsArticle {
                     }
                     else {
                         //add one to the value because this is the 'plus one' case
-                        int val = UtilityMethods.safeConvertInt(fPrint.get(idx)) + 1;
+                        int val = UtilityMethods.safeConvertInt(fPrint.get(idx)) + bias;
                         //pad out 01 thru 09 to two digits because usually when special option
                         //is used it needs to be only two digits.
                         if (val<10) {

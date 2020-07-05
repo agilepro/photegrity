@@ -127,6 +127,7 @@
     photoApp.controller('photoCtrl', function ($scope) {
         $scope.recs = <% allArts.write(out,2,2);%>;
         $scope.thisPath = "<%=thisPage%>";
+        $scope.bunch = <%bunch.getJSON().write(out,2,2);%>;
     });
 </script>
 </head>
@@ -170,7 +171,7 @@
     </li>
     <li>Template: <input type="text" name="template" value="<%HTMLWriter.writeHtml(out, template);%>" size="110">
 
-                <input type="checkbox" name="plusOne" value="true" <% if (bunch.plusOneNumber) {%>checked="checked"<%}%>> Plus One
+                Bias: <input type="text" name="bias" ng-model="bunch.bias"> 
                 </li>
     <li>ExtraTags: <input type="text" name="extraTags" value="<%HTMLWriter.writeHtml(out, bunch.extraTags);%>" size="50">
                 <input type="submit" name="cmd" value="Set Tags">

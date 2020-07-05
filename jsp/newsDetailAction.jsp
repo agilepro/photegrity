@@ -340,7 +340,7 @@
         DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
         boolean createIt = ("yes".equals(UtilityMethods.defParam(request, "createIt", "no")));
         boolean copyFiles = ("Set And Move Files".equals(cmd));
-        boolean plusOne = UtilityMethods.defParam(request, "plusOne", null)!=null;
+        int bias = UtilityMethods.defParamInt(request, "bias", 0);
         String newTemplate =  UtilityMethods.defParam(request, "template", "");
         System.out.println("OK=== newTemplate is "+newTemplate);
         if (createIt) {
@@ -352,7 +352,7 @@
         }
         out.write("\n<li>changing the bunch location"+dest+"</li>");
         out.flush();
-        bunch.changeLocAndTemplate(dest, newTemplate, copyFiles, out, plusOne);
+        bunch.changeLocAndTemplate(dest, newTemplate, copyFiles, out, bias);
 
         rememberDestination(session, dest);
     }
@@ -361,8 +361,8 @@
         bunch.extraTags = extraTags;
     }
     else if ("Set Template".equals(cmd)) {
-        boolean plusOne = UtilityMethods.defParam(request, "plusOne", null)!=null;
-        bunch.changeTemplateInt(UtilityMethods.defParam(request, "template", ""), true, out, plusOne);
+        int bias = UtilityMethods.defParamInt(request, "bias", 0);
+        bunch.changeTemplateInt(UtilityMethods.defParam(request, "template", ""), true, out, bias);
     }
     else if ("Cover".equals(cmd)) {
 

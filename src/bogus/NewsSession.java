@@ -4,6 +4,7 @@ import java.io.Reader;
 
 import org.apache.commons.net.nntp.ArticleInfo;
 import org.apache.commons.net.nntp.NNTPClient;
+import org.apache.commons.net.nntp.NewsgroupInfo;
 
 import com.purplehillsbooks.json.JSONException;
 
@@ -120,5 +121,9 @@ public class NewsSession {
 			throw new JSONException("NNTPClient.retrieveArticle returned a null value for article {0}", articleNo);
 		}
 		return msgReader;
+	}
+	
+	public synchronized NewsgroupInfo[] listNewsgroups(String groupName) throws Exception {
+	    return client.listNewsgroups(groupName);
 	}
 }

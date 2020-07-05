@@ -10,6 +10,7 @@
 %><%@page import="bogus.NewsSession"
 %><%@page import="bogus.Stats"
 %><%@page import="bogus.UtilityMethods"
+%><%@page import="bogus.NewsBackground"
 %><%@page import="com.purplehillsbooks.streams.CSVHelper"
 %><%@page import="java.io.File"
 %><%@page import="java.io.Reader"
@@ -68,6 +69,11 @@ for (NewsAction na : NewsAction.getAllActions()) {
 %>
 </table>
 
+<br/>
+<br/>
+<div>
+Logging to: <%= NewsBackground.singleton.logFile %>
+</div>
 </body>
 </html>
 

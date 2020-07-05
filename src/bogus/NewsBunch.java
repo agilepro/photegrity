@@ -27,8 +27,8 @@ public class NewsBunch {
     public String from;
     public String extraTags;
     public int pState = 0;
-    public boolean plusOneNumber = false; // make file with number 1 larger than
-                                          // article says
+    public int fileNumOffset = 0;
+    
     public static final int STATE_INITIAL = 0;
     public static final int STATE_INTEREST = 1;
     public static final int STATE_SEEK = 2;
@@ -310,13 +310,9 @@ public class NewsBunch {
         }
         values.add(Integer.toString(count));
 
-        // add either 'plus' or 'zero' to indicate increment
-        if (plusOneNumber) {
-            values.add("plus");
-        }
-        else {
-            values.add("zero");
-        }
+        // add offset (bias) for this bunch.   This used to be
+        // either 'plus' or 'zero' to indicate increment, but now changed to a number
+        values.add(Integer.toString(this.fileNumOffset));
         values.add(Integer.toString(fileTotal));
         values.add(Integer.toString(fileComplete));
         values.add(Integer.toString(fileDown));
@@ -408,7 +404,16 @@ public class NewsBunch {
 
         if (values.size() > 5) {
             // sixth column is either 'zero' or 'plus'
-            newBunch.plusOneNumber = "plus".equals(values.get(5));
+            String offset = values.get(5);
+            if ("plus".equals(offset)) {
+                newBunch.fileNumOffset = 1;
+            }
+            else if ("zero".equals(offset)) {
+                newBunch.fileNumOffset = 0;
+            }
+            else {
+                newBunch.fileNumOffset = UtilityMethods.safeConvertInt(offset);
+            }
         }
         if (values.size() > 8) {
             //added these to the file format at the same time, so get all or none
@@ -801,19 +806,17 @@ public class NewsBunch {
 
     public void changeTemplate(String newTemplate, boolean renameFiles, Writer out)
             throws Exception {
-        changeTemplateInt(newTemplate, renameFiles, out, plusOneNumber);
+        changeTemplateInt(newTemplate, renameFiles, out, fileNumOffset);
     }
 
     public void changeTemplateInt(String newTemplate, boolean renameFiles, Writer out,
-            boolean newPlusOne) throws Exception {
-        changeLocAndTemplate(getFolderLoc(), newTemplate, renameFiles, out,newPlusOne);
+            int offset) throws Exception {
+        changeLocAndTemplate(getFolderLoc(), newTemplate, renameFiles, out, offset);
     }
 
     public void changeLocAndTemplate(String newFolder, String newTemplate, boolean renameFiles,
-            Writer out, boolean newPlusOne) throws Exception {
+            Writer out, int newBias) throws Exception {
 
-        int newBias = (newPlusOne?1:0);
-        int oldBias = (plusOneNumber?1:0);
         long startTime = System.currentTimeMillis();
         DiskMgr oldDM         = disk;
         File    oldFolderPath = getFolderPath();
@@ -835,7 +838,7 @@ public class NewsBunch {
         FracturedFileName newFracTemplate = FracturedFileName.parseTemplate(newTemplate);
 
         if (dm2 == disk && destPath.equals(pathInDisk) &&
-                newFracTemplate.equals(fracTemplate) && newBias == oldBias) {
+                newFracTemplate.equals(fracTemplate) && newBias == fileNumOffset) {
             // skip this trouble if setting to the same disk/path/name/plus it already at.
             return;
         }
@@ -849,7 +852,7 @@ public class NewsBunch {
         if (hasFolder() && renameFiles && hasTemplate()) {
 
             FracturedFileName oldTemplate = fracTemplate;
-            if (newFracTemplate.equals(fracTemplate) && newPlusOne != plusOneNumber) {
+            if (newFracTemplate.equals(fracTemplate) && newBias != fileNumOffset) {
                 // if we are not changing the template at the same time, we need
                 // to
                 // first move the files to a dummy name, so that number change
@@ -864,8 +867,8 @@ public class NewsBunch {
                         out.write("</li>");
                         out.flush();
                     }
-                    nf.renameFracDeluxe(oldFolderPath, oldTemplate, oldBias, oldFolderPath,
-                            nonClashTemplate, oldBias);
+                    nf.renameFracDeluxe(oldFolderPath, oldTemplate, fileNumOffset, oldFolderPath,
+                            nonClashTemplate, fileNumOffset);
                 }
                 fracTemplate = nonClashTemplate;
                 oldTemplate = nonClashTemplate;
@@ -881,7 +884,7 @@ public class NewsBunch {
                     out.write("</li>");
                     out.flush();
                 }
-                nf.renameFracDeluxe(oldFolderPath, oldTemplate, oldBias, newFolderPath,
+                nf.renameFracDeluxe(oldFolderPath, oldTemplate, fileNumOffset, newFolderPath,
                         newFracTemplate, newBias);
             }
             samplePattern = null;
@@ -890,7 +893,7 @@ public class NewsBunch {
         setRelativePath(destPath);
         out.write("\n<li>relative path now set to "+destPath+"</li>");
         fracTemplate = newFracTemplate;
-        plusOneNumber = newPlusOne;
+        fileNumOffset = newBias;
         // forces it to recalculate if needed
         specialTokenIndex = -2;
 
@@ -1198,7 +1201,7 @@ public class NewsBunch {
      * Within the bunch, tokens can have different numbers for different files.
      * There is a special token, and that is the one that distinguishes files in
      * a set. Is it the first token ($0) or a later token (such as $5). This is
-     * important for the 'plusOneNumber' feature which adds one to the value
+     * important for the 'fileNumOffset' feature which adds some to the value
      * that numbers the files within a set (usually only for index files).
      *
      * @return the token index that must be treated specially. Returns 0 for the
@@ -1381,13 +1384,7 @@ public class NewsBunch {
             rec.put("failure", failureMessage.toString());
         }
         rec.put("template", getTemplate());
-        rec.put("plusOne", plusOneNumber);
-        if (plusOneNumber) {
-            rec.put("bias", 1);
-        }
-        else {
-            rec.put("bias", 0);
-        }
+        rec.put("bias", fileNumOffset);
         rec.put("isYEnc", isYEnc);
         rec.put("shrinkFiles", shrinkFiles);
         rec.put("seekExtent", seekExtent);
@@ -1418,7 +1415,7 @@ public class NewsBunch {
     		}
     		if (changed) {
     			PrintWriter pw = new PrintWriter(System.out);
-    			changeLocAndTemplate(folderLoc, template, true, pw, false);
+    			changeLocAndTemplate(folderLoc, template, true, pw, 0);
     			pw.flush();
     		}
     	}
@@ -1428,9 +1425,6 @@ public class NewsBunch {
     }
     
     public int getBias() {
-        if (plusOneNumber) {
-            return 1;
-        }
-        return 0;
+        return fileNumOffset;
     }
 }

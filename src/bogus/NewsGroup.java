@@ -218,7 +218,7 @@ public class NewsGroup {
             return;
         }
         session.connect();
-        NewsgroupInfo[] ngiList = session.client.listNewsgroups(groupName);
+        NewsgroupInfo[] ngiList = session.listNewsgroups(groupName);
         if (ngiList.length == 0) {
             throw new JSONException("Can't find a news group with the name ({0}) on that server!", groupName);
         }

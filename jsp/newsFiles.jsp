@@ -307,9 +307,7 @@
             address = address + "&folder="+encodeURIComponent($scope.folder);
             address = address + "&go=<%=URLEncoder.encode(thisPage, "UTF-8")%>";
             address = address + "&template="+encodeURIComponent($scope.template);
-            if ($scope.bunch.plusOne) {
-                address = address + "&plusOne=true";
-            }
+            address = address + "&bias="+$scope.bunch.bias;
             window.location.assign(address);
 
             /*
@@ -362,7 +360,6 @@
         <button ng-click="setFilePath('Set And Move Files')">Set And Move Files</button>
         <button ng-click="setFilePath('Set Without Files')">Set Without Files</button>
         <input type="hidden" name="createIt" value="yes">
-        <input type="submit" name="cmd" value="Set Without Files">
 
     </li>
     <li ng-show="showFolders" style="background-color: springgreen; padding: 5;">
@@ -375,9 +372,8 @@
         }
     %>
     </li>
-    <li>Template: <input type="text" ng-model="template" size="100"/>
-
-                <input type="checkbox" ng-model="bunch.plusOne"> Plus One
+    <li>Template: <input type="text" ng-model="template" size="100"/></li>
+    <li>Bias: <input type="text" ng-model="bunch.bias"> 
                 <button ng-click="randomName()">Randomize</button>
                 <br/>
         <button ng-click="setFilePath('SetPattern')">SetPattern</button>

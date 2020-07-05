@@ -75,7 +75,12 @@ public class DiskMgr {
             String[] allDirs = dbdir.split(",");
             File rootFolder = new File(allDirs[0]);
             File defaultFolder = new File(rootFolder, "news");
-            NewsBackground.startNewsThread(defaultFolder);
+            NewsGroup ng = NewsGroup.getCurrentGroup();
+            if (ng.containingFolder==null) {
+                //if no news groups is really open, then we have to give it something
+                ng.containingFolder = defaultFolder;
+            }
+            NewsBackground.startNewsThread(ng.containingFolder);
         }
         if (localdir != null) {
             DiskMgr.archiveView = localdir.toLowerCase();

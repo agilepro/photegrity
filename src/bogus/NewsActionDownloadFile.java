@@ -130,7 +130,7 @@ public class NewsActionDownloadFile extends NewsAction {
                     continue;
                 }
                 if (art.buffer == null) {
-                    out.write("("+art.articleNo+") downloading: ");
+                    out.write("("+art.articleNo+") downloading: "); 
                     try {
                         art.getMsgBody();
                     }

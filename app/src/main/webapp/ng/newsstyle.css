@@ -1,0 +1,25 @@
+table {
+    table-layout:fixed;
+    overflow: hidden;
+}
+.trSelected {
+    outline: dotted red;
+}
+.menuBox {
+    outline: dotted yellow;
+    background-color: LightYellow;
+    padding: 8px;
+}
+td {
+    border-width: 1px;
+    border-color: white;
+    border-style: solid;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.cellPicked {
+    background-color: yellow;
+}
+.position-fixed {
+    position: fixed;
+}

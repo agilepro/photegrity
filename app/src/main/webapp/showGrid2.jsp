@@ -494,6 +494,11 @@ $scope.dataSet = {
             }
         }
         
+        $scope.listOneColumn = function(col) {
+            var url = "show.jsp?q="+encodeURIComponent($scope.query+"e("+$scope.stripPath(col)+")");
+            window.open(url);
+        }
+        
         $scope.refresh = function() {
             var newLoc = "showGrid2.jsp?r="+$scope.currentRow+"&c="+$scope.currentCol;
             window.location = newLoc;
@@ -633,7 +638,7 @@ $scope.dataSet = {
         <td>
         </td>
         <td ng-repeat="col in showCols">
-            <a href="show.jsp?q={{query+'e('+stripPath(col)+')'| encodeURIComponent}}" target="_blank">S</a>
+            <button ng-click="listOneColumn(col)"><i class="glyphicon glyphicon-share"></i></button>
             ({{imageCount[col]}})
         </td>
     </tr>

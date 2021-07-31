@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'photegrity'
-include('app')
+include('photoWar')

@@ -14,9 +14,6 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
-%><%@page import="org.apache.commons.net.nntp.ArticlePointer"
-%><%@page import="org.apache.commons.net.nntp.NNTPClient"
-%><%@page import="org.apache.commons.net.nntp.NewsgroupInfo"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%
     request.setCharacterEncoding("UTF-8");
@@ -67,10 +64,10 @@
             if (newsSession==null) {
                 out.write("\n<br/>Starting up...");
                 out.flush();
-                newsSession = newsGroup.session;
+                newsSession = NewsGroup.session;
                 newsSession.connect();
             }
-            act.perform(out, newsSession);
+            //act.perform(out, newsSession);
         }
         catch (Exception e) {
             newsSession=null;

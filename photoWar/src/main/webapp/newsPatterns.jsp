@@ -131,7 +131,6 @@
     </li>
     <li>Template: <input type="text" name="template" value="<%HTMLWriter.writeHtml(out, bunch.getTemplate());%>" size="50">
 
-                <input type="checkbox" name="plusOne" value="true" <% if (bunch.plusOneNumber) {%>checked="checked"<%}%>> Plus One
                 <br/>
                 <input type="submit" name="cmd" value="GetPatt"> |
                 <input type="submit" name="cmd" value="SetPattern">

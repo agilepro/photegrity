@@ -44,7 +44,7 @@
     }
     String query = gData.getQuery();
     gData.singleRow = true;
-    Hashtable selectedColumns = gData.getSelectedColumns();
+    Hashtable<String, String> selectedColumns = gData.getSelectedColumns();
 
 
 
@@ -70,9 +70,8 @@
     boolean groupNum = true;    //TODO: eliminate
     String order = "num";     //TODO: eliminate
 
-    Vector rowMap = gData.getRowMap();
-    if (showSel)
-    {
+    Vector<Integer> rowMap = gData.getRowMap();
+    if (showSel) {
         rowMap = gData.getSelectedRowMap();
     }
 
@@ -124,7 +123,7 @@
 
 
     //Make a vector of Vectors
-    Vector grid = gData.getEntireGrid();
+    Vector<Vector<JSONObject>> grid = gData.getEntireGrid();
 
     Vector<String> colVec = gData.getColumnMapWithoutSelectionPrioritization();
 
@@ -144,7 +143,7 @@
     int lastSize = -1;
 
     int rowQuant = ((Integer)rowMap.elementAt(rowMin)).intValue();
-    Vector<ImageInfo> row = gData.getRow(rowQuant);
+    Vector<JSONObject> row = gData.getRow(rowQuant);
     if (row==null) {
         throw new Exception("row '"+rowQuant+"' of grid is inexplicably null.");
     }
@@ -155,9 +154,9 @@
         JSONObject oneColumn = new JSONObject();
         oneColumn.put("column", colLoc);
         oneColumn.put("isMarked", isMarked);
-        ImageInfo sii = null;
-        for (ImageInfo ii : row) {
-            String column = ii.getPosPat().getSymbol();
+        JSONObject sii = null;
+        for (JSONObject ii : row) {
+            String column = ii.getString("symbol");
             if (!column.equals(colLoc)) {
                 //finding the image with a particular column
                 continue;
@@ -166,24 +165,20 @@
             break;
         }
         if (sii==null) {
-            sii = gData.defaultImage(colLoc);
+            sii = gData.defaultImage2(colLoc);
             oneColumn.put("isNull", true);
         }
         else {
-            oneColumn.put("isNull", sii.isNullImage());
+            oneColumn.put("isNull", false);
         }
-        oneColumn.put("fileName", sii.fileName);
-        oneColumn.put("relPath",sii.getRelPath());
+        oneColumn.put("fileName", sii.getString("fileName"));
+        oneColumn.put("relPath",sii.getString("localPath"));
         oneColumn.put("fullPath", sii.getFullPath());
-        oneColumn.put("patt", sii.getPosPat().getPattern());
-        oneColumn.put("symbol", sii.getPosPat().getSymbol());
-        oneColumn.put("disk", sii.diskMgr.diskName);
-        oneColumn.put("isTrashed", sii.isTrashed);
-        JSONArray tags = new JSONArray();
-        for (TagInfo ti : sii.tagVec) {
-            tags.put(ti.tagName);
-        }
-        oneColumn.put("tags", tags);        
+        oneColumn.put("patt", sii.getString("pattern"));
+        oneColumn.put("symbol", sii.getString("symbol"));
+        oneColumn.put("disk", sii.getString("diskMgr"));
+        //oneColumn.put("isTrashed", sii.isTrashed);
+        oneColumn.put("tags", sii.getJSONArray("tags"));        
         rowData.put(oneColumn);
     }
 

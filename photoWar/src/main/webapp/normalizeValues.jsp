@@ -4,6 +4,8 @@
 <%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
+<%@page import="com.purplehillsbooks.photegrity.PosPat" %>
+<%@page import="com.purplehillsbooks.photegrity.MongoDB" %>
 <%@page import="com.purplehillsbooks.photegrity.Thumb" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
 <%@page import="java.io.File" %>
@@ -57,6 +59,7 @@
     //String testPattern = sample.getPattern();
     boolean foundNegativeZero = false;
     Vector<ImageInfo> workingSet = new Vector<ImageInfo>();
+    Vector<PosPat> pps = new Vector<PosPat>();
 
     for (ImageInfo ii : groupImages) {
 
@@ -79,8 +82,25 @@
         out.write("</li>\n");
 
         ii.renameFile(potential);
+        
+        boolean found = false;
+        for (PosPat pp : pps) {
+            if (pp.getSymbol().equals(ii.pp.getSymbol())) {
+                found = true;
+            }
+        }
+        if (!found) {
+            pps.add(ii.pp);
+        }
     }
 
+
+    //make sure all the DB records are up to date
+    MongoDB mongo = new MongoDB();
+    for (PosPat pp : pps) {
+        mongo.updatePosPat(pp);
+    }
+    mongo.close();
 
 
 

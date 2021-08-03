@@ -553,11 +553,9 @@ public class ImageInfo
         String symbol = pp.getSymbol();
         
         List<ImageInfo> res = new ArrayList<ImageInfo>();
-        if (imagesByName != null) {
-            for (ImageInfo ii : imagesByName) {
-                if (symbol.equals(ii.pp.getSymbol())) {
-                    res.add(ii);
-                }
+        for (ImageInfo ii : getImagesByName()) {
+            if (symbol.equals(ii.pp.getSymbol())) {
+                res.add(ii);
             }
         }
         return res;
@@ -656,6 +654,16 @@ public class ImageInfo
         return low;
     }
 
+    
+    public static ImageInfo findImage3(JSONObject image) throws Exception {
+        String symbol = image.getString("symbol");
+        int pos = symbol.indexOf(":");
+        String diskMgr = symbol.substring(0,pos);
+        int pos2 = symbol.lastIndexOf("/");
+        String relPath = symbol.substring(pos+1, pos2);
+        String name = image.getString("fileName");
+        return findImage2(diskMgr, relPath, name);
+    }
 
 
     public static ImageInfo findImage2(String disk, String relPath, String name)
@@ -1660,13 +1668,10 @@ public class ImageInfo
     }
 
     public JSONObject getJSON() throws Exception {
-        JSONObject wholeDoc = new JSONObject();
+        JSONObject wholeDoc = getMinimalJSON();
         wholeDoc.put("disk", pp.getDiskMgr().diskName);
         wholeDoc.put("path", pp.getLocalPath());
         wholeDoc.put("pattern", pp.getPattern());
-        wholeDoc.put("fileName", fileName);
-        wholeDoc.put("value", value);
-        wholeDoc.put("fileSize", fileSize);
 
         JSONArray tags = new JSONArray();
         for (TagInfo ti : tagVec) {
@@ -1675,20 +1680,12 @@ public class ImageInfo
         wholeDoc.put("tags", tags);
         return wholeDoc;
     }
-
-    public void storeInElasticSearch(Writer out) throws Exception {
-        JSONObject wholeDoc = getJSON();
-        URL url = new URL("http://bobcat:9200/photos/images/");
-        JSONObject response = RemoteJSON.postToRemote(url, wholeDoc);
-
-        if (response.has("error")) {
-            out.write("ERROR: ");
-            response.write(out, 2, 2);
-        }
-        else {
-            out.write("SAVED: "+response.getString("_id")+" ==> "+this.getFilePath().toString()+"\n");
-        }
-        out.flush();
+    public JSONObject getMinimalJSON() throws Exception {
+        JSONObject wholeDoc = new JSONObject();
+        wholeDoc.put("fileName", fileName);
+        wholeDoc.put("value", value);
+        wholeDoc.put("fileSize", fileSize);
+        return wholeDoc;
     }
     
 }

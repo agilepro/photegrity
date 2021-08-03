@@ -106,6 +106,9 @@ public class APIHandler {
                     return setSessionFromJSON();
                 }
             }
+            if ("grid".equals(mainGroup)) {
+                return doGrid(objIn);
+            }
             if ("batchUpdate".equals(mainGroup)) {
                 return doBatchUpdate(objIn);
             }
@@ -305,6 +308,21 @@ public class APIHandler {
         }
         return bunch.getJSON();
     }
+    
+    private JSONObject doGrid(JSONObject posted) throws Exception {
+        GridData gData = (GridData) session.getAttribute("gData");
+        if (gData==null) {
+            gData = new GridData();
+            session.setAttribute("gData", gData);
+        }
+        if (posted!=null && posted.has("query")) {
+            gData.setQuery(posted.getString("query"));
+            gData.reindex();
+        }
+        JSONObject grid = gData.getJSON();
+        return grid;
+    }
+    
     
     public static String hexDecoder(String val) {
         StringBuffer sb = new StringBuffer(val.length()/2);

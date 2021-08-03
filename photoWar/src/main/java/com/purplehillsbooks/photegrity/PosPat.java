@@ -482,7 +482,7 @@ public class PosPat {
     public static synchronized List<PosPat> getAllForDisk(DiskMgr dm) throws Exception {
         List<PosPat> newIndex = new ArrayList<PosPat>();
         for (PosPat pp : ppIndex) {
-            if (!pp.diskMgr.equals(dm)) {
+            if (pp.diskMgr.equals(dm)) {
                 newIndex.add(pp);
             }
         }
@@ -691,12 +691,15 @@ public class PosPat {
     public JSONObject getFullMongoDoc() throws Exception {
         
         JSONObject jo = new JSONObject();
-        jo.put("diskMgr", diskMgr.getJson());
+        jo.put("diskMgr", diskMgr.diskName);
         jo.put("localPath", localPath);
         jo.put("pattern", pattern);
-        jo.put("diskMgr", diskMgr);
         jo.put("symbol", getSymbol());
-        jo.put("tags", new JSONArray(pathTags));
+        JSONArray tags = new JSONArray();
+        for (String tag : pathTags) {
+            tags.put(tag);
+        }
+        jo.put("tags", tags);
         jo.put("imageCount", imageCount);
         
         JSONArray images = new JSONArray();

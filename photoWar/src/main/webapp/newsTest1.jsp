@@ -52,7 +52,7 @@ Failed
 
 <%
     int i=10;
-    int lastArticle = nGroup.lastArticle+1;
+    long lastArticle = nGroup.lastArticle+1;
     while (--i > 0)
     {
 %>
@@ -68,9 +68,7 @@ Failed
             continue;
         }
 %>
-<pre>
-<% art.parseHeader(out); %>
-</pre>
+
 
 <ul><li>article number: <%= art.getNumber()  %> </li>
 <li> Subject: <% HTMLWriter.writeHtml(out, art.getHeaderSubject()); %> </li>

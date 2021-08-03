@@ -31,6 +31,7 @@
     }
 
     String pageName = "showGrid.jsp";
+    /*
     GridData gData = (GridData) session.getAttribute("gData");
     if (gData==null)
     {
@@ -40,14 +41,15 @@
     gData.setQuery(gData.getQuery());
     gData.reindex(); 
     Vector<ImageInfo> row = gData.getRow(0);
+    */
     
     //Make a vector of Vectors
-    JSONObject grid = gData.getJSON();
+    //JSONObject grid = gData.getJSON();
 
 
     int r = UtilityMethods.defParamInt(request, "r", 1);
     int c = UtilityMethods.defParamInt(request, "c", 0);
-    String query = gData.getQuery();
+    String query = request.getParameter("query");
     String queryOrder = "startGrid.jsp?q="+URLEncoder.encode(query,"UTF8");
     String queryOrderRow = queryOrder+"&r="+r;
     String lastPath = "";
@@ -157,11 +159,7 @@ $scope.dataSet = {
     var bunchApp = angular.module('bunchApp', ['ui.bootstrap']);
     bunchApp.controller('bunchCtrl', function ($scope, $http, $timeout) {
         $scope.query = "<%JavaScriptWriter.encode(out,query);%>";
-        $scope.dataSet = <% grid.write(out, 2, 2); %>;
-        $scope.dataSet.cols.sort();
-        $scope.dataSet.rows.sort(function(a,b){
-            return Number(a)-Number(b);
-        });
+        $scope.dataSet = {cols:[],defs:{},rows:[],grid:{}};
         $scope.ySize = 5;
         $scope.xSize = 6;
         $scope.pinCols = [];
@@ -176,11 +174,6 @@ $scope.dataSet = {
         $scope.currentRow = <%=r%>;
         $scope.currentCol = <%=c%>;
         $scope.imageCount = {};
-        $scope.dataSet.cols.forEach( function(colName) {
-            $scope.pinMap[colName] = "unpinned";
-            $scope.biasMap[colName] = 0;
-            $scope.imageCount[colName] = Object.keys($scope.dataSet.grid[colName]).length;
-        });
         var rowPoz = 0;
         
         $scope.fastConvert = {};
@@ -213,7 +206,40 @@ $scope.dataSet = {
         $scope.fastConvert[-8] = "-8";
         $scope.fastConvert[-9] = "-9";
         
+        $scope.getData = function() {
+            var url = "api/grid";
+            var postObj = {};
+            postObj.query = $scope.query;
+            console.log("QUERY:", $scope.query);
+            
+            $http.post(url, JSON.stringify(postObj))
+            .success(function(data) {
+                setData(data);
+            })
+            .error( function(data) {
+                alert(JSON.stringify(data,null,2));
+            });
+            
+        }
+        function setData(data) {
+            console.log("RECEIVED DATA:", data);
+            $scope.dataSet = data;
+            $scope.dataSet.cols.sort();
+            $scope.dataSet.rows.sort(function(a,b){
+                return Number(a)-Number(b);
+            });
+            $scope.dataSet.cols.forEach( function(colName) {
+                $scope.pinMap[colName] = "unpinned";
+                $scope.biasMap[colName] = 0;
+                $scope.imageCount[colName] = Object.keys($scope.dataSet.grid[colName]).length;
+            });
+            findAllRows();
+            //$scope.$apply();
+            $scope.setRow($scope.currentRow);
+            $scope.setCol($scope.currentCol);
+        }
         
+        $scope.getData();
         
         $scope.imageUrl = function(col, row) {
             var colrecs = $scope.dataSet.grid[col];
@@ -293,6 +319,7 @@ $scope.dataSet = {
         }
         
         function findAllRows() {
+            console.log("DATA: ", $scope.dataSet);
             var allRows = [];
             if (someColumnHasRowValue(-300)) {
                 allRows.push($scope.fastConvert[-300]);
@@ -318,23 +345,25 @@ $scope.dataSet = {
         }
         function someColumnHasRowValue(rowVal) {
             var res = false;
-            $scope.dataSet.cols.forEach( function(col) {
-                var thisCol = $scope.dataSet.grid[col];
-                if (rowVal<0) {
-                    if ($scope.fastConvert[rowVal] in thisCol) {
-                        res = true;
+            if ($scope.dataSet.cols) {
+                $scope.dataSet.cols.forEach( function(col) {
+                    var thisCol = $scope.dataSet.grid[col];
+                    if (rowVal<0) {
+                        if ($scope.fastConvert[rowVal] in thisCol) {
+                            res = true;
+                        }
                     }
-                }
-                else {
-                    var rowValForCol = rowVal + $scope.biasMap[col];
-                    if (rowValForCol>=0 && rowValForCol<=999 && $scope.fastConvert[rowValForCol] in thisCol) {
-                        res = true;
+                    else {
+                        var rowValForCol = rowVal + $scope.biasMap[col];
+                        if (rowValForCol>=0 && rowValForCol<=999 && $scope.fastConvert[rowValForCol] in thisCol) {
+                            res = true;
+                        }
                     }
-                }
-            });
+                });
+            }
             return res;
         }
-        findAllRows();
+        
         
         $scope.setRow = function(rowTarget) {
             //make sure it is a valid index into allRows
@@ -374,14 +403,16 @@ $scope.dataSet = {
             $scope.currentRow = rowTarget;
             $scope.showRows = finalList;
         }
-        $scope.setRow($scope.currentRow);
         $scope.setCol = function(colTarget) {
             if ($scope.onlyPinned) {
                 $scope.showCols = $scope.pinCols;
                 $scope.setRow($scope.currentRow);
                 return;
             }
-            var maxCol = $scope.dataSet.cols.length;
+            var maxCol = 0
+            if ($scope.dataSet.cols) {
+                maxCol = $scope.dataSet.cols.length;
+            }
             if (colTarget > maxCol - $scope.xSize) {
                 colTarget = maxCol - $scope.xSize;
             }
@@ -410,7 +441,6 @@ $scope.dataSet = {
             $scope.showCols = finalList;
             $scope.setRow($scope.currentRow);
         }
-        $scope.setCol($scope.currentCol);
         $scope.setColByName = function(newName) {
             for (var i=0; i<$scope.dataSet.cols.length; i++) {
                 if (newName == $scope.dataSet.cols[i]) {
@@ -500,8 +530,7 @@ $scope.dataSet = {
         }
         
         $scope.refresh = function() {
-            var newLoc = "showGrid2.jsp?r="+$scope.currentRow+"&c="+$scope.currentCol;
-            window.location = newLoc;
+            $scope.getData();
         }
         
     });

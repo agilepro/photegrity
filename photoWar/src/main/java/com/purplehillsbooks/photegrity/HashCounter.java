@@ -50,7 +50,7 @@ public class HashCounter extends Hashtable<String,Integer>
     }
 
 
-    public Vector<String> getSortedKeys(Hashtable<String, Object> selected) throws Exception {
+    public Vector<String> getSortedKeys(Hashtable<String, String> selected) throws Exception {
         try {
             Vector<String> sortedKeys = new Vector<String>();
             sortedKeys.addAll(keySet());
@@ -172,9 +172,9 @@ public class HashCounter extends Hashtable<String,Integer>
     }
 
     static class SelectedComparator implements Comparator<String> {
-        Hashtable<String, Object> selected;
+        Hashtable<String, String> selected;
 
-        public SelectedComparator(Hashtable<String, Object> s) {
+        public SelectedComparator(Hashtable<String, String> s) {
             selected = s;
         }
 

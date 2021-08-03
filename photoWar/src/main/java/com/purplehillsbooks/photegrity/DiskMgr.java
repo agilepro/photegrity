@@ -18,12 +18,6 @@ import java.util.Vector;
 
 import javax.servlet.ServletContext;
 
-import org.bson.Document;
-
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
 
@@ -480,6 +474,7 @@ public class DiskMgr {
             isLoaded = true;
             isChanged = false;
             writeSummary();
+            storeDiskInMongo();
         }
         catch (Exception e) {
             throw new JSONException("Unable to load the disk '{0}'", e, diskName);
@@ -879,10 +874,20 @@ public class DiskMgr {
         MongoDB mongo = new MongoDB();
         
         for (PosPat pp : PosPat.getAllForDisk(this)) {
-            JSONObject jo = pp.getFullMongoDoc();
             mongo.updatePosPat(pp);
         }
 
+        mongo.close();
+    }
+    public void updateSymbolsInMongo(List<String> symbolList) throws Exception {
+        MongoDB mongo = new MongoDB();
+        
+        for (String symbol : symbolList) {
+            PosPat pp = PosPat.getPosPatFromSymbol(symbol);
+            if (pp!=null) {
+                mongo.updatePosPat(pp);
+            }
+        }
         mongo.close();
     }
     
@@ -907,12 +912,5 @@ public class DiskMgr {
         }
     }
 
-    public void storeInElasticSearch(Writer out) throws Exception {
-        for (ImageInfo ii : ImageInfo.getImagesByPath()) {
-            if (this.equals(ii.pp.getDiskMgr())) {
-                ii.storeInElasticSearch(out);
-            }
-        }
-    }
 
 }

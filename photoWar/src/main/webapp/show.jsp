@@ -262,7 +262,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
    </td><td>
       <a href="manage.jsp?q=<%=queryOrderPart%>">I</a>
    </td><td>
-      <a href="startGrid.jsp?q=<%=queryOrderPart%>">Row</a>
+      <a href="showGrid2.jsp?query=<%=queryOrderPart%>">Row</a>
    </td><td>
       <a href="compare.jsp">Compare</a>
    </td></tr>

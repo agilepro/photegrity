@@ -1,6 +1,7 @@
 package com.purplehillsbooks.photegrity;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -15,13 +16,13 @@ public class GridData {
     public String query = "";
 
     private Vector<ImageInfo> rawData = new Vector<ImageInfo>();
-    private Vector<Vector<ImageInfo>> grid = new Vector<Vector<ImageInfo>>();
-    private Hashtable<String, Object> selectedColumns = new Hashtable<String, Object>();
+    private Vector<Vector<JSONObject>> grid = new Vector<Vector<JSONObject>>();
+    private Hashtable<String, String> selectedColumns = new Hashtable<String, String>();
 
     /*
      * Retains the default image info for a particular column name
      */
-    private Hashtable<String, ImageInfo> defImage = new Hashtable<String, ImageInfo>();
+    private Hashtable<String, JSONObject> defImage = new Hashtable<String, JSONObject>();
 
     /**
      * When you have a grid, there are a certain number of images per row.
@@ -57,8 +58,22 @@ public class GridData {
     }
 
     public void setQuery(String newQuery) throws Exception {
-        query = newQuery;
-        flushCache();
+        if (!newQuery.equals(query)) {
+            query = newQuery;
+            flushCache();
+            needsRecalc = true;
+            rangeTop = -999;
+            rangeBottom = 999;
+            totalPerRow = new NumericCounter();
+            totalPerCol = new HashCounter();
+            selectedPerRow = new NumericCounter();
+            totalRowMap = new Vector<Integer>();
+            selectedRowMap = new Vector<Integer>();
+            rawData = new Vector<ImageInfo>();
+            grid = new Vector<Vector<JSONObject>>();
+            selectedColumns = new Hashtable<String, String>();
+            singleRow = true;
+        }
     }
 
     public String getQuery() throws Exception {
@@ -111,7 +126,7 @@ public class GridData {
         return selectedRowMap;
     }
 
-    public Hashtable<String, Object> getSelectedColumns() throws Exception {
+    public Hashtable<String, String> getSelectedColumns() throws Exception {
         if (needsRecalc) {
             processQuery();
         }
@@ -134,13 +149,16 @@ public class GridData {
     }
 
     public ImageInfo defaultImage(String cval) throws Exception {
+        return ImageInfo.findImage3(defImage.get(cval));
+    }
+    public JSONObject defaultImage2(String cval) throws Exception {
         return defImage.get(cval);
     }
 
     /**
      * temporarily needed for conversion.
      */
-    public Vector<Vector<ImageInfo>> getEntireGrid() throws Exception {
+    public Vector<Vector<JSONObject>> getEntireGrid() throws Exception {
         if (needsRecalc) {
             processQuery();
         }
@@ -150,7 +168,7 @@ public class GridData {
     /**
      * temporarily needed for conversion.
      */
-    public Vector<ImageInfo> getRow(int value) throws Exception {
+    public Vector<JSONObject> getRow(int value) throws Exception {
         if (needsRecalc) {
             processQuery();
         }
@@ -190,7 +208,7 @@ public class GridData {
         needsRecalc = true;
     }
 
-    private void processQuery() throws Exception {
+    private void processQueryOldWay() throws Exception {
         flushCache();
         if (query.length() == 0) {
             // nothing to process, so just ignore this
@@ -199,17 +217,54 @@ public class GridData {
         rawData.addAll(ImageInfo.imageQuery(query));
         ImageInfo.sortImages(rawData, "num");
 
-        Vector<ImageInfo> rowVec = null;
+        Vector<JSONObject> rowVec = null;
         int rowValue = -99999;
         for (ImageInfo ii : rawData) {
             int thisValue = ii.value;
             if (rowValue != thisValue) {
-                rowVec = new Vector<ImageInfo>();
+                rowVec = new Vector<JSONObject>();
                 grid.add(rowVec);
                 rowValue = thisValue;
             }
-            rowVec.add(ii);
+            rowVec.add(ii.getJSON());
         }
+        reindex();
+        needsRecalc = false;
+    }
+    private void processQuery() throws Exception {
+        flushCache();
+        if (query.length() == 0) {
+            // nothing to process, so just ignore this
+            return;
+        }
+        MongoDB mongo = new MongoDB();
+        JSONArray sets = mongo.querySets(query);
+        HashMap<Integer, Vector<JSONObject>> tempRows = new HashMap<Integer, Vector<JSONObject>>();
+        
+        for (JSONObject setRec : sets.getJSONObjectList()) {
+            //String diskMgr = setRec.getString("diskMgr");
+            //String localPath = setRec.getString("localPath");
+            String symbol = setRec.getString("symbol");
+            
+            JSONArray images = setRec.getJSONArray("images");
+            for (JSONObject image : images.getJSONObjectList()) {
+                image.put("symbol", symbol);
+                int value = image.getInt("value");
+                //String fileName = image.getString("fileName");
+                //ImageInfo ii = ImageInfo.findImage2(diskMgr, localPath, fileName);
+                    
+                Vector<JSONObject> rowVec = tempRows.get(value);
+                if (rowVec==null) {
+                    rowVec = new Vector<JSONObject>();
+                    tempRows.put(value, rowVec);
+                }
+                rowVec.add(image);
+            }
+        }
+        for (int key : tempRows.keySet()) {
+            grid.add(tempRows.get(key));
+        }
+        
         reindex();
         needsRecalc = false;
     }
@@ -221,18 +276,18 @@ public class GridData {
         totalRowMap.clear();
         selectedRowMap.clear();
 
-        for (Vector<ImageInfo> rowVec : grid) {
-            for (ImageInfo ii : rowVec) {
-                int thisValue = ii.value;
-                String colVal = ii.getPatternSymbol();
+        for (Vector<JSONObject> rowVec : grid) {
+            for (JSONObject ii : rowVec) {
+                int thisValue = ii.getInt("value");
+                String colVal = ii.getString("symbol");
                 boolean isMarked = (selectedColumns.get(colVal) != null);
                 totalPerRow.increment(thisValue);
                 totalPerCol.increment(colVal);
                 if (isMarked) {
                     selectedPerRow.increment(thisValue);
                 }
-                ImageInfo def = defImage.get(colVal);
-                if (def == null || ii.value == 0 || (def.value < 0 && ii.value > def.value)) {
+                JSONObject def = defImage.get(colVal);
+                if (def == null || thisValue == 0 || !def.has("value") || (def.getInt("value") < 0 && thisValue > def.getInt("value"))) {
                     defImage.put(colVal, ii);
                 }
             }
@@ -256,22 +311,26 @@ public class GridData {
     }
     
     public JSONObject getJSON() throws Exception {
+        if (needsRecalc) {
+            processQuery();
+        }
         JSONObject total = new JSONObject();
         JSONObject gridjo = new JSONObject();
         Set<String> valueSet = new HashSet<String>();
         Set<String> colSet = new HashSet<String>();
         
-        for (Vector<ImageInfo> rowVec : grid) {
-            for (ImageInfo ii : rowVec) {
+        for (Vector<JSONObject> rowVec : grid) {
+            for (JSONObject ii : rowVec) {
+                int value = ii.getInt("value");
                 String thisValue = "??";
-                if (ii.value>=0) {
-                    thisValue = Integer.toString(1000+ii.value).substring(1);
+                if (value>=0) {
+                    thisValue = Integer.toString(1000+value).substring(1);
                 }
                 else {
-                    thisValue = Integer.toString(ii.value);
+                    thisValue = Integer.toString(value);
                 }
                 valueSet.add(thisValue);
-                String thisCol = ii.getPatternSymbol();
+                String thisCol = ii.getString("symbol");
                 colSet.add(thisCol);
                 
                 if (!gridjo.has(thisCol)) {
@@ -279,7 +338,7 @@ public class GridData {
                 }
                 
                 JSONObject colObj = gridjo.getJSONObject(thisCol);
-                colObj.put(thisValue, ii.getJSON());
+                colObj.put(thisValue, ii);
             }
         }
         total.put("grid",  gridjo);
@@ -294,8 +353,8 @@ public class GridData {
         JSONObject defs = new JSONObject();
         for (String col : colSet) {
             colsjo.put(col);
-            ImageInfo defImg = this.defaultImage(col);
-            defs.put(col, defImg.getJSON());
+            JSONObject defImg = this.defaultImage2(col);
+            defs.put(col, defImg);
         }
         total.put("cols",  colsjo);
         total.put("defs",  defs);

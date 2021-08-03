@@ -6,6 +6,7 @@
 %><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.MongoDB"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileReader"
 %><%@page import="java.io.LineNumberReader"
@@ -14,6 +15,8 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%request.setCharacterEncoding("UTF-8");
     response.setContentType("text/html;charset=UTF-8");
     long starttime = System.currentTimeMillis();
@@ -57,7 +60,7 @@
 
     String listName = UtilityMethods.getSessionString(session, "listName", "");
     int thumbsize = UtilityMethods.getSessionInt(session, "thumbsize", 100);
-    String localPath = UtilityMethods.getSessionString(session, "localPath", "../pict/");
+    String localPath2 = UtilityMethods.getSessionString(session, "localPath", "../pict/");
     int columns = UtilityMethods.getSessionInt(session, "columns", 3);
     int rows = UtilityMethods.getSessionInt(session, "rows", 4);
     int pageSize = UtilityMethods.getSessionInt(session, "listSize", 20);
@@ -98,7 +101,7 @@
         rowMax = rows;
     }
 
-    Vector[] rowVectors = new Vector[rowMax];
+    Hashtable<Integer,Vector<JSONObject>> rowVectors = new Hashtable<Integer,Vector<JSONObject>>();
 
     int dispMin = UtilityMethods.defParamInt(request, "min", 0);
     if (dispMin < 0) {
@@ -117,14 +120,28 @@
 
     String lastPath = "";
     Hashtable diskMap = new Hashtable();
-    Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
-    groupImages.addAll(ImageInfo.imageQuery(query));
-    ImageInfo.sortImages(groupImages, order);
-    Enumeration e2 = groupImages.elements();
+    
+    MongoDB mongo = new MongoDB();
+    JSONArray groupImages = mongo.querySets(query);
+    mongo.close();
+    
+    //ImageInfo.sortImages(groupImages, order);
+    //Enumeration e2 = groupImages.elements();
     int totalCount = -1;
     String queryOrderNoMin = URLEncoder.encode(query,"UTF8")+"&o="+order;
     String queryOrderPart = queryOrderNoMin+"&min="+dispMin;
-    int recordCount = groupImages.size();
+    JSONArray justImages = new JSONArray();
+    for (JSONObject setInfo : groupImages.getJSONObjectList()) {
+        if (!setInfo.has("disk")) {
+            throw new Exception("SetInfo does not have a disk: "+setInfo.toString(2));
+        }
+        String diskMgr = setInfo.getString("disk");
+        String localPath = setInfo.getString("path");
+        for (JSONObject image : setInfo.getJSONArray("images").getJSONObjectList()) {
+            justImages.put(image);
+        }
+    }
+    int recordCount = justImages.length();
 
 ///////////////////////////////////////
 
@@ -134,23 +151,25 @@
     int lastSize = -1;
     int minValue = 999;
 
-    while (e2.hasMoreElements())
-    {
+    for (JSONObject ii : justImages.getJSONObjectList()) {
+        
         totalCount++;
-        ImageInfo ii = (ImageInfo)e2.nextElement();
-        if (ii.value<minValue) {
-            minValue = ii.value;
-        }
-        String location = "";
-        if (!ii.isNullImage())
-        {
-            diskMap.put(ii.diskMgr.diskName, ii);
-            location = ii.diskMgr.diskName+":"+ii.getRelativePath();
+        int value = ii.getInt("value");
+        int fileSize = ii.getInt("fileSize");
+        String diskName = ii.getString("disk");
+        if (value<minValue) {
+            minValue = value;
         }
 
-        //if you have not reached the start image, then skip
-        if (totalCount < dispMin)
+        /*
+        if (!ii.isNullImage())
         {
+            diskMap.put(diskName, ii);
+        }
+        */
+
+        //if you have not reached the start image, then skip
+        if (totalCount < dispMin) {
             continue;
         }
         //if you have all the rows, then skip forward (so statistics are over fullset)
@@ -166,18 +185,18 @@
         //now determine if we need a new row
         if (groupNum)
         {
-            if (lastSize != ii.value)
+            if (lastSize != value)
             {
                 rowNum++;
-                lastSize = ii.value;
+                lastSize = value;
             }
         }
         else if (groupSize)
         {
-            if (lastSize != ii.fileSize)
+            if (lastSize != fileSize)
             {
                 rowNum++;
-                lastSize = ii.fileSize;
+                lastSize = fileSize;
             }
         }
         else if (showPict)
@@ -203,11 +222,11 @@
             continue;
         }
 
-        Vector row = rowVectors[rowNum];
+        Vector<JSONObject> row = rowVectors.get(rowNum);
         if (row==null)
         {
-            row = new Vector();
-            rowVectors[rowNum] = row;
+            row = new Vector<JSONObject>();
+            rowVectors.put(rowNum, row);
         }
 
         row.add(ii);
@@ -328,38 +347,37 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
 
     for (rowNum=0; rowNum<rowMax; rowNum++)
     {
-        Vector row = rowVectors[rowNum];
+        Vector<JSONObject> row = rowVectors.get(rowNum);
         if (row==null)
         {
             continue;
         }
         out.write("<tr>");
-        Enumeration rowe = row.elements();
         boolean firstInRow = true;
-        while (rowe.hasMoreElements())
-        {
+        for (JSONObject ii : row) {
             totalCount++;
-            ImageInfo ii = (ImageInfo)rowe.nextElement();
-            String location = "";
-            if (!ii.isNullImage())
-            {
-                location = ii.diskMgr.diskName+":"+ii.getRelativePath();
-            }
 
-            String encodedName = URLEncoder.encode(ii.fileName,"UTF8");
-            String encodedPath = URLEncoder.encode(ii.getFullPath(),"UTF8");
-            String encodedDisk = URLEncoder.encode(ii.diskMgr.diskName,"UTF8");
+            String fileName = ii.getString("fileName");
+            int value = ii.getInt("value");
+            int fileSize = ii.getInt("fileSize");
+            String diskName = ii.getString("disk");
+            String localPath = ii.getString("path");
+            String fullPath = diskName + "/" + localPath + fileName;
+            String encodedName = URLEncoder.encode(fileName,"UTF8");
+            String encodedPath = URLEncoder.encode(localPath,"UTF8");
+            String encodedDisk = URLEncoder.encode(diskName,"UTF8");
             String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
-            String stdAndGo = stdParams+"&go="+encodedPath;
-            String newQ = query+"e("+ii.getPattern()+")";
+            String newQ = query+"e("+ii.getString("pattern")+")";
             String trashIcon = "trash.gif";
+            /*
             if (ii.isTrashed)
             {
                 trashIcon = "delicon.gif";
             }
+            */
 
 
-            String truncName = ii.fileName;
+            String truncName = fileName;
             if (truncName.length()>30)
             {
                 truncName = truncName.substring(0,28)+"...";
@@ -371,24 +389,24 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
                 {
                     if (groupSize)
                     {
-                        out.write(Integer.toString(ii.fileSize));
+                        out.write(Integer.toString(fileSize));
                     }
                     else
                     {
-                        out.write(Integer.toString(ii.value));
+                        out.write(Integer.toString(value));
                     }
                     out.write("</td>");
                 }
                 out.write("<td>");
 %>
-                <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" class="thumbnail" ></a>
+                <a href="photo/<%=fullPath%>" target="photo">
+                <img src="thumb/<%=thumbsize%>/<%=fullPath%>" width="<%=thumbsize%>" class="thumbnail" ></a>
                 </td><td><a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">S</a><br/>
                 <a href="selectImage.jsp?<%=stdParams%>&a=supp" target="suppwindow">
                     <img border=0 src="addicon.gif" border="0"></a><br/>
                 <a href="manage.jsp?q=<%=queryOrderNoMin%>&min=<%=totalCount%>">
                     <img border=0 src="searchicon.gif" border="0"></a><br/>
-                <font size="-4" color="#99CC99"><%=ii.value%></font><br/>
+                <font size="-4" color="#99CC99"><%=value%></font><br/>
                 <a href="deleteOne.jsp?<%=stdParams%>&go=<%=URLEncoder.encode(thisPage,"UTF-8")%>">
                 <img border=0 src="<%=trashIcon%>" border="0"></a>
                 </td><%
@@ -397,8 +415,8 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
                             {
                 %>
                 <td>
-                <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" class="thumbnail" ></a>
+                <a href="photo/<%=fullPath%>" target="photo">
+                <img src="thumb/<%=thumbsize%>/<%=fullPath%>" class="thumbnail" ></a>
                 </td>
                 <td>
                 <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">S</a><br/>
@@ -406,10 +424,10 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
                     <img border=0 src="addicon.gif" border="0"></a><br/>
                 <a href="manage.jsp?q=<%=queryOrderNoMin%>&min=<%=totalCount%>">
                     <img border=0 src="searchicon.gif" border="0"></a><br/>
-                <font size="-4" color="#99CC99"><%=ii.value%></font><br/>
+                <font size="-4" color="#99CC99"><%=value%></font><br/>
                 <a href="deleteOne.jsp?<%=stdParams%>&go=<%=URLEncoder.encode(thisPage,"UTF-8")%>">
                 <img border=0 src="<%=trashIcon%>" border="0"></a>
-                </td><td><%=ii.diskMgr.diskName%>:<%=ii.getRelPath()%>
+                </td><td><%=diskName%>:<%=fullPath%>
                 </td><%
                     }
                             else if (allPict)
@@ -422,10 +440,10 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
                                 }
                 %>
                 <td>
-                <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" class="thumbnail"></a>
+                <a href="photo/<%=fullPath%>" target="photo">
+                <img src="thumb/<%=thumbsize%>/<%=fullPath%>" class="thumbnail"></a>
                 </td><td>
-                <font size="-4" ><%=ii.value%></font><br/>
+                <font size="-4" ><%=value%></font><br/>
                 <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">
                        S</a><br/>
                 <a href="manage.jsp?q=<%=queryOrderNoMin%>&min=<%=totalCount%>">
@@ -439,31 +457,30 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
     %>
                 <td>
                 <a href="show.jsp?q=<%=URLEncoder.encode(newQ,"UTF8")%>&o=<%=order%>">S</a>
-                <a href="photo/<%=ii.getRelPath()%>" target="photo">
+                <a href="photo/<%=fullPath%>" target="photo">
                     <%=truncName%></a></td>
                 <td><a href="manage.jsp?q=<%=queryOrderNoMin%>&min=<%=totalCount%>">
                     <img border=0 src="searchicon.gif" border="0"></a></td>
-                <td bgcolor="#FFCCAA"><%=ii.diskMgr.diskName%></td>
+                <td bgcolor="#FFCCAA"><%=diskName%></td>
                 <td>
                 <a href="deleteOne.jsp?<%=stdParams%>&go=<%=URLEncoder.encode(thisPage,"UTF-8")%>">
                 <img src="<%=trashIcon%>" border="0"></a>
                 </td>
                 <td>(<%
-                    if (ii.fileSize>250000) {
-                                    out.write("<b><font color=\"red\">"+ii.fileSize+"</font></b>");
+                    if (fileSize>250000) {
+                                    out.write("<b><font color=\"red\">"+fileSize+"</font></b>");
                                   } else {
-                                    out.write(Integer.toString(ii.fileSize));
+                                    out.write(Integer.toString(fileSize));
                                   }
                 %>)
     <%
-                    Enumeration eg = ii.tagVec.elements();
-                    while (eg.hasMoreElements()) {
-                        TagInfo gi = (TagInfo) eg.nextElement();
-                        HTMLWriter.writeHtml(out, gi.tagName);
+
+                    for (String tag : ii.getJSONArray("tags").getStringList()) {
+                        HTMLWriter.writeHtml(out, tag);
                         out.write(" \t ");
                     }
                     //suppress duplicate paths
-                    String pp = ii.getRelativePath();
+                    String pp = localPath;
                     if (pp.equals(lastPath))
                     {
                         pp = "";
@@ -582,7 +599,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
   Columns: <input type="text" name="columns" size="5" value="<%=columns%>">
   Rows: <input type="text" name="rows" size="5" value="<%=rows%>">
   List: <input type="text" name="listSize" size="5" value="<%=pageSize%>">
-  <input type="hidden" name="pict" value="<%=localPath%>">
+  <input type="hidden" name="pict" value="<%=localPath2%>">
   <input type="hidden" name="go" value="show.jsp?q=<%=queryOrderPart%>">
 </form>
 </td></tr></table>

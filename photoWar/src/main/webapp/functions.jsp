@@ -99,11 +99,8 @@
         out.write( foo.substring(start) );
     }
 
-    public
-    static
-    void
-    sortGroupsByCount(Vector patterns, Hashtable localGroups)
-        throws Exception
+    public static void sortGroupsByCount(Vector<String> patterns, 
+               Hashtable<String, Vector<JSONObject>> localGroups) throws Exception
     {
         GroupsByCountComparator sc = new GroupsByCountComparator(localGroups);
         Collections.sort(patterns, sc);
@@ -112,25 +109,23 @@
 
     static class GroupsByCountComparator implements Comparator
     {
-        Hashtable localGroups;
+        Hashtable<String, Vector<JSONObject>> localGroups;
 
-        public GroupsByCountComparator(Hashtable n_localGroups) {
+        public GroupsByCountComparator(Hashtable<String, Vector<JSONObject>> n_localGroups) {
             localGroups = n_localGroups;
         }
 
-        public int compare(Object o1, Object o2)
+        public int compare(Object name1, Object name2)
         {
-            if (!(o1 instanceof TagInfo)) {
+            if (!(name1 instanceof String)) {
                 return -1;
             }
-            if (!(o2 instanceof TagInfo)) {
+            if (!(name2 instanceof String)) {
                 return 1;
             }
-            String name1 = ((TagInfo)o1).tagName;
-            Vector o1list = (Vector) localGroups.get(name1);
+            Vector<JSONObject> o1list = localGroups.get(name1);
             int o1size = o1list.size();
-            String name2 = ((TagInfo)o2).tagName;
-            Vector o2list = (Vector) localGroups.get(name2);
+            Vector<JSONObject> o2list = localGroups.get(name2);
             int o2size = o2list.size();
 
             if (o1size > o2size) {

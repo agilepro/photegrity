@@ -873,6 +873,9 @@ public class DiskMgr {
     public void storeDiskInMongo() throws Exception {
         MongoDB mongo = new MongoDB();
         
+        //get rid of any pospats that no longer exist on the disk
+        mongo.clearAllFromDisk(diskName);
+        
         for (PosPat pp : PosPat.getAllForDisk(this)) {
             mongo.updatePosPat(pp);
         }

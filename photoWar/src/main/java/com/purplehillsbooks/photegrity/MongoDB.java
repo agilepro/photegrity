@@ -72,6 +72,17 @@ public class MongoDB {
         return ja;
     }
     
+    
+    /**
+     * This deletes all the pospat records that are associated with a particular disk
+     */
+    public void clearAllFromDisk(String diskName) throws Exception {
+        //this should identify the existing pos pat record for deleting it if exists
+        JSONObject filter = new JSONObject();
+        filter.put("disk", diskName);
+        pospatdb.deleteMany(Document.parse(filter.toString(2)));
+    }
+    
     public void updatePosPat(PosPat pp) throws Exception {
         String symbol = pp.getSymbol();
         
@@ -100,11 +111,9 @@ public class MongoDB {
                 throw new JSONException("error with query, second character must be an open paren");
             }
 
-            Vector<ImageInfo> vImages = new Vector<ImageInfo>();
             JSONObject mongoQuery = new JSONObject();
             
-            // will be (AND  q q q)
-            // all the 
+            // all conditions will be ANDED together:  (AND  q q q)
             JSONArray queryAndList = new JSONArray();
 
 
@@ -128,18 +137,18 @@ public class MongoDB {
                         break;
                     case 'p':
                         //pattern starts with this
-                        q.put("pattern", val.toLowerCase());
+                        q.put("pattern", val);
                         queryAndList.put(q);
                         break;
                     case 'e':
                         //this is the exact match
-                        q.put("pattern", val.toLowerCase());
+                        q.put("pattern", val);
                         queryAndList.put(q);
                         break;
                     case 's':   
                         //pattern starts with
                         JSONObject regex = q.requireJSONObject("pattern");
-                        regex.put("$regex", "^"+val.toLowerCase());
+                        regex.put("$regex", "^"+val);
                         queryAndList.put(q);
                         break;
                     case 'd':  

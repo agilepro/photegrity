@@ -691,8 +691,8 @@ public class PosPat {
     public JSONObject getFullMongoDoc() throws Exception {
         
         JSONObject jo = new JSONObject();
-        jo.put("diskMgr", diskMgr.diskName);
-        jo.put("localPath", localPath);
+        jo.put("disk", diskMgr.diskName);
+        jo.put("path", localPath);
         jo.put("pattern", pattern);
         jo.put("symbol", getSymbol());
         JSONArray tags = new JSONArray();

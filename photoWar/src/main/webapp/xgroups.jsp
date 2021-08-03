@@ -7,6 +7,9 @@
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.MongoDB"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileReader"
 %><%@page import="java.io.LineNumberReader"
@@ -65,28 +68,30 @@
     String rd = UtilityMethods.defParam(request, "rd", "");
     DiskMgr requiredDisk = DiskMgr.getDiskMgrOrNull(rd);
 
-    Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
-    groupImages.addAll(ImageInfo.imageQuery(query));
+    MongoDB mongo = new MongoDB();
+    JSONArray groupImages = mongo.querySets(query);
+    mongo.close();
 
-    Vector sortedGroups = new Vector();
-    Enumeration e4 = groupImages.elements();
-    Hashtable allGroups = new Hashtable();
-    Hashtable localGroups = new Hashtable();
-    while (e4.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e4.nextElement();
-        Enumeration eg = ii.tagVec.elements();
-        while (eg.hasMoreElements()) {
-            TagInfo gi = (TagInfo) eg.nextElement();
-            if (allGroups.get(gi.tagName)==null) {
-                sortedGroups.add(gi);
+    Vector<String> sortedGroups = new Vector<String>();
+    Hashtable<String, String> allGroups = new Hashtable<String, String>();
+    Hashtable<String, Vector<JSONObject>> localGroups = new Hashtable<String, Vector<JSONObject>>();
+    
+    for (JSONObject set : groupImages.getJSONObjectList()) {
+        JSONArray tags = set.getJSONArray("tags");
+        JSONArray images = set.getJSONArray("images");
+        for (JSONObject image : images.getJSONObjectList()) {
+            for (String tagName : tags.getStringList()) {
+                if (allGroups.get(tagName)==null) {
+                    sortedGroups.add(tagName);
+                }
+                allGroups.put(tagName, tagName);
+                Vector<JSONObject> gimg = localGroups.get(tagName);
+                if (gimg==null) {
+                    gimg = new Vector<JSONObject>();
+                    localGroups.put(tagName, gimg);
+                }
+                gimg.add(image);
             }
-            allGroups.put(gi.tagName, gi);
-            Vector gimg = (Vector) localGroups.get(gi.tagName);
-            if (gimg==null) {
-                gimg = new Vector();
-                localGroups.put(gi.tagName, gimg);
-            }
-            gimg.add(ii);
         }
     }
     sortGroupsByCount(sortedGroups, localGroups);
@@ -107,7 +112,7 @@
     Element  e_body   = DOMUtils.createChildElement(e_html, e_tr9,    "td");
 
     //Row 1
-    topLine(e_html, e_body, groupImages.size(), query, queryOrderPart, "xgroups");
+    topLine(e_html, e_body, groupImages.length(), query, queryOrderPart, "xgroups");
 
     //Row 2
     Element  e_table1 = DOMUtils.createChildElement(e_html, e_body,   "table");
@@ -142,7 +147,6 @@
     e_tr1.setAttribute("width", "100");
     e_tr1.setAttribute("align", "center");
 
-    Enumeration e = sortedGroups.elements();
     Random rand = new Random(System.currentTimeMillis());
     int imageLimit = 30;
 
@@ -175,11 +179,10 @@
         }
     }
 
-    while (e.hasMoreElements()) {
-        TagInfo gi = (TagInfo) e.nextElement();
-        if (gi.tagName.equals("extra")) continue;
-        if (gi.tagName.equals("y")) continue;
-        if (requiredDisk!=null && requiredDisk.getTagCount(gi.tagName)==0)
+    for (String tagName : sortedGroups) {
+        if (tagName.equals("extra")) continue;
+        if (tagName.equals("y")) continue;
+        if (requiredDisk!=null && requiredDisk.getTagCount(tagName)==0)
         {
             continue;
         }
@@ -188,19 +191,19 @@
         e_tr1.setAttribute("bgcolor", colors[(row++)%2]);
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1,    "td");
 
-        String newQuery = query+"g("+gi.tagName+")";
+        String newQuery = query+"g("+tagName+")";
         String newQueryEncoded = URLEncoder.encode(newQuery,"UTF8");
 
-        Vector gimg = (Vector) localGroups.get(gi.tagName);
+        Vector gimg = (Vector) localGroups.get(tagName);
         int num = gimg.size();
 
-        String fract = Integer.toString(num) + "/" + Integer.toString(gi.getCount());
+        String fract = Integer.toString(num) + "/" + Integer.toString(999);
         e_td1.appendChild(e_html.createTextNode(fract));
         DOMUtils.createChildElement(e_html, e_td1,    "br");
 
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");
-        e_a = DOMUtils.createChildElement(e_html, e_td1, "a", gi.tagName);
-        e_a.setAttribute("href", "group.jsp?g="+URLEncoder.encode(gi.tagName, "UTF-8"));
+        e_a = DOMUtils.createChildElement(e_html, e_td1, "a", tagName);
+        e_a.setAttribute("href", "group.jsp?g="+URLEncoder.encode(tagName, "UTF-8"));
         DOMUtils.createChildElement(e_html, e_td1,    "br");
 
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");
@@ -225,12 +228,12 @@
 
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");
         e_a = DOMUtils.createChildElement(e_html, e_td1, "a", "Exclude");
-        e_a.setAttribute("href", "xgroups.jsp?q="+URLEncoder.encode(query+"d("+gi.tagName+")","UTF8"));
+        e_a.setAttribute("href", "xgroups.jsp?q="+URLEncoder.encode(query+"d("+tagName+")","UTF8"));
 
         int triple=0;
         for (DiskMgr dm : sortedDisks) {
             e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");
-            int count = dm.getTagCount(gi.tagName);
+            int count = dm.getTagCount(tagName);
             if (count > 0) {
                 e_td1.appendChild(e_html.createTextNode(Integer.toString(count)));
                 if ((triple++ % 3)==2) {

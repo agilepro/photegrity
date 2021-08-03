@@ -6,6 +6,9 @@
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
 %><%@page import="com.purplehillsbooks.photegrity.PosPat"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.MongoDB"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileReader"
 %><%@page import="java.io.LineNumberReader"
@@ -81,22 +84,27 @@
         prevPage = 0;
     }
 
-    Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
-    groupImages.addAll(ImageInfo.imageQuery(query));
+    MongoDB mongo = new MongoDB();
+    JSONArray groupImages = mongo.querySets(query);
+    mongo.close();
 
     Hashtable allGroups = new Hashtable();
-    Hashtable localGroups = new Hashtable();
+    Hashtable<String,PatternInfo> localGroups = new Hashtable<String,PatternInfo>();
     Vector<PatternInfo> sortedPatterns = new Vector<PatternInfo>();
-    for (ImageInfo ii : groupImages) {
-        String gpatt = ii.getPattern();
-        PatternInfo pi = (PatternInfo) localGroups.get(gpatt);
-        if (pi==null) {
-            pi = new PatternInfo(ii);
-            localGroups.put(gpatt, pi);
-            sortedPatterns.add(pi);
-        }
-        else {
-            pi.addImage(ii);
+    for (JSONObject set : groupImages.getJSONObjectList()) {
+        JSONArray tags = set.getJSONArray("tags");
+        JSONArray images = set.getJSONArray("images");
+        String gpatt = set.getString("pattern");
+        for (JSONObject image : images.getJSONObjectList()) {
+            PatternInfo pi = (PatternInfo) localGroups.get(gpatt);
+            if (pi==null) {
+                pi = new PatternInfo(image);
+                localGroups.put(gpatt, pi);
+                sortedPatterns.add(pi);
+            }
+            else {
+                pi.addImage(image);
+            }
         }
     }
     String[] colors = {"#FDF5E6", "#FEF9F5"};
@@ -222,7 +230,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
    </td><td>
       <a href="startGrid.jsp?q=<%=queryOrderPart%>&min=<%=dispMin%>">Grid</a>
    </td><td>
-      <%HTMLWriter.writeHtml(out,query);%>   #<%= groupImages.size() %> -
+      <%HTMLWriter.writeHtml(out,query);%>   #<%= groupImages.length() %> -
       <img src="pattSelect.gif"> [<%HTMLWriter.writeHtml(out,zingpat);%>]
    </td></tr>
 </table>
@@ -290,15 +298,15 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 
         if (showImages)
         {
-            ImageInfo ii = null;
+            JSONObject image = null;
             int setSize = pi.allImages.size();
             %><td width="<%=(thumbsize+10)*imageNum%>"><%
             if ((--imageLimit)>0) {
                 if (imageNum >= setSize) {
                     for (int ni = 0; ni<setSize; ni++) {
-                        ii = (ImageInfo) pi.allImages.elementAt(ni);
-%>                  <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                        <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
+                        image = pi.allImages.elementAt(ni);
+%>                  <a href="photo/<%=image.getString("path")%>" target="photo">
+                        <img src="thumb/<%=thumbsize%>/<%=image.getString("path")%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
 <%                  }
                 }
                 else {
@@ -315,9 +323,9 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                             choice = rand.nextInt(setSize);
                         }
                         repeatGuard[choice]=true;
-                        ii = (ImageInfo) pi.allImages.elementAt(choice);
-%>                  <a href="photo/<%=ii.getRelPath()%>" target="photo">
-                        <img src="thumb/<%=thumbsize%>/<%=ii.getRelPath()%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
+                        image = pi.allImages.elementAt(choice);
+%>                  <a href="photo/<%=image.getString("path")%>" target="photo">
+                        <img src="thumb/<%=thumbsize%>/<%=image.getString("localPath")%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
 <%                  }
                 }
             }
@@ -337,13 +345,12 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                  title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a><br>
             <table border="0"><tr>
 <%
-            if (pi.count==1 && ii!=null) {
+            if (pi.count==1 && image!=null) {
 %>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, ii.diskMgr.diskNameLowerCase);%>">
-                <input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, ii.getFullPath());%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, ii.fileName);%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.cover.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="cover">
@@ -351,9 +358,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 </form>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, ii.diskMgr.diskNameLowerCase);%>">
-                <input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, ii.getFullPath());%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, ii.fileName);%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.flogo.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="flogo">
@@ -361,9 +367,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 </form>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, ii.diskMgr.diskNameLowerCase);%>">
-                <input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, ii.getFullPath());%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, ii.fileName);%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.sample.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="sample">
@@ -371,9 +376,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 </form>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, ii.diskMgr.diskNameLowerCase);%>">
-                <input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, ii.getFullPath());%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, ii.fileName);%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"!01.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="Single Index">
@@ -432,9 +436,9 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
               <a href="allPatts.jsp?q=<%=newQuery%>">P</a></td>
 <%
         } else {
-            ImageInfo ii = (ImageInfo) pi.allImages.elementAt(0);
+            JSONObject image = pi.allImages.elementAt(0);
 %>
-      <td><a href="photo/<%=ii.getRelPath()%>" target="photo">D</a></td>
+      <td><a href="photo/<%=image.getString("path")%>" target="photo">D</a></td>
       <td><a href="show.jsp?q=<%=newQuery%>">S</a>
           <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
           <a href="queryManip.jsp?q=<%=newQuery%>">M</a>
@@ -637,17 +641,14 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
         res.append(x.charAt(f%16));
     }
 
-    public int findTarget(Vector<ImageInfo> imageSet, int targetNo)
-    {
+    public int findTarget(Vector<JSONObject> imageSet, int targetNo) throws Exception {
         if (targetNo<1)
         {
             return -1;
         }
         int pos = 0;
-        for (ImageInfo ii : imageSet)
-        {
-            if (ii.value >= targetNo)
-            {
+        for (JSONObject ii : imageSet) {
+            if (ii.getInt("value") >= targetNo) {
                 return pos;
             }
             pos++;

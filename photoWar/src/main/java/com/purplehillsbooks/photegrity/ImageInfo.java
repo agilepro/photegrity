@@ -1,8 +1,6 @@
 package com.purplehillsbooks.photegrity;
 
 import java.io.File;
-import java.io.Writer;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -924,12 +922,12 @@ public class ImageInfo
 
                 PatternInfo pi = map.get(lcpatt);
                 if (pi == null) {
-                    pi = new PatternInfo(ii);
+                    pi = new PatternInfo(ii.getJSON());
                     map.put(lcpatt, pi);
                     vPatterns.addElement(pi);
                 }
                 else {
-                    pi.addImage(ii);
+                    pi.addImage(ii.getJSON());
                 }
             }
             return vPatterns;
@@ -993,12 +991,12 @@ public class ImageInfo
                 String lcpatt = ii.getPattern().toLowerCase();
                 PatternInfo pi = map.get(lcpatt);
                 if (pi == null) {
-                    pi = new PatternInfo(ii);
+                    pi = new PatternInfo(ii.getJSON());
                     map.put(lcpatt, pi);
                     vPatterns.addElement(pi);
                 }
                 else {
-                    pi.addImage(ii);
+                    pi.addImage(ii.getJSON());
                 }
             }
             return vPatterns;
@@ -1376,7 +1374,9 @@ public class ImageInfo
                     Vector<PatternInfo> vPatt = ImageInfo.getAllPatternsStartingWith(val);
                     for (PatternInfo pi : vPatt) {
                         if (pi.getPattern().equalsIgnoreCase(val)) {
-                            vImages.addAll(pi.allImages);
+                            for (JSONObject image : pi.allImages) {
+                                vImages.add(ImageInfo.findImage3(image));
+                            }
                         }
                     }
                     break;

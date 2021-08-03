@@ -6,8 +6,7 @@ import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONObject;
 
-public class PatternInfo
-{
+public class PatternInfo {
     public String    pattern;
 
     public int       count;
@@ -17,20 +16,20 @@ public class PatternInfo
 
     public Hashtable<String,PatternInfo> diskMap;
 
-    public Vector<ImageInfo> allImages;
+    public Vector<JSONObject> allImages;
 
-    public PatternInfo(ImageInfo ii)
-    {
-        pattern = ii.getPattern();
+    public PatternInfo(JSONObject image) throws Exception {
+        pattern = image.getString("pattern");
         count = 0;
-        min = ii.value;
-        max = ii.value;
+        int value = image.getInt("value");
+        min = value;
+        max = value;
         diskMap = new Hashtable<String,PatternInfo>(12);
-        allImages = new Vector<ImageInfo>();
+        allImages = new Vector<JSONObject>();
 
         // it does not matter what we put in the hash table, the
         // test is just that something is there.
-        this.addImage(ii);
+        this.addImage(image);
     }
     
     public JSONObject getJSON() throws Exception {
@@ -43,20 +42,20 @@ public class PatternInfo
         return jo;
     }
 
-    public void addImage(ImageInfo ii)
-    {
+    public void addImage(JSONObject image) throws Exception {
         count++;
-        if (ii.value < min) {
-            min = ii.value;
+        int value = image.getInt("value");
+        if (value < min) {
+            min = value;
         }
-        if (ii.value > max) {
-            max = ii.value;
+        if (value > max) {
+            max = value;
         }
-        if (ii.value==0 && ii.isIndex) {
+        if (value==0 && pattern.indexOf("!")>=0) {
             hasNegZero = true;
         }
-        diskMap.put(ii.diskMgr.diskName, this);
-        allImages.addElement(ii);
+        diskMap.put(image.getString("disk"), this);
+        allImages.add(image);
     }
 
     public String[] getDisks()
@@ -70,7 +69,7 @@ public class PatternInfo
         return retval;
     }
 
-    public void removeImage(ImageInfo ii)
+    public void removeImage(JSONObject ii)
     {
         count--;
         allImages.remove(ii);

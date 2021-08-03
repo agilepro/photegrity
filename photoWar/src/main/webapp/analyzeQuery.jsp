@@ -6,6 +6,7 @@
 %><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.MongoDB"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileReader"
 %><%@page import="java.io.LineNumberReader"
@@ -14,6 +15,8 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%
 
     request.setCharacterEncoding("UTF-8");
@@ -60,15 +63,15 @@
 
     String queryNoOrder = "show.jsp?q="+URLEncoder.encode(query,"UTF8");
     String queryOrder = "show.jsp?q="+URLEncoder.encode(query,"UTF8")+"&o="+order+pictParam;
-    String lastPath = "";
     Hashtable groupMap = new Hashtable();
     Hashtable patternMap = new Hashtable();
-    Hashtable diskMap = new Hashtable();
-    Vector groupImages = new Vector();
-    groupImages.addAll(ImageInfo.imageQuery(query));
-    ImageInfo.sortImages(groupImages, order);
+    
+    MongoDB mongo = new MongoDB();
+    JSONArray groupImages = mongo.querySets(query);
+    mongo.close();
+    
     String lastSize = "";
-    ImageInfo lastImage = null;
+    JSONObject lastImage = null;
     int totalCount = -1;
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
@@ -80,6 +83,21 @@
     int destSize = destVec.size();
     String queryOrderPart = URLEncoder.encode(query,"UTF8")+"&o="+order+"&min="+dispMin;
 
+    for (JSONObject set : groupImages.getJSONObjectList()) {
+        JSONArray images = set.getJSONArray("images");
+        for (JSONObject image : images.getJSONObjectList()) {
+            totalCount++;
+            String pp = set.getString("path");
+            for (String tagName : image.getJSONArray("tags").getStringList()) {
+                groupMap.put(tagName, "x");
+                groupCount.increment(tagName);
+            }
+            String lcPattern = set.getString("pattern");
+
+            patternMap.put(lcPattern, image);
+            pattCount.increment(lcPattern);
+        }
+    }
 
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -102,7 +120,7 @@
    </td><td>
       <a href="manage.jsp?q=<%=queryOrderPart%>">I</a>
    </td><td>
-      <%HTMLWriter.writeHtml(out,query);%>   #<%= groupImages.size() %>
+      <%HTMLWriter.writeHtml(out,query);%>   #<%= totalCount %>
    </td></tr>
 </table>
 <table>
@@ -133,31 +151,7 @@
         </form>
         </td></tr></table>
     </td></tr>
-<%
 
-    Enumeration e2 = groupImages.elements();
-    while (e2.hasMoreElements()) {
-        totalCount++;
-        ImageInfo ii = (ImageInfo)e2.nextElement();
-        diskMap.put(ii.diskMgr.diskName, ii);
-        String pp = ii.getRelativePath();
-        if (pp.equals(lastPath)) {
-            pp = "";
-        }
-        else {
-            lastPath = pp;
-        }
-        for (String tagName : ii.getTagNames()) {
-            groupMap.put(tagName, "x");
-            groupCount.increment(tagName);
-        }
-        String lcPattern = ii.getPattern();
-
-        patternMap.put(lcPattern, ii);
-        pattCount.increment(lcPattern);
-        out.flush();
-    }
-%>
     </table>
     Tags:
     <table>

@@ -7,6 +7,9 @@
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
 %><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.MongoDB"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%@page import="java.io.File"
 %><%@page import="java.io.FileReader"
 %><%@page import="java.io.LineNumberReader"
@@ -32,8 +35,9 @@
     String listName = "";
     String newGroup = UtilityMethods.getSessionString(session, "newGroup", "");
 
-    Vector groupImages = new Vector();
-    groupImages.addAll(ImageInfo.imageQuery(query));
+    MongoDB mongo = new MongoDB();
+    JSONArray groupImages = mongo.querySets(query);
+    mongo.close();
 
     String extras = "&o="+order+"&min="+dispMin;
     String thisURL = "queryManip.jsp?q="+URLEncoder.encode(query,"UTF8")+extras;
@@ -62,18 +66,23 @@
     Hashtable diskMap = new Hashtable();
     pathCount = new HashCounter();
     allPaths = new Hashtable<String,String>();
-    ImageInfo.sortImages(groupImages, order);
-    int recordCount = groupImages.size();
-    Enumeration e2 = groupImages.elements();
+    //ImageInfo.sortImages(groupImages, order);
+    int recordCount = groupImages.length();
+
     long totalSize = 0;
     int totalCount = 0;
-    while (e2.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e2.nextElement();
-        String location = ii.diskMgr.diskName+":"+ii.getRelativePath();
-        allPaths.put(location, ii.getFullPath());
-        pathCount.increment(location);
-        totalSize += ii.fileSize;
-        totalCount++;
+    for (JSONObject set : groupImages.getJSONObjectList()) {
+        JSONArray tags = set.getJSONArray("tags");
+        JSONArray images = set.getJSONArray("images");
+        String gpatt = set.getString("pattern");
+        for (JSONObject image : images.getJSONObjectList()) {
+
+            String location = image.getString("disk")+":"+image.getString("path");
+            allPaths.put(location, location);
+            pathCount.increment(location);
+            totalSize += image.getInt("fileSize");
+            totalCount++;
+        }
     }
 
     Document e_html = DOMUtils.createDocument("html");
@@ -87,7 +96,7 @@
     Element  e_body   = DOMUtils.createChildElement(e_html, e_tr9,    "td");
 
     //Row 1
-    Element e_tr1 = topLine(e_html, e_body, groupImages.size(), query, queryOrder, "queryManip");
+    Element e_tr1 = topLine(e_html, e_body, groupImages.length(), query, queryOrder, "queryManip");
 
 
     Element e_table1 = DOMUtils.createChildElement(e_html, e_body,   "hr");
@@ -303,7 +312,6 @@
     while (ep.hasMoreElements()) {
         String loc = (String) ep.nextElement();
         loc = loc.substring(0, loc.length()-1 );
-        String locp = (String) allPaths.get(loc);
         int start = 0;
         int lastStart=0;
         int lastPos=0;
@@ -395,9 +403,6 @@
         e_a.setAttribute("href", "queryManip.jsp?q="+URLEncoder.encode(query + "d("+midSegment.toLowerCase()+")", "UTF8")+extras);
         e_td1    = DOMUtils.createChildElement(e_html, e_tr1,  "td", ""+cnt.toString());
         e_td1.setAttribute("width", "50");
-        String realPath = ""+allPaths.get(loc+"/");
-        e_td1    = DOMUtils.createChildElement(e_html, e_tr1,  "td", realPath.replace('/', '\\'));
-        e_td1.setAttribute("width", "300");
         return true;
     }
 

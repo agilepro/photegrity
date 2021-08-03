@@ -172,11 +172,11 @@
             oneColumn.put("isNull", false);
         }
         oneColumn.put("fileName", sii.getString("fileName"));
-        oneColumn.put("relPath",sii.getString("localPath"));
+        oneColumn.put("relPath",sii.getString("path"));
         oneColumn.put("fullPath", sii.getFullPath());
         oneColumn.put("patt", sii.getString("pattern"));
         oneColumn.put("symbol", sii.getString("symbol"));
-        oneColumn.put("disk", sii.getString("diskMgr"));
+        oneColumn.put("disk", sii.getString("disk"));
         //oneColumn.put("isTrashed", sii.isTrashed);
         oneColumn.put("tags", sii.getJSONArray("tags"));        
         rowData.put(oneColumn);

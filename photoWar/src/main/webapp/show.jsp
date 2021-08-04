@@ -137,6 +137,7 @@
         }
         String diskMgr = setInfo.getString("disk");
         String localPath = setInfo.getString("path");
+        System.out.println("  --SHOW.JSP:  localPath = "+localPath);
         for (JSONObject image : setInfo.getJSONArray("images").getJSONObjectList()) {
             justImages.put(image);
         }

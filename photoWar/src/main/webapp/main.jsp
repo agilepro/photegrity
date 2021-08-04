@@ -134,21 +134,21 @@
         out.write("<a href=\"diskinfo.jsp?n=");
         UtilityMethods.writeURLEncoded(out, mgr.diskName);
         out.write("\"><img src=\"info.png\" border=\"0\"></a>&nbsp;\n");
-        out.write(" <a href=\"show.jsp?q=g(");
-        UtilityMethods.writeURLEncoded(out, mgr.diskName);
-        out.write(")\">S</a>\n");
-        out.write("<a href=\"analyzeQuery.jsp?q=g(");
-        UtilityMethods.writeURLEncoded(out, mgr.diskName);
-        out.write(")\">A</a>\n");
-        out.write("<a href=\"xgroups.jsp?q=g(");
-        UtilityMethods.writeURLEncoded(out, mgr.diskName);
-        out.write(")\">T</a>\n");
-        out.write("<a href=\"allPatts.jsp?q=g(");
-        UtilityMethods.writeURLEncoded(out, mgr.diskName);
-        out.write(")\">P</a>\n");
-        out.write("<a href=\"queryManip.jsp?q=g(");
-        UtilityMethods.writeURLEncoded(out, mgr.diskName);
-        out.write(")\">M</a>\n");
+        out.write(" <a href=\"show.jsp?q=");
+        UtilityMethods.writeURLEncoded(out, getQuery(mgr.diskName));
+        out.write("\">S</a>\n");
+        out.write("<a href=\"analyzeQuery.jsp?q=");
+        UtilityMethods.writeURLEncoded(out, getQuery(mgr.diskName));
+        out.write("\">A</a>\n");
+        out.write("<a href=\"xgroups.jsp?q=");
+        UtilityMethods.writeURLEncoded(out, getQuery(mgr.diskName));
+        out.write("\">T</a>\n");
+        out.write("<a href=\"allPatts.jsp?q=");
+        UtilityMethods.writeURLEncoded(out, getQuery(mgr.diskName));
+        out.write("\">P</a>\n");
+        out.write("<a href=\"queryManip.jsp?q=");
+        UtilityMethods.writeURLEncoded(out, getQuery(mgr.diskName));
+        out.write("\">M</a>\n");
             %></td><td><%
         if (mgr.isChanged) {
             %> * <%
@@ -199,3 +199,22 @@
     <font color="#BBBBBB">page generated in <%=duration%>ms.</font>
 </body>
 </HTML>
+
+<%!
+
+public String getQuery(String diskName) {
+    StringBuilder sb = new StringBuilder();
+    int pos = diskName.indexOf(".");
+    int start = 0;
+    while (pos > start) {
+        String part = diskName.substring(start,pos).trim();
+        sb.append("g(").append(part).append(")");
+        start = pos+1;
+        pos = diskName.indexOf(".", start);
+    }
+    sb.append("g(").append(diskName.substring(start)).append(")");
+    String x = sb.toString();
+    return x;
+}
+
+%>

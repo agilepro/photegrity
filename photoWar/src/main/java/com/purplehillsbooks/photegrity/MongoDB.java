@@ -1,5 +1,6 @@
 package com.purplehillsbooks.photegrity;
 
+import java.util.List;
 import java.util.Vector;
 
 import org.bson.Document;
@@ -10,6 +11,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.InsertOneResult;
 import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
@@ -82,6 +85,14 @@ public class MongoDB {
         filter.put("disk", diskName);
         pospatdb.deleteMany(Document.parse(filter.toString(2)));
     }
+    public void clearAllFromDiskPath(String diskName, String path) throws Exception {
+        //this should identify the existing pos pat record for deleting it if exists
+        JSONObject filter = new JSONObject();
+        filter.put("disk", diskName);
+        filter.put("path", path);
+        DeleteResult dr = pospatdb.deleteMany(Document.parse(filter.toString(0)));
+        System.out.println("MONGO: removed "+dr.getDeletedCount()+" records disk=("+diskName+") path=("+path+") using "+filter.toString(0));
+    }
     
     public void updatePosPat(PosPat pp) throws Exception {
         String symbol = pp.getSymbol();
@@ -89,13 +100,25 @@ public class MongoDB {
         //this should identify the existing pos pat record for deleting it if exists
         JSONObject filter = new JSONObject();
         filter.put("symbol", symbol);
-        
-        pospatdb.deleteOne(Document.parse(filter.toString(2)));
+        DeleteResult dr = pospatdb.deleteOne(Document.parse(filter.toString(2)));
+        System.out.println("MONGO: removed "+dr.getDeletedCount()+" records using "+filter.toString(0));
         
         //now add the new one for this symbol
         JSONObject jo = pp.getFullMongoDoc();
-        pospatdb.insertOne(Document.parse(jo.toString(2)));
+        InsertOneResult ior = pospatdb.insertOne(Document.parse(jo.toString(2)));
+        System.out.println("MONGO: added ("+ior.wasAcknowledged()+") record using "+jo.toString(2));
         
+    }
+    public void createPosPatRecord(String symbol, List<ImageInfo> imagesForPP) throws Exception {
+        
+        //this should identify the existing pos pat record for deleting it if exists
+        JSONObject filter = new JSONObject();
+        filter.put("symbol", symbol);
+        pospatdb.deleteOne(Document.parse(filter.toString(2)));
+        
+        PosPat pp = PosPat.getPosPatFromSymbol(symbol);
+        JSONObject jo = pp.getFullMongoDoc(imagesForPP);
+        pospatdb.insertOne(Document.parse(jo.toString(2)));
     }
     
     public JSONArray querySets(String query) throws Exception {
@@ -138,6 +161,12 @@ public class MongoDB {
                     case 'p':
                         //pattern starts with this
                         q.put("pattern", val);
+                        queryAndList.put(q);
+                        break;
+                    case 'b':
+                        //pattern starts with this
+                        JSONObject negp = q.requireJSONObject("pattern");
+                        negp.put("$ne", val.toLowerCase());
                         queryAndList.put(q);
                         break;
                     case 'e':

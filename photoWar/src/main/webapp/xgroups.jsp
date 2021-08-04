@@ -203,7 +203,7 @@
 
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");
         e_a = DOMUtils.createChildElement(e_html, e_td1, "a", tagName);
-        e_a.setAttribute("href", "group.jsp?g="+URLEncoder.encode(tagName, "UTF-8"));
+        e_a.setAttribute("href", "show.jsp?q="+newQueryEncoded);
         DOMUtils.createChildElement(e_html, e_td1,    "br");
 
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.LineNumberReader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -269,7 +270,7 @@ public class DiskMgr {
     }
 
     public String getRelativePath(File path) throws Exception {
-        String fullPath = fixSlashes(path.toString());
+        String fullPath = fixSlashes(path.getAbsolutePath());
         return convertFullPathToRelativePath(fullPath);
     }
 
@@ -396,6 +397,7 @@ public class DiskMgr {
             }
 
             if (scanFile.isDirectory()) {
+                System.out.println("DISKMGR: scanning folder: "+scanFile.getAbsolutePath());
                 out.write("\n<li>");
                 out.write(scanFile.toString());
                 out.flush();
@@ -410,9 +412,9 @@ public class DiskMgr {
                 return;
             }
 
-            String fileName = scanFile.getName();
+            String fileNamelc = scanFile.getName().toLowerCase();
 
-            if (scanFile.isFile() && (fileName.endsWith(".jpg") || fileName.endsWith(".JPG"))) {
+            if (scanFile.isFile() && (fileNamelc.endsWith(".jpg"))) {
                 ImageInfo ii = new ImageInfo(scanFile, this);
                 answer.addElement(ii);
             }
@@ -422,19 +424,17 @@ public class DiskMgr {
         }
     }
 
-    private void scanDiskOneFolder(File scanFile, Vector<ImageInfo> answer)
-            throws Exception {
+    private void scanDiskOneFolder(File scanFile, Vector<ImageInfo> answer) throws Exception {
         System.out.println("scanDiskOneFolder: "+scanFile);
         try {
             if (!scanFile.exists()) {
                 return;
             }
-
             if (!scanFile.isDirectory()) {
                 throw new JSONException("scanDiskOneFolder must be passed a folder (directory)");
             }
             for (File child : scanFile.listFiles()) {
-                 String childName = child.getName();
+                String childName = child.getName();
                 if (child.isFile() && (childName.endsWith(".jpg") || childName.endsWith(".JPG"))) {
                     ImageInfo ii = new ImageInfo(child, this);
                     answer.addElement(ii);
@@ -466,15 +466,19 @@ public class DiskMgr {
 
             out.write("\n<li><hr/></li>\n<li>Directories have been scanned, now accepting</li>");
 
-            ImageInfo.acceptNewImages(imagesForDisk);
-            out.write("\n<li><hr/></li><li>Accepted, now registering with PosPat list</li>");
-            PosPat.registerImages(imagesForDisk);
-            out.write("\n<li><hr/></li>\n<li>All done</li>");
+            //ImageInfo.acceptNewImages(imagesForDisk);
+            //out.write("\n<li><hr/></li><li>Accepted, now registering with PosPat list</li>");
+            //PosPat.registerImages(imagesForDisk);
+            //out.write("\n<li><hr/></li>\n<li>All done</li>");
+
+            MongoDB mongo = new MongoDB();
+            mongo.clearAllFromDisk(diskName);
+            mongo.close();
 
             isLoaded = true;
             isChanged = false;
             writeSummary();
-            storeDiskInMongo();
+            storeDiskInMongo(imagesForDisk);
         }
         catch (Exception e) {
             throw new JSONException("Unable to load the disk '{0}'", e, diskName);
@@ -485,30 +489,24 @@ public class DiskMgr {
     public synchronized void refreshDiskFolder(File folderPath) throws Exception {
         long startTime = System.currentTimeMillis();
         System.out.println("refreshDiskFolder1 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        if (!isLoaded) {
-            //if there is nothing in memory, then nothing to fix
-            return;
-        }
+
         String relPath = this.getRelativePath(folderPath);
-        System.out.println("refreshDiskFolder2 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        ImageInfo.removeDiskPath(this, relPath);
-        System.out.println("refreshDiskFolder3 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
-        System.out.println("refreshDiskFolder4 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        scanDiskOneFolder(folderPath, imagesForDisk);
-        System.out.println("refreshDiskFolder5 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        ImageInfo.acceptNewImages(imagesForDisk);
-        System.out.println("refreshDiskFolder6 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        PosPat.registerImages(imagesForDisk);
-        isChanged = true;
-        System.out.println("refreshDiskFolder7 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
+        System.out.println("refreshDiskFolder2 - "+(System.currentTimeMillis()-startTime)+"ms - REL "+relPath);
+        //ImageInfo.removeDiskPath(this, relPath);
         
-        startTime = System.currentTimeMillis();
-        Vector<ImageInfo> bogusCopy = new Vector<ImageInfo>();
-        for (ImageInfo iii : ImageInfo.imagesByName) {
-            bogusCopy.add(iii);
-        }
-        System.out.println("SIMPLE COPY - "+(System.currentTimeMillis()-startTime)+"ms - ");
+        MongoDB mongo = new MongoDB();
+        mongo.clearAllFromDiskPath(diskName, relPath);
+        mongo.close();
+        
+        Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
+        
+        System.out.println("refreshDiskFolder3 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
+        scanDiskOneFolder(folderPath, imagesForDisk);
+        System.out.println("refreshDiskFolder4 - "+(System.currentTimeMillis()-startTime)+"ms - found "+imagesForDisk.size()+" images.");
+        
+        storeDiskInMongo(imagesForDisk);
+        
+        System.out.println("refreshDiskFolder9 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
     }
 
 
@@ -605,8 +603,8 @@ public class DiskMgr {
     }
 
     public void assertOnDisk(File fromPath) throws Exception {
-        String fromPathStr = fromPath.getCanonicalPath();
-        String containStr  = imageFolder.getCanonicalPath();
+        String fromPathStr = fromPath.getAbsolutePath();
+        String containStr  = imageFolder.getAbsolutePath();
         if (!fromPathStr.startsWith(containStr)) {
             throw new JSONException("Initial path MUST start with '{0}', instead received: {1}", 
                     containStr, fromPathStr);
@@ -842,6 +840,7 @@ public class DiskMgr {
         return aFile.exists();
     }
 
+    /*
     public void incrementGroupCount(String newGrp) throws Exception {
         allTagCnts.increment(newGrp);
     }
@@ -849,6 +848,7 @@ public class DiskMgr {
     public void decrementGroupCount(String oldGrp) throws Exception {
         allTagCnts.decrement(oldGrp);
     }
+    */
 
     public int getPatternCount(String pattern) {
         return PosPat.countAllPatternOnDisk(this, pattern);
@@ -870,14 +870,31 @@ public class DiskMgr {
     }
 
     
-    public void storeDiskInMongo() throws Exception {
+    public void storeDiskInMongo(Vector<ImageInfo> imagesForDisk) throws Exception {
         MongoDB mongo = new MongoDB();
         
-        //get rid of any pospats that no longer exist on the disk
-        mongo.clearAllFromDisk(diskName);
+        List<String> allPP = new Vector<String>();
+        //first, find all the pospat symbols
+        for (ImageInfo ii : imagesForDisk) {
+            String symbol = ii.getPatternSymbol();
+            if (!allPP.contains(symbol)) {
+                allPP.add(symbol);
+            }
+        }
         
-        for (PosPat pp : PosPat.getAllForDisk(this)) {
-            mongo.updatePosPat(pp);
+        //now walk through the images by pospat symbol
+        for (String ss : allPP) {
+            List<ImageInfo> imagesForPP = new ArrayList<ImageInfo>();
+            for (ImageInfo ii : imagesForDisk) {
+                String symbol = ii.getPatternSymbol();
+                if (ss.equals(symbol)) {
+                    imagesForPP.add(ii);
+                }
+            }
+            if (imagesForPP.size()>0) {
+                System.out.println("DISKMGR: stored "+ss+" in DB");
+                mongo.createPosPatRecord(ss, imagesForPP);
+            }
         }
 
         mongo.close();

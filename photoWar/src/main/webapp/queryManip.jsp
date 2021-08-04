@@ -382,7 +382,7 @@
         e_td1.appendChild(e_html.createTextNode(firstSegment));
         Element e_a      = DOMUtils.createChildElement(e_html, e_td1,    "a", midSegment);
         String queryExt = query + "g("+midSegment.toLowerCase()+")";
-        e_a.setAttribute("href", "group.jsp?g="+URLEncoder.encode(midSegment.toLowerCase(), "UTF8"));
+        e_a.setAttribute("href", "show.jsp?q="+URLEncoder.encode(queryExt, "UTF8")+extras);
         if (lastSegment != null) {
             e_td1.appendChild(e_html.createTextNode(lastSegment));
         }

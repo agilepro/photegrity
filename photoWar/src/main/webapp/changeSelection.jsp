@@ -55,28 +55,38 @@
 
     // must make  a copy because the move and suppress commands
     // cause elements to be removed from the original vector
-    Vector copyImages = new Vector();
+    Vector<ImageInfo> copyImages = new Vector<ImageInfo>();
     copyImages.addAll(ImageInfo.imageQuery(query));
-    Enumeration e2 = copyImages.elements();
-    while (e2.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e2.nextElement();
+    Vector<String> allPP = new Vector<String>();
+    DiskMgr diskMgr = null;
+    
+    for (ImageInfo ii : copyImages) {
         if (ii == null) {
             throw new Exception ("null image file ");
         }
+        
         if (ii.getPattern().equalsIgnoreCase(oldPatt)) {
             out.write("\n<li>");
             HTMLWriter.writeHtml(out,ii.getFilePath().toString());
             ii.changePattern(newPatt);
             out.write(" --&gt; ");
             HTMLWriter.writeHtml(out,ii.fileName);
+            
+            //record that this needs DB update
+            String symbol = ii.getPatternSymbol();
+            if (!allPP.contains(symbol)) {
+                allPP.add(symbol);
+                diskMgr = ii.diskMgr;
+            }
         }
         else {
             out.write("\n<li><i>ignoring ");
             HTMLWriter.writeHtml(out,ii.fileName);
             out.write("</i>");
         }
-
     }
+    
+    diskMgr.updateSymbolsInMongo(allPP);
 
 %>
 <li><b>All Done</b>

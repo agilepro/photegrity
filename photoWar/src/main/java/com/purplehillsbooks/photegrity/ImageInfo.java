@@ -26,7 +26,7 @@ public class ImageInfo
     public String  tail;     // rest of the file name after the number
 
     public int    fileSize;
-    public Vector<TagInfo> tagVec;
+    private Vector<String> tagNames;
     public int    randomValue;
 
     public boolean isIndex = false;
@@ -57,7 +57,7 @@ public class ImageInfo
     {
         try {
             diskMgr = disk;
-            tagVec = new Vector<TagInfo>();
+            tagNames = new Vector<String>();
             randomValue = randGen.nextInt(1000000000);
 
             fileName = filePath.getName();
@@ -72,7 +72,7 @@ public class ImageInfo
             throw new JSONException("Unable to create image info for {0}",e,filePath);
         }
     }
-
+    
     /**
     * Used only for Null Images
     */
@@ -82,7 +82,7 @@ public class ImageInfo
         value = 0;
         tail = "";
         fileSize = 0;
-        tagVec = new Vector<TagInfo>();
+        tagNames = new Vector<String>();
         randomValue = 0;
         isIndex = false;
     }
@@ -282,10 +282,7 @@ public class ImageInfo
         if (tail == null) {
             return;
         }
-        for (TagInfo tag : tagVec) {
-            tag.removeImage(this);
-        }
-        tagVec.clear();
+        tagNames.clear();
         tail = null;
     }
 
@@ -352,17 +349,12 @@ public class ImageInfo
             if (scnTag.equals("extra")) {
                 continue;   //ignore this tag because everything has this
             }
-            TagInfo tag = TagInfo.findTag(scnTag);
-            tag.addImage(this);
-            tagVec.addElement(tag);
+            tagNames.add(scnTag);
         }
     }
 
     private void wipeAllConnections() {
         pp.decrementImageCount();
-        for (TagInfo tag : tagVec) {
-            tag.removeImage(this);
-        }
     }
 
 
@@ -387,19 +379,8 @@ public class ImageInfo
 
 
 
-    public Vector<String> getTagNames()
-        throws Exception
-    {
-        try {
-            Vector<String> tagNames = new Vector<String>();
-            for (TagInfo tag : tagVec) {
-                tagNames.addElement(tag.tagName);
-            }
-            return tagNames;
-        }
-        catch (Exception ex) {
-            throw new JSONException("getTagNames failed",ex);
-        }
+    public Vector<String> getTagNames() throws Exception {
+        return tagNames;
     }
 
 
@@ -527,6 +508,7 @@ public class ImageInfo
 
     public static synchronized void acceptNewImages(Vector<ImageInfo> imagesForDisk)
     {
+        /*
         imagesByPath = null;
         imagesBySize = null;
         imagesByNum  = null;
@@ -537,6 +519,7 @@ public class ImageInfo
         newVec.addAll(imagesForDisk);
         imagesByName = newVec;
         unsorted = true;
+        */
     }
 
 
@@ -1030,10 +1013,6 @@ public class ImageInfo
         for (int i=0; i<memory.length; i++) {
             memory[i].remove(this);
         }
-
-        for (TagInfo tag : tagVec) {
-            tag.removeImage(this);
-        }
     }
 
 
@@ -1049,10 +1028,6 @@ public class ImageInfo
 
             diskMgr.suppressFile(fPath);
             deleteThumbnails();
-
-            for (TagInfo tag : tagVec) {
-                diskMgr.decrementGroupCount(tag.tagName);
-            }
 
             unPlugImage();
 
@@ -1102,7 +1077,6 @@ public class ImageInfo
             if (dm2!=diskMgr || !destFolder.equals(oldPath))
             {
                 PosPat.removeImage(this);
-                eraseStats();
                 pp = PosPat.findOrCreate(dm2, newFolderPath, getPattern());
 
                 fileName = dm2.moveFileToDisk(diskMgr, oldFolderPath, fileName, destFolder);
@@ -1113,7 +1087,6 @@ public class ImageInfo
                     initializeInternals(newFolderPath);
 
                     // but, if not loaded, how to correct stats?
-                    recordStats();
                     PosPat.registerImage(this);
                 }
                 else
@@ -1136,28 +1109,20 @@ public class ImageInfo
         }
     }
 
+    /*
     // diskManager keeps statistics about grops and patterns
     // this tells a manager to forget about this image for now
     // usually because name or location is going to change
-    public void eraseStats()
-        throws Exception
-    {
-        for (TagInfo gi : tagVec) {
-            diskMgr.decrementGroupCount(gi.tagName);
-        }
+    public void eraseStats() throws Exception {
     }
 
     // diskManager keeps statistics about grops and patterns
     // this tells a manager to record this image
     // done automatically at load time, this is only needed
     // if you previously erased stats about this image.
-    public void recordStats()
-        throws Exception
-    {
-        for (TagInfo tag : tagVec) {
-            diskMgr.incrementGroupCount(tag.tagName);
-        }
+    public void recordStats() throws Exception {
     }
+    */
 
     public void changePattern(String newPattern) throws Exception
     {
@@ -1224,14 +1189,12 @@ public class ImageInfo
 
         PosPat.removeImage(this);
         deleteThumbnails();
-        eraseStats();
         unsplit();
 
         diskMgr.renameDiskFile(folderPath, fileName, newName);
         fileName = newName;
         unsorted = true;
         initializeInternals(relPath);
-        recordStats();
         PosPat.registerImage(this);
     }
 
@@ -1338,7 +1301,24 @@ public class ImageInfo
     }
 
 
-    public static Vector<ImageInfo> imageQuery(String query)
+    public static Vector<ImageInfo> imageQuery(String query) throws Exception {
+        MongoDB mongo = new MongoDB();
+        JSONArray list = mongo.querySets(query);
+        mongo.close();
+        
+        Vector<ImageInfo> res = new Vector<ImageInfo>();
+        for (JSONObject set : list.getJSONObjectList()) {
+            JSONArray images = set.getJSONArray("images");
+            for (JSONObject image : images.getJSONObjectList()) {
+                ImageInfo ii = ImageInfo.genFromJSON(image);
+                res.add(ii);
+            }
+        }
+        return res;
+    }    
+    
+    /*
+    public static Vector<ImageInfo> imageQueryOLDSTYLE(String query)
         throws Exception
     {
         try {
@@ -1532,15 +1512,6 @@ public class ImageInfo
                             }
                         }
                         break;
-                    case 'u':   //number range
-                        int numgrps = Integer.parseInt(val);
-
-                        for (ImageInfo ii : oldGrp) {
-                            if (ii.tagVec.size() == numgrps) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
                     case 'l':   //larger-than specified size
                         int minsize = Integer.parseInt(val);
 
@@ -1566,6 +1537,7 @@ public class ImageInfo
             throw new JSONException("Error in queryImages({0})",e, query);
         }
     }
+    */
 
 
     /****************  HELPER CLASSES  ***********************/
@@ -1666,16 +1638,31 @@ public class ImageInfo
             return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
         }
     }
+    
+    public static ImageInfo genFromJSON(JSONObject image) throws Exception {
+        String disk = image.getString("disk");
+        DiskMgr dm = DiskMgr.getDiskMgr(disk);
+        String path = image.getString("path");
+        String fileName = image.getString("fileName");
+        File parentFolder = dm.getFilePath(path);
+        File fullPath = new File(parentFolder, fileName);
+        
+        ImageInfo ii = new ImageInfo(fullPath, dm);
+        return ii;
+    }
+
+    
 
     public JSONObject getJSON() throws Exception {
         JSONObject wholeDoc = getMinimalJSON();
         wholeDoc.put("disk", pp.getDiskMgr().diskName);
+        
         wholeDoc.put("path", pp.getLocalPath());
         wholeDoc.put("pattern", pp.getPattern());
 
         JSONArray tags = new JSONArray();
-        for (TagInfo ti : tagVec) {
-            tags.put(ti.tagName);
+        for (String oneTag : tagNames) {
+            tags.put(oneTag);
         }
         wholeDoc.put("tags", tags);
         return wholeDoc;

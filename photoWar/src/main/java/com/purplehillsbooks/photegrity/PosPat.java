@@ -689,9 +689,14 @@ public class PosPat {
     }
 
     public JSONObject getFullMongoDoc() throws Exception {
+        return getFullMongoDoc(ImageInfo.findImagesForPosPat(this));
+    }
+    
+    public JSONObject getFullMongoDoc(List<ImageInfo> imageList) throws Exception {
         
         JSONObject jo = new JSONObject();
         jo.put("disk", diskMgr.diskName);
+        
         jo.put("path", localPath);
         jo.put("pattern", pattern);
         jo.put("symbol", getSymbol());
@@ -703,7 +708,7 @@ public class PosPat {
         jo.put("imageCount", imageCount);
         
         JSONArray images = new JSONArray();
-        for (ImageInfo ii : ImageInfo.findImagesForPosPat(this)) {
+        for (ImageInfo ii : imageList) {
             images.put(ii.getJSON());
         }
         jo.put("images",  images);

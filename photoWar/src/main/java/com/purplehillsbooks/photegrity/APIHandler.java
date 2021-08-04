@@ -316,6 +316,9 @@ public class APIHandler {
             session.setAttribute("gData", gData);
         }
         if (posted!=null && posted.has("query")) {
+            if (posted.has("force")) {
+                gData.clearQuery();
+            }
             gData.setQuery(posted.getString("query"));
             gData.reindex();
         }

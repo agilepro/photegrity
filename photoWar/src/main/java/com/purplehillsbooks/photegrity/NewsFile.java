@@ -419,6 +419,8 @@ public class NewsFile {
         else if (fracName.tailPart.indexOf(".sample.")>0) {
             val = -300;
         }
+        throw new Exception("removed functionality for news");
+        /*
         List<ImageInfo> images = ImageInfo.findAllMatching(disk.diskName, relPath, patternFromFile, val);
         if (images.size()==0) {
             if (fail) {
@@ -429,6 +431,7 @@ public class NewsFile {
 
         //just return an arbitrary one ... should be only one
         return images.get(0);
+        */
     }
 
     public void moveFile(DiskMgr newDiskMgr, String newSubPath, boolean deleteConflict)

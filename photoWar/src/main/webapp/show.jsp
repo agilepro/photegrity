@@ -3,7 +3,6 @@
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.photegrity.MongoDB"
@@ -137,7 +136,6 @@
         }
         String diskMgr = setInfo.getString("disk");
         String localPath = setInfo.getString("path");
-        System.out.println("  --SHOW.JSP:  localPath = "+localPath);
         for (JSONObject image : setInfo.getJSONArray("images").getJSONObjectList()) {
             justImages.put(image);
         }
@@ -231,7 +229,10 @@
         }
 
         row.add(ii);
-    }%>
+    }
+    
+        
+%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>

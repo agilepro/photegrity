@@ -128,7 +128,7 @@ public class PosPat {
     }
 
     
-    public Vector<String> getTags() {
+    public List<String> getTags() {
         return tags.sortedKeys();
     }
     public List<String> getPathTags() {
@@ -688,8 +688,25 @@ public class PosPat {
         oldFilePath.delete();
     }
 
+    public List<ImageInfo> scanDiskForImages() throws Exception {
+        List<ImageInfo> imageList =  new ArrayList<ImageInfo>();
+        File parentFolder = diskMgr.getFilePath(localPath);
+        for (File child : parentFolder.listFiles()) {
+            if (child.isDirectory()) {
+                continue;
+            }
+            ImageInfo ii = new ImageInfo(child, diskMgr);
+            if (pattern.equals(ii.getPattern())) {
+                imageList.add(ii);
+            }
+        }
+        return imageList;
+    }
+    
+    
     public JSONObject getFullMongoDoc() throws Exception {
-        return getFullMongoDoc(ImageInfo.findImagesForPosPat(this));
+        List<ImageInfo> imageList =  scanDiskForImages();
+        return getFullMongoDoc(imageList);
     }
     
     public JSONObject getFullMongoDoc(List<ImageInfo> imageList) throws Exception {
@@ -705,7 +722,7 @@ public class PosPat {
             tags.put(tag);
         }
         jo.put("tags", tags);
-        jo.put("imageCount", imageCount);
+        jo.put("imageCount", imageList.size());
         
         JSONArray images = new JSONArray();
         for (ImageInfo ii : imageList) {

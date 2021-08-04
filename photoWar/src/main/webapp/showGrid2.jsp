@@ -2,7 +2,6 @@
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
 %><%@page import="com.purplehillsbooks.photegrity.GridData"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
@@ -206,10 +205,13 @@ $scope.dataSet = {
         $scope.fastConvert[-8] = "-8";
         $scope.fastConvert[-9] = "-9";
         
-        $scope.getData = function() {
+        $scope.getData = function(force) {
             var url = "api/grid";
             var postObj = {};
             postObj.query = $scope.query;
+            if (force) {
+                postObj.force = true;
+            }
             console.log("QUERY:", $scope.query);
             
             $http.post(url, JSON.stringify(postObj))
@@ -525,12 +527,12 @@ $scope.dataSet = {
         }
         
         $scope.listOneColumn = function(col) {
-            var url = "show.jsp?q="+encodeURIComponent($scope.query+"e("+$scope.stripPath(col)+")");
+            var url = "show.jsp?q="+encodeURIComponent($scope.query+"x("+col+")");
             window.open(url);
         }
         
         $scope.refresh = function() {
-            $scope.getData();
+            $scope.getData(true);
         }
         
     });

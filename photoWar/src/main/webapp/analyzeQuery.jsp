@@ -3,7 +3,6 @@
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.photegrity.MongoDB"
@@ -66,15 +65,12 @@
     Hashtable groupMap = new Hashtable();
     Hashtable patternMap = new Hashtable();
     
-    MongoDB mongo = new MongoDB();
-    JSONArray groupImages = mongo.querySets(query);
-    mongo.close();
-    
     String lastSize = "";
     JSONObject lastImage = null;
     int totalCount = -1;
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
+    HashCounter symbolCount = new HashCounter();
 
     Vector destVec = (Vector) session.getAttribute("destVec");
     if (destVec == null) {
@@ -83,22 +79,10 @@
     int destSize = destVec.size();
     String queryOrderPart = URLEncoder.encode(query,"UTF8")+"&o="+order+"&min="+dispMin;
 
-    for (JSONObject set : groupImages.getJSONObjectList()) {
-        JSONArray images = set.getJSONArray("images");
-        for (JSONObject image : images.getJSONObjectList()) {
-            totalCount++;
-            String pp = set.getString("path");
-            for (String tagName : image.getJSONArray("tags").getStringList()) {
-                groupMap.put(tagName, "x");
-                groupCount.increment(tagName);
-            }
-            String lcPattern = set.getString("pattern");
-
-            patternMap.put(lcPattern, image);
-            pattCount.increment(lcPattern);
-        }
-    }
-
+    MongoDB mongo = new MongoDB();
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
+    mongo.close();
+    
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
@@ -168,10 +152,8 @@
 
 <%
     int lineGrey = 0;
-    Enumeration e3 = HashCounter.sort(groupCount.keys());
-    while (e3.hasMoreElements()) {
-        String gg = (String) e3.nextElement();
-        Integer cnt = (Integer) groupCount.get(gg);
+    for (String gg : groupCount.sortedKeys()) {
+        int cnt = groupCount.getCount(gg);
         String newQ = query+"g("+gg+")";
 %>
         <tr <%if(((lineGrey++)%5)==4){%> BGCOLOR="#CCCCCC" <% } %> >

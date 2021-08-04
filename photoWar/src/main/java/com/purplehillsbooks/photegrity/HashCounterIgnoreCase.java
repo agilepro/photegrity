@@ -8,16 +8,23 @@ public class HashCounterIgnoreCase extends HashCounter {
         super();
     }
 
-    public void decrement(String val) throws Exception {
+    @Override
+    public void decrement(String val) {
         super.decrement(val.toLowerCase());
     }
 
-    public void increment(String val) throws Exception {
+    @Override
+    public void increment(String val) {
         super.increment(val.toLowerCase());
     }
 
+    @Override
     public int getCount(String val) {
         return super.getCount(val.toLowerCase());
     }
 
+    @Override
+    public void changeBy(String val, int num) {
+        super.changeBy(val.toLowerCase(), num);
+    }
 }

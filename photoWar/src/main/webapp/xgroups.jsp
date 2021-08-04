@@ -2,7 +2,6 @@
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="com.purplehillsbooks.photegrity.DOMUtils"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
@@ -16,6 +15,7 @@
 %><%@page import="java.io.Writer"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.Arrays"
+%><%@page import="java.util.List"
 %><%@page import="java.util.Collections"
 %><%@page import="java.util.Comparator"
 %><%@page import="java.util.Enumeration"
@@ -35,18 +35,7 @@
     Vector<DiskMgr> sortedDisks = new Vector<DiskMgr>();
     for (DiskMgr dm : DiskMgr.getAllDiskMgr())
     {
-        if (dm.isLoaded)
-        {
-            sortedDisks.add(dm);
-        }
-
-    }
-    for (DiskMgr dm : DiskMgr.getAllDiskMgr())
-    {
-        if (!dm.isLoaded)
-        {
-            sortedDisks.add(dm);
-        }
+        sortedDisks.add(dm);
     }
 
 
@@ -68,33 +57,16 @@
     String rd = UtilityMethods.defParam(request, "rd", "");
     DiskMgr requiredDisk = DiskMgr.getDiskMgrOrNull(rd);
 
+    HashCounter groupCount = new HashCounter();
+    HashCounter pattCount = new HashCounter();
+    HashCounter symbolCount = new HashCounter();
+
     MongoDB mongo = new MongoDB();
-    JSONArray groupImages = mongo.querySets(query);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
     mongo.close();
 
-    Vector<String> sortedGroups = new Vector<String>();
-    Hashtable<String, String> allGroups = new Hashtable<String, String>();
-    Hashtable<String, Vector<JSONObject>> localGroups = new Hashtable<String, Vector<JSONObject>>();
-    
-    for (JSONObject set : groupImages.getJSONObjectList()) {
-        JSONArray tags = set.getJSONArray("tags");
-        JSONArray images = set.getJSONArray("images");
-        for (JSONObject image : images.getJSONObjectList()) {
-            for (String tagName : tags.getStringList()) {
-                if (allGroups.get(tagName)==null) {
-                    sortedGroups.add(tagName);
-                }
-                allGroups.put(tagName, tagName);
-                Vector<JSONObject> gimg = localGroups.get(tagName);
-                if (gimg==null) {
-                    gimg = new Vector<JSONObject>();
-                    localGroups.put(tagName, gimg);
-                }
-                gimg.add(image);
-            }
-        }
-    }
-    sortGroupsByCount(sortedGroups, localGroups);
+    List<String> sortedGroups = groupCount.sortedKeys();
+    sortGroupsByCount(sortedGroups, groupCount);
 
     String[] colors = {"#FDF5E6", "#FEF9F5"};
     int row = 0;
@@ -112,7 +84,7 @@
     Element  e_body   = DOMUtils.createChildElement(e_html, e_tr9,    "td");
 
     //Row 1
-    topLine(e_html, e_body, groupImages.length(), query, queryOrderPart, "xgroups");
+    topLine(e_html, e_body, groupCount.size(), query, queryOrderPart, "xgroups");
 
     //Row 2
     Element  e_table1 = DOMUtils.createChildElement(e_html, e_body,   "table");
@@ -160,23 +132,13 @@
     e_td1 = DOMUtils.createChildElement(e_html, e_tr1,    "td");
     e_td1 = DOMUtils.createChildElement(e_html, e_tr1,    "td");
     e_td1 = DOMUtils.createChildElement(e_html, e_tr1,    "td");
-    Enumeration eh = sortedDisks.elements();
-    while (eh.hasMoreElements()) {
-        DiskMgr dm = (DiskMgr) eh.nextElement();
+    for (DiskMgr dm  : sortedDisks) {
 
         e_td1 = DOMUtils.createChildElement(e_html, e_tr1,    "td");
-        if (!dm.isLoaded) {
-            e_a = DOMUtils.createChildElement(e_html, e_td1, "a", dm.diskName);
-            e_a.setAttribute("href", "loaddisk.jsp?n="+dm.diskName+"&dest="+URLEncoder.encode(thisPageURL,"UTF8"));
-            e_a.setAttribute("title", "Load into memory disk named "+dm.diskName);
-        }
-        else
-        {
-            e_td1.appendChild(e_html.createTextNode(dm.diskName + " "));
-            e_a = DOMUtils.createChildElement(e_html, e_td1, "a", "req");
-            e_a.setAttribute("href", "xgroups.jsp?q=" + queryOrderPart + "&rd="+dm.diskName);
-            e_a.setAttribute("title", "Exclusive to "+dm.diskName);
-        }
+        e_td1.appendChild(e_html.createTextNode(dm.diskName + " "));
+        e_a = DOMUtils.createChildElement(e_html, e_td1, "a", "req");
+        e_a.setAttribute("href", "xgroups.jsp?q=" + queryOrderPart + "&rd="+dm.diskName);
+        e_a.setAttribute("title", "Exclusive to "+dm.diskName);
     }
 
     for (String tagName : sortedGroups) {
@@ -194,8 +156,7 @@
         String newQuery = query+"g("+tagName+")";
         String newQueryEncoded = URLEncoder.encode(newQuery,"UTF8");
 
-        Vector gimg = (Vector) localGroups.get(tagName);
-        int num = gimg.size();
+        int num = groupCount.getCount(tagName);
 
         String fract = Integer.toString(num) + "/" + Integer.toString(999);
         e_td1.appendChild(e_html.createTextNode(fract));
@@ -230,15 +191,14 @@
         e_a = DOMUtils.createChildElement(e_html, e_td1, "a", "Exclude");
         e_a.setAttribute("href", "xgroups.jsp?q="+URLEncoder.encode(query+"d("+tagName+")","UTF8"));
 
-        int triple=0;
         for (DiskMgr dm : sortedDisks) {
             e_td1 = DOMUtils.createChildElement(e_html, e_tr1, "td");
             int count = dm.getTagCount(tagName);
             if (count > 0) {
                 e_td1.appendChild(e_html.createTextNode(Integer.toString(count)));
-                if ((triple++ % 3)==2) {
-                    DOMUtils.createChildElement(e_html, e_td1, "br");
-                }
+            }
+            else {
+                e_td1.appendChild(e_html.createTextNode(" - "));
             }
         }
         out.flush();

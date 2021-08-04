@@ -42,12 +42,23 @@
     }
 
     NewsGroup newsGroup = NewsGroup.getCurrentGroup();
-    
+    boolean groupLoaded = (newsGroup.defaultDiskMgr!=null);
+    if (!groupLoaded) {
+        Vector<File> files = DiskMgr.getNewsFiles();
+        File parentFile = files.get(0);
+        boolean connect = false;
+        if (!parentFile.exists()) {
+            throw new Exception("The news file path is not valid!:  "+parentFile);
+        }
+        newsGroup.openNewsGroupFile(parentFile, connect);
+    }
+   
+
     if (newsGroup.lowestToDisplay < newsGroup.lowestFetched - 1000) {
         newsGroup.lowestToDisplay = newsGroup.lowestFetched;
     }
 
-    boolean groupLoaded = (newsGroup.defaultDiskMgr!=null);
+
 
     String dMode = UtilityMethods.defParam(request, "dMode", "norm");
     String thisPage = "news.jsp?dMode="+dMode;

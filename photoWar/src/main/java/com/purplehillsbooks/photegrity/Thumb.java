@@ -168,7 +168,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             DiskMgr dm = DiskMgr.getDiskMgr(disk);
 
             File thumbFile = new File(dm.thumbPath,"100/"+dm.diskName+"/"+relativePath+fileName);
-            File fullFile = new File(dm.imageFolder,relativePath+fileName);
+            File fullFile = new File(dm.mainFolder,relativePath+fileName);
 
             if (!thumbFile.exists()) {
                 genThumbNail(thumbFile, fullFile, 100);

@@ -8,17 +8,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
+import com.purplehillsbooks.json.JSONObject;
 
 @SuppressWarnings("serial")
-public class HashCounter extends Hashtable<String,Integer>
-{
+public class HashCounter extends Hashtable<String,Integer> {
 
-    public
-    HashCounter()
-    {
+    public HashCounter() {
         super();
     }
 
@@ -39,7 +38,7 @@ public class HashCounter extends Hashtable<String,Integer>
         }
     }
 
-    public Vector<String> sortedKeys() {
+    public List<String> sortedKeys() {
         Vector<String> keyList = new Vector<String>();
         for (String key : keySet()) {
             keyList.add(key);
@@ -50,7 +49,7 @@ public class HashCounter extends Hashtable<String,Integer>
     }
 
 
-    public Vector<String> getSortedKeys(Hashtable<String, String> selected) throws Exception {
+    public List<String> getSortedKeys(Hashtable<String, String> selected) throws Exception {
         try {
             Vector<String> sortedKeys = new Vector<String>();
             sortedKeys.addAll(keySet());
@@ -65,13 +64,45 @@ public class HashCounter extends Hashtable<String,Integer>
         }
     }
 
+    public void sortKeysByCount(List<String> patterns) throws Exception {
+         GroupsByCountComparator sc = new GroupsByCountComparator(this);
+         Collections.sort(patterns, sc);
+    }
 
 
-    public void decrement(String val) throws Exception {
+     static class GroupsByCountComparator implements Comparator<String>
+     {
+         HashCounter counter;
+    
+         public GroupsByCountComparator(HashCounter _counter) {
+             counter = _counter;
+         }
+    
+         public int compare(String name1, String name2)
+         {
+             int o1size = counter.getCount(name1);
+             int o2size = counter.getCount(name2);
+    
+             if (o1size > o2size) {
+                 return -1;
+             }
+             else if (o1size == o2size) {
+                 return 0;
+             }
+             else {
+                 return 1;
+             }
+         }
+    }
+
+
+
+    public void decrement(String val) {
         if (containsKey(val)) {
             Integer i = get(val);
             if (i == null) {
-                throw new JSONException("Strange, map should contain an element for ({0}) but got a null back.", val);
+                //this really should never happen, so make it invisible
+                throw new RuntimeException("Strange, map should contain an element for ("+val+") but got a null back.");
             }
             int ival = i.intValue();
             if (ival <= 1) {
@@ -84,11 +115,12 @@ public class HashCounter extends Hashtable<String,Integer>
     }
 
 
-    public void increment(String val) throws Exception {
+    public void increment(String val) {
         if (containsKey(val)) {
             Integer i = get(val);
             if (i == null) {
-                throw new JSONException("Strange, map should contain an element for ({0}) but got a null back.", val);
+                //this really should never happen, so make it invisible
+                throw new RuntimeException("Strange, map should contain an element for ("+val+") but got a null back.");
             }
             put(val, new Integer(i.intValue() + 1));
         }
@@ -97,6 +129,26 @@ public class HashCounter extends Hashtable<String,Integer>
         }
     }
 
+    
+    /**
+     * increments (or decrements with negative number) by more than one.
+     * Pass the amount of change desired.   This saved having to call
+     * increment or decrement a number of times.
+     */
+    public void changeBy(String val, int num) {
+        if (containsKey(val)) {
+            Integer i = get(val);
+            if (i == null) {
+                //this really should never happen, so make it invisible
+                throw new RuntimeException("Strange, map should contain an element for ("+val+") but got a null back.");
+            }
+            put(val, new Integer(i.intValue() + num));
+        }
+        else {
+            put(val, new Integer(num));
+        }
+    }
+    
 
     public int getCount(String val) {
         Integer i = get(val);
@@ -106,6 +158,12 @@ public class HashCounter extends Hashtable<String,Integer>
         return i.intValue();
     }
 
+    
+    public void addAll(HashCounter other) {
+        for (String key : other.keySet()) {
+            changeBy(key, other.getCount(key));
+        }
+    }
 
     public void writeToFile(File summaryFile) throws Exception {
         try {
@@ -196,4 +254,11 @@ public class HashCounter extends Hashtable<String,Integer>
     }
 
 
+    public JSONObject getJSON() throws Exception {
+        JSONObject jo = new JSONObject();
+        for (String key : sortedKeys()) {
+            jo.put(key, getCount(key));
+        }
+        return jo;
+    }
 }

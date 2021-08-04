@@ -32,11 +32,11 @@ public class ImageInfo
     public boolean isIndex = false;
     public boolean isTrashed = false;
 
-    public static Vector<ImageInfo> imagesByName;
+    //public static Vector<ImageInfo> imagesByName;
     public static boolean unsorted = true;
-    private static Vector<ImageInfo> imagesByPath;
-    private static Vector<ImageInfo> imagesBySize;
-    private static Vector<ImageInfo> imagesByNum;
+    //private static Vector<ImageInfo> imagesByPath;
+    //private static Vector<ImageInfo> imagesBySize;
+    //private static Vector<ImageInfo> imagesByNum;
     public static Hashtable<String, String> pathCompressor = new  Hashtable<String, String>();
 
     private static ImageInfo nullImage = null;
@@ -142,7 +142,7 @@ public class ImageInfo
 
     /********************************************************/
 
-
+/*
     public static synchronized Vector<ImageInfo> getImagesByName()
         throws Exception
     {
@@ -226,7 +226,7 @@ public class ImageInfo
         ImagesByNumComparator sc = new ImagesByNumComparator();
         Collections.sort(images, sc);
     }
-
+*/
     public static void sortImages(Vector<ImageInfo> images, String order)
         throws Exception
     {
@@ -254,7 +254,7 @@ public class ImageInfo
         }
         Collections.sort(images, sc);
     }
-
+/*
     public static synchronized Vector<ImageInfo> getImagesByPath()
         throws Exception
     {
@@ -272,7 +272,7 @@ public class ImageInfo
         imagesByPath = v;
         return imagesByPath;
     }
-
+*/
 
     /********************************************************/
 
@@ -353,9 +353,11 @@ public class ImageInfo
         }
     }
 
+    /*
     private void wipeAllConnections() {
         pp.decrementImageCount();
     }
+    */
 
 
     public static void parsePathTags(HashCounterIgnoreCase cache, String path) throws Exception {
@@ -411,16 +413,15 @@ public class ImageInfo
         throws Exception
     {
         // clear everything up front so that garbage collection will work
-        imagesByPath = null;
-        imagesBySize = null;
-        imagesByName = null;
+        //imagesByPath = null;
+        //imagesBySize = null;
+        //imagesByName = null;
         pathCompressor = new Hashtable<String, String>();
         for (int i=0; i<memory.length; i++) {
             memory[i] = new MarkedVector();
         }
 
         // take care of peer classes
-        TagInfo.garbageCollect();
         PosPat.clearAllCache();
         DiskMgr.resetDiskList();
 
@@ -453,6 +454,7 @@ public class ImageInfo
      * remove all images from a particular disk
      */
     public static synchronized void removeDiskImages(DiskMgr dm) {
+        /*
         Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
         if (imagesByName != null) {
             for (ImageInfo ii : imagesByName) {
@@ -468,6 +470,7 @@ public class ImageInfo
         imagesByPath = null;
         imagesBySize = null;
         imagesByNum  = null;
+        */
         unsorted = true;
     }
 
@@ -476,6 +479,7 @@ public class ImageInfo
      * particular relative path
      */
     public static synchronized void removeDiskPath(DiskMgr dm, String relPath) throws Exception {
+        /*
         long startTime = System.currentTimeMillis();
         Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
         Vector<ImageInfo> wipeables = new Vector<ImageInfo>();
@@ -502,6 +506,7 @@ public class ImageInfo
         imagesByPath = null;
         imagesBySize = null;
         imagesByNum  = null;
+        */
         unsorted = true;
     }
 
@@ -530,6 +535,7 @@ public class ImageInfo
         return findImage2(dm.diskName, relPath, filePath.getName());
     }
     
+    /*
     public static List<ImageInfo> findImagesForPosPat(PosPat pp) throws Exception {
         String symbol = pp.getSymbol();
         
@@ -541,32 +547,9 @@ public class ImageInfo
         }
         return res;
     }
-
-
-    /**
-    *  Don't use this one, use instead the findImage that has the relPath below
     */
-    public static ImageInfo findImage(String disk, String originalFullPath, String name)
-        throws Exception
-    {
-        try {
-            if (disk == null) {
-                throw new JSONException("findImage was passed a null disk name");
-            }
-            if (originalFullPath == null) {
-                throw new JSONException("findImage was passed a null originalFullPath");
-            }
-            DiskMgr dm = DiskMgr.getDiskMgr(disk);
-            if (!dm.isLoaded) {
-                throw new JSONException("the disk ({0}) is not loaded, can not find images on it",disk);
-            }
-            String relPath = dm.convertFullPathToRelativePath(originalFullPath);
-            return findImage2(disk, relPath, name);
-        }
-        catch (Exception e) {
-            throw new JSONException("Unable to find an image (disk={0})(originalFullPath={1})(name={2})", e, disk, originalFullPath,name);
-        }
-    }
+
+
 
     /**
      * Finds the first image in the list with a name that is equal to or
@@ -574,6 +557,8 @@ public class ImageInfo
      * Note: a name passed that is lower than all names, returns 0
      * a name passed greater than all names, returns vec.size (not a valid index!)
      */
+    
+    /*
     private static int findFirstImageWithName(Vector<ImageInfo> vec, String term) {
 
         int low = 0;
@@ -634,7 +619,32 @@ public class ImageInfo
         }
         return low;
     }
+    */
 
+    /**
+    *  Don't use this one, use instead the findImage that has the relPath below
+    */
+    public static ImageInfo findImage(String disk, String originalFullPath, String name)
+        throws Exception
+    {
+        try {
+            if (disk == null) {
+                throw new JSONException("findImage was passed a null disk name");
+            }
+            if (originalFullPath == null) {
+                throw new JSONException("findImage was passed a null originalFullPath");
+            }
+            DiskMgr dm = DiskMgr.getDiskMgr(disk);
+            if (!dm.isLoaded) {
+                throw new JSONException("the disk ({0}) is not loaded, can not find images on it",disk);
+            }
+            String relPath = dm.convertFullPathToRelativePath(originalFullPath);
+            return findImage2(disk, relPath, name);
+        }
+        catch (Exception e) {
+            throw new JSONException("Unable to find an image (disk={0})(originalFullPath={1})(name={2})", e, disk, originalFullPath,name);
+        }
+    }
     
     public static ImageInfo findImage3(JSONObject image) throws Exception {
         String symbol = image.getString("symbol");
@@ -647,73 +657,39 @@ public class ImageInfo
     }
 
 
-    public static ImageInfo findImage2(String disk, String relPath, String name)
-        throws Exception
-    {
-        try {
-            if (disk == null) {
-                throw new JSONException("findImage was passed a null disk name");
-            }
-            if (relPath == null) {
-                throw new JSONException("findImage was passed a null relPath");
-            }
-            if (name == null) {
-                throw new JSONException("findImage was passed a null file name");
-            }
-            if (relPath.length()>0 && !relPath.endsWith("/")) {
-                throw new JSONException("relPath must either be a null string, or it must end with a slash!  instead got: {0}",relPath);
-            }
-            Vector<ImageInfo> vFiles = getImagesByName();
-
-            int last = vFiles.size();
-            if (last == 0) {
-                throw new JSONException("Searched and not found because there are no images loaded, starting point :{0}",name);
-            }
-            int pos = findFirstImageWithName(vFiles, name);
-
-            //if the file name is greater than all files in the list, handle that
-            if (pos>=vFiles.size()) {
-                throw new JSONException("the name ({0}) is greater than all files in the index, nothing with that name",name);
-            }
-
-            int traceCount =  15;
-            StringBuffer trace = new StringBuffer();
-            trace.append("starting search with pos="+pos+" and last="+last+"\n");
-
-            if (pos>0) {
-                ImageInfo previous = vFiles.elementAt(pos-1);
-                trace.append("prev: F("+previous.fileName+")D("+previous.diskMgr.diskName+")P("+previous.getRelativePath()+") \n");
-                if (previous.fileName.equalsIgnoreCase(name)) {
-                    throw new JSONException("findFirstImageWithName failed to find the first index with name ({0}) \n {1}",name,trace);
-                }
-            }
-
-            while (pos < last) {
-                ImageInfo ii = vFiles.elementAt(pos);
-                if (traceCount-- > 0) {
-                    trace.append("img"+pos+": F("+ii.fileName+")D("+ii.diskMgr.diskName+")P("+ii.getRelativePath()+") \n");
-                }
-                int comp = name.compareToIgnoreCase(ii.fileName);
-
-                //if the file has a name greater than searching for, we are done
-                if (comp<0) {
-                    throw new JSONException("Searched and not found \n {0}",trace);
-                }
-                if (disk.equalsIgnoreCase(ii.diskMgr.diskName) &&
-                        relPath.equalsIgnoreCase(ii.getRelativePath()) &&
-                        name.equalsIgnoreCase(ii.fileName)) {
-                    return ii;
-                }
-                pos++;
-            }
-            throw new JSONException("Searched through to end and not found \n {0}",trace);
+    public static ImageInfo findImage2(String disk, String relPath, String name) throws Exception {
+        if (disk == null) {
+            throw new JSONException("findImage was passed a null disk name");
         }
-        catch (Exception e) {
-            throw new JSONException("Unable to find an image with disk={0}, relPath={1}, name={2}", e, disk, relPath, name);
+        if (relPath == null) {
+            throw new JSONException("findImage was passed a null relPath");
         }
+        if (name == null) {
+            throw new JSONException("findImage was passed a null file name");
+        }
+        if (relPath.length()>0 && !relPath.endsWith("/")) {
+            throw new JSONException("relPath must either be a null string, or it must end with a slash!  instead got: {0}",relPath);
+        }
+        DiskMgr diskMgr = DiskMgr.getDiskMgr(disk);
+        File parentPath = diskMgr.getFilePath(relPath);
+        if (!parentPath.exists()) {
+            throw new JSONException("Attempt to find an image on path ({0}) but path not found", parentPath.getAbsolutePath());
+        }
+        File fullPath = new File(parentPath, name);
+        if (!parentPath.exists()) {
+            throw new JSONException("Attempt to find an image on path ({0}) with name ({1}) but none found", parentPath.getAbsolutePath(), name);
+        }
+        return constructImageInfo(diskMgr, fullPath);
     }
 
+    public static ImageInfo constructImageInfo(DiskMgr diskMgr, File fullPath) throws Exception {
+        if (!fullPath.exists()) {
+            throw new JSONException("Unable to find an image on disk ({0}), path ({1})", diskMgr.diskName, fullPath.getAbsolutePath());
+        }
+        return new ImageInfo(fullPath, diskMgr);
+    }
 
+/*
     public static ImageInfo findFirstMatch(String disk, String relPath, String pattern, int val)
             throws Exception
         {
@@ -776,7 +752,9 @@ public class ImageInfo
                 throw new JSONException("Unable to find an image with disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
             }
         }
+        */
 
+    /*
     public static List<ImageInfo> findAllMatching(String disk, String relPath, String pattern, int val)
             throws Exception
         {
@@ -806,7 +784,8 @@ public class ImageInfo
                 throw new JSONException("Error trying to find image for disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
             }
         }
-
+        */
+/*
     public static ImageInfo findImageByKey(String key) throws Exception
     {
         try {
@@ -867,7 +846,9 @@ public class ImageInfo
             throw new JSONException("Unable to find an image with key={0}",e,key);
         }
     }
+    */
 
+    /*
     public static Vector<PatternInfo> getAllPatternsStartingWith(String start) throws Exception
     {
         try {
@@ -919,11 +900,13 @@ public class ImageInfo
             throw new JSONException("Error in getAllPatternsStartingWith({0})",e,start);
         }
     }
+    */
 
 
     /**
     * Searches the loaded images that have a particular pattern
     */
+    /*
     public static Vector<ImageInfo> getImagesMatchingPattern(String searchPatt) throws Exception
     {
         try {
@@ -940,8 +923,10 @@ public class ImageInfo
             throw new JSONException("Error in getImagesMatchingPattern({0})",e, searchPatt);
         }
     }
+    */
 
 
+    /*
     public static Vector<PatternInfo> queryImages(String start) throws Exception
     {
         try {
@@ -988,6 +973,7 @@ public class ImageInfo
             throw new JSONException("Error in queryImages({0})",e,start);
         }
     }
+    */
 
 
 
@@ -997,6 +983,7 @@ public class ImageInfo
     private void unPlugImage()
         throws Exception
     {
+        /*
         if (imagesByName != null) {
             imagesByName.remove(this);
         }
@@ -1009,6 +996,7 @@ public class ImageInfo
         if (imagesByNum != null) {
             imagesByNum.remove(this);
         }
+        */
         // just in case this is part of a selection
         for (int i=0; i<memory.length; i++) {
             memory[i].remove(this);
@@ -1044,7 +1032,7 @@ public class ImageInfo
         String diskName = newLoc.substring(0, colonPos);
         String diskPath = newLoc.substring(colonPos+1);
         DiskMgr dm = DiskMgr.getDiskMgr(diskName);
-        moveImage(dm, new File(dm.imageFolder,diskPath));
+        moveImage(dm, new File(dm.mainFolder,diskPath));
     }
 
 

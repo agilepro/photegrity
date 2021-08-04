@@ -8,19 +8,14 @@ import java.util.Vector;
 import com.purplehillsbooks.json.JSONException;
 
 @SuppressWarnings("serial")
-public class NumericCounter extends Hashtable<Integer,Integer>
-{
+public class NumericCounter extends Hashtable<Integer,Integer> {
 
-    public
-    NumericCounter()
-    {
+    public NumericCounter() {
         super();
     }
 
 
-    public Vector<Integer> getSortedKeys()
-        throws Exception
-    {
+    public Vector<Integer> getSortedKeys() throws Exception {
         try {
             Vector<Integer> sortedKeys = new Vector<Integer>();
             Enumeration<Integer> unsorted = keys();

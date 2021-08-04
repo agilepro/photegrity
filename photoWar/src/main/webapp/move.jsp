@@ -6,7 +6,6 @@
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Vector" %>
 <%@page import="com.purplehillsbooks.photegrity.HashCounterIgnoreCase" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.NewsBunch" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>

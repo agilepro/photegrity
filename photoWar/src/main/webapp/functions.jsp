@@ -2,13 +2,13 @@
 %><%@page import="com.purplehillsbooks.photegrity.DOMUtils"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.Collections"
 %><%@page import="java.util.Comparator"
 %><%@page import="java.util.Hashtable"
+%><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
 %><%@page import="javax.servlet.http.HttpServletRequest"
 %><%@page import="org.w3c.dom.Document"
@@ -99,23 +99,22 @@
         out.write( foo.substring(start) );
     }
 
-    public static void sortGroupsByCount(Vector<String> patterns, 
-               Hashtable<String, Vector<JSONObject>> localGroups) throws Exception
-    {
-        GroupsByCountComparator sc = new GroupsByCountComparator(localGroups);
+    public static void sortGroupsByCount(List<String> patterns, 
+               HashCounter counter) throws Exception {
+        GroupsByCountComparator sc = new GroupsByCountComparator(counter);
         Collections.sort(patterns, sc);
     }
 
 
-    static class GroupsByCountComparator implements Comparator
+    static class GroupsByCountComparator implements Comparator<String>
     {
-        Hashtable<String, Vector<JSONObject>> localGroups;
+        HashCounter counter;
 
-        public GroupsByCountComparator(Hashtable<String, Vector<JSONObject>> n_localGroups) {
-            localGroups = n_localGroups;
+        public GroupsByCountComparator(HashCounter _counter) {
+            counter = _counter;
         }
 
-        public int compare(Object name1, Object name2)
+        public int compare(String name1, String name2)
         {
             if (!(name1 instanceof String)) {
                 return -1;
@@ -123,10 +122,8 @@
             if (!(name2 instanceof String)) {
                 return 1;
             }
-            Vector<JSONObject> o1list = localGroups.get(name1);
-            int o1size = o1list.size();
-            Vector<JSONObject> o2list = localGroups.get(name2);
-            int o2size = o2list.size();
+            int o1size = counter.getCount((String)name1);
+            int o2size = counter.getCount((String)name2);
 
             if (o1size > o2size) {
                 return -1;

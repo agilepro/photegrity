@@ -10,7 +10,6 @@
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Vector" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.HashCounter" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
@@ -34,7 +33,7 @@
         int max = DiskMgr.masterGroups.size();
         while (max - min > 5) {
             int middle = (max+min)/2;
-            String item = (String) DiskMgr.masterGroups.elementAt(middle);
+            String item = (String) DiskMgr.masterGroups.get(middle);
             if (search.compareTo(item) > 0) {
                 min = middle;
             }
@@ -45,7 +44,7 @@
         n = min;
     }
 %>
-
+ 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD><TITLE>All Tags '<%= 8 %>'</TITLE></HEAD>
@@ -69,11 +68,11 @@
     }
     String alreadyPrinted = "";
     while (n<last) {
-        String g = (String) DiskMgr.masterGroups.elementAt(n);
-        if (!alreadyPrinted.equals(g)) {
+        String tagName = (String) DiskMgr.masterGroups.get(n);
+        if (!alreadyPrinted.equals(tagName)) {
         %>
-        <li> <a href="group.jsp?g=<%=URLEncoder.encode(g, "UTF-8")%>"><%=g%></a> .<%
-            alreadyPrinted = g;
+        <li> <a href="show.jsp?q=g(<%=URLEncoder.encode(tagName, "UTF-8")%>)"><%=tagName%> (<%=DiskMgr.globalTagCnts.getCount(tagName)%>)</a> .<%
+            alreadyPrinted = tagName;
         }
         else {
             %>.<%

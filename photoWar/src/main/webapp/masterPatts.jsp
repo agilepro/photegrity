@@ -11,7 +11,6 @@
 <%@page import="java.util.List" %>
 <%@page import="java.util.Vector" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PosPat" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.HashCounter" %>

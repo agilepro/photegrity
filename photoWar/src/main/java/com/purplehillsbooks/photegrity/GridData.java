@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -56,6 +57,10 @@ public class GridData {
     public GridData() {
         needsRecalc = true;
     }
+    
+    public void clearQuery() throws Exception {
+        setQuery("");
+    }
 
     public void setQuery(String newQuery) throws Exception {
         if (!newQuery.equals(query)) {
@@ -80,14 +85,14 @@ public class GridData {
         return query;
     }
 
-    public Vector<String> getColumnMap() throws Exception {
+    public List<String> getColumnMap() throws Exception {
         if (needsRecalc) {
             processQuery();
         }
         return totalPerCol.getSortedKeys(selectedColumns);
     }
 
-    public Vector<String> getColumnMapWithoutSelectionPrioritization() throws Exception {
+    public List<String> getColumnMapWithoutSelectionPrioritization() throws Exception {
         if (needsRecalc) {
             processQuery();
         }

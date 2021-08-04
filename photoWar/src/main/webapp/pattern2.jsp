@@ -9,7 +9,6 @@
 <%@page import="java.util.List" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
 <%@page import="com.purplehillsbooks.photegrity.PosPat" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.HashCounter" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>

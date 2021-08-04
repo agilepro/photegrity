@@ -5,12 +5,14 @@
 %><%@page import="java.io.LineNumberReader"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.Hashtable"
+%><%@page import="java.util.Vector"
 %><%@page import="java.util.Enumeration"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.photegrity.NewsGroup"
 %><%
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();
@@ -30,6 +32,19 @@
     int thumbsize = UtilityMethods.getSessionInt(session, "thumbsize", 100);
     int colInt = UtilityMethods.getSessionInt(session, "columns", 3);
     int imageNum = UtilityMethods.getSessionInt(session, "imageNum", 3);
+    
+    //starts news background processing if needed
+    NewsGroup newsGroup = NewsGroup.getCurrentGroup();
+    boolean groupLoaded = (newsGroup.defaultDiskMgr!=null);
+    if (!groupLoaded) {
+        Vector<File> files = DiskMgr.getNewsFiles();
+        File parentFile = files.get(0);
+        boolean connect = false;
+        if (!parentFile.exists()) {
+            throw new Exception("The news file path is not valid!:  "+parentFile);
+        }
+        newsGroup.openNewsGroupFile(parentFile, connect);
+    }
 
 %>
 

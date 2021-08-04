@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.LineNumberReader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -27,15 +26,8 @@ public class DiskMgr {
     public String diskNameLowerCase;
 
     public File mainFolder;    //root of the 'disk'
-    public File imageFolder;   //root for images, sometimes same as mainFolder
-                               //sometimes has an "extra" folder in it
-
-    public String viewPath; // view + slash + diskname + slash
-
-    public String basePath; // use mainFolder instead
-    public String extraPath; // use imageFolder instead
-
-    public File thumbPath;   // archive + slash + thumbs + slash
+    public String mainPath;    //this is a string with the slashes the right way
+    
     public boolean isLoaded = false;
     public boolean loadingNow = false;
     public boolean isChanged = false;
@@ -43,8 +35,16 @@ public class DiskMgr {
     public int extraCount = 0;
     public long extraSize = 0;
 
-    private HashCounterIgnoreCase allTagCnts = null;
 
+    public HashCounter allSymbolCnts = null;
+    public HashCounterIgnoreCase allTagCnts = null;
+    public HashCounterIgnoreCase allPattCnts = null;
+
+    //across all disks
+    public static HashCounter globalSymbolCnts = null;
+    public static HashCounterIgnoreCase globalTagCnts = null;
+    public static HashCounterIgnoreCase globalPattCnts = null;
+    
     private static Hashtable<String, DiskMgr> diskList = null;
     private static Vector<File> newsFiles = null;
 
@@ -52,10 +52,10 @@ public class DiskMgr {
      * This is a list of paths separated by semicolons of all the places to look
      * for directories of photos
      */
-    public static String archivePaths = null;
-    public static String archiveView = null;
+    private static File rootFolder;
+    public static File thumbPath;   // archive + slash + thumbs + slash
 
-    public static Vector<String> masterGroups = new Vector<String>();
+    public static List<String> masterGroups = new Vector<String>();
 
     
     public static void initPhotoServer(ServletContext sc) throws Exception {
@@ -71,11 +71,16 @@ public class DiskMgr {
         props.load(fis);
 
         String dbdir = (String) props.get("DBDir");
-        String localdir = (String) props.get("LocalDir");
-        if (dbdir != null) {
-            DiskMgr.archivePaths = dbdir.toLowerCase();
-            String[] allDirs = dbdir.split(",");
-            File rootFolder = new File(allDirs[0]);
+        rootFolder = new File(dbdir);
+        if (!rootFolder.exists()) {
+            throw new Exception("The main root data folder does not exist: "+rootFolder.getAbsolutePath());
+        }
+        thumbPath = new File(rootFolder,"thumbs");
+        if (!thumbPath.exists()) {
+            thumbPath.mkdir();
+        }
+        
+        if (true) {
             File defaultFolder = new File(rootFolder, "news");
             NewsGroup ng = NewsGroup.getCurrentGroup();
             if (ng.containingFolder==null) {
@@ -84,13 +89,26 @@ public class DiskMgr {
             }
             NewsBackground.startNewsThread(ng.containingFolder);
         }
-        if (localdir != null) {
-            DiskMgr.archiveView = localdir.toLowerCase();
+        
+        //this forces the construction of all the disk managers
+        getDiskList();
+        
+        globalSymbolCnts = new HashCounter();
+        globalTagCnts    = new HashCounterIgnoreCase();
+        globalPattCnts   = new HashCounterIgnoreCase();
+        
+        for (String diskName : diskList.keySet()) {
+            DiskMgr oneMgr = diskList.get(diskName);
+            globalSymbolCnts.addAll(oneMgr.allSymbolCnts);
+            globalTagCnts.addAll(oneMgr.allTagCnts);
+            globalPattCnts.addAll(oneMgr.allPattCnts);
         }
+        
+        masterGroups = globalTagCnts.sortedKeys();
     }
     
     public static boolean isInitialized() {
-        return (archivePaths != null && archiveView != null);
+        return (rootFolder!=null && rootFolder.exists());
     }
     public static void assertInitialized() throws Exception {
         if (!isInitialized()) {
@@ -100,22 +118,25 @@ public class DiskMgr {
 
     
     
-    public DiskMgr(File archiveBase, String name, String viewBase) throws Exception {
+    public DiskMgr(File diskPath) throws Exception {
         try {
-            if (archivePaths == null) {
+            if (!rootFolder.exists()) {
                 //not globally initialized yet
-                throw new JSONException(
-                        "variable 'DiskMgr.archivePaths' must be set before doing any operations on disks.");
+                throw new JSONException("Root folder has to exist: "+ rootFolder.getAbsolutePath());
             }
-
-            diskNameLowerCase = name.toLowerCase();
-            mainFolder = new File(archiveBase, diskNameLowerCase);
-            if (!mainFolder.exists()) {
+            if (!diskPath.exists()) {
                 throw new JSONException("Attempt to create a DiskMgr on path that does not exist: ({0})",mainFolder.toString());
             }
             
-            //TODO: these are always the same, could get rid of one variable . . .
-            imageFolder = mainFolder;
+            mainFolder = diskPath;
+            diskName = diskPath.getName();
+            diskNameLowerCase = diskName.toLowerCase();
+            
+            mainPath = mainFolder.getAbsolutePath().replace('\\', '/');
+            if (!mainPath.endsWith("/")) {
+                mainPath = mainPath + "/";
+            }
+
             
             // determine if there is an extra directory, and if so complain about it
             //TODO: remove this once sure all archives are up to date and don't have extra folder
@@ -124,33 +145,8 @@ public class DiskMgr {
                 throw new Exception("Appears to be an disk archive with an OUTDATED extra folder in it  . . . eliminate this from : "+this.diskName);
             }
             
-
-            diskName = name;
-
             System.out.println("--Constructing DiskMgr ("+mainFolder+") at ("+(new Date())+")");
 
-            thumbPath = new File(archiveBase,"thumbs");
-
-            //lets try to eliminate these two values
-            basePath = fixSlashes(mainFolder.toString());
-            if (!basePath.endsWith("/")) {
-                basePath = basePath + "/";
-            }
-            extraPath = fixSlashes(imageFolder.toString());
-            if (!extraPath.endsWith("/")) {
-                extraPath = extraPath + "/";
-            }
-
-            viewPath = viewBase + diskName + "/";
-
-            allTagCnts = new HashCounterIgnoreCase();
-            allTagCnts.loadFromFile(new File(mainFolder, "groups.txt"));
-
-            Enumeration<String> ee = allTagCnts.keys();
-            while (ee.hasMoreElements()) {
-                masterGroups.addElement(ee.nextElement());
-            }
-            Collections.sort(masterGroups, new StringComparator());
 
             File f1 = new File(mainFolder,"stats.txt");
             if (f1.exists()) {
@@ -176,9 +172,17 @@ public class DiskMgr {
                 pp.setImageCount(allPosPat.getCount(key));
             }
             PosPat.sortIndex();
+            
+            allSymbolCnts = new HashCounter();
+            allTagCnts    = new HashCounterIgnoreCase();
+            allPattCnts   = new HashCounterIgnoreCase();
+            
+            MongoDB mongo = new MongoDB();
+            mongo.findStatsForDisk(diskName, allTagCnts, allPattCnts, allSymbolCnts);
+            mongo.close();
         }
         catch (Exception e) {
-            throw new JSONException("Can't construct a DiskMgr object for {0}",e,name);
+            throw new JSONException("Can't construct a DiskMgr object for {0}",e,diskPath.getAbsolutePath());
         }
     }
 
@@ -255,14 +259,14 @@ public class DiskMgr {
     }
 
     public File getFilePath(String localPath) {
-        return new File(imageFolder, localPath);
+        return new File(mainFolder, localPath);
     }
 
     public String convertFullPathToRelativePath(String fullPath) throws Exception {
-        if (!fullPath.startsWith(extraPath)) {
-            throw new JSONException("Can not find relative path for ({0}) because it is not on disk at ({1})", fullPath, extraPath);
+        if (!fullPath.startsWith(mainPath)) {
+            throw new JSONException("Can not find relative path for ({0}) because it is not on disk at ({1})", fullPath, mainPath);
         }
-        String res = fullPath.substring(extraPath.length());
+        String res = fullPath.substring(mainPath.length());
         if (!res.endsWith("/")) {
             res = res + "/";
         }
@@ -316,63 +320,39 @@ public class DiskMgr {
         }
 
         //not initialized, so initialize this now
-        if (archivePaths == null) {
-            throw new JSONException(
-                    "variable 'DiskMgr.archivePaths' must be set before doing any operations on disks.");
-        }
-        if (archiveView == null) {
-            throw new JSONException(
-                    "variable 'DiskMgr.archiveView' must be set before doing any operations on disks.");
+        if (!rootFolder.exists()) {
+            throw new JSONException("Root folder must exist: "+rootFolder.getAbsolutePath());
         }
 
         Hashtable<String, DiskMgr> tempTable = new Hashtable<String, DiskMgr>();
         String archiveBase = null;
         Vector<File> newNewsList = new Vector<File>();
 
-        String[] allPaths = UtilityMethods.splitOnDelimiter(archivePaths, ';');
-        String[] allViews = UtilityMethods.splitOnDelimiter(archiveView, ';');
-        if (allPaths.length != allViews.length) {
-            throw new JSONException(
-                    "'DiskMgr.archivePaths' and 'DiskMgr.archiveView' must have the same number of elements, but it seems that one has {0} and the other {1}",
-                        allPaths.length,  allViews.length);
+        File[] children = rootFolder.listFiles();
+        if (children==null) {
+            throw new JSONException("there is apparently no folder named: {0}", rootFolder.getAbsolutePath());
         }
 
-        try {
-            for (int j = 0; j < allPaths.length; j++) {
-                archiveBase = allPaths[j];
-                File mainDir = new File(archiveBase);
-                File[] children = mainDir.listFiles();
-                if (children==null) {
-                    throw new JSONException("there is apparently no folder named: {0}", mainDir.toString());
-                }
-
-                for (File cfile : children) {
-                    String diskName = cfile.getName();
-                    if (!cfile.isDirectory()) {
-                        continue;
-                    }
-                    if (diskName.equalsIgnoreCase("thumbs")) {
-                        continue; // skip the thumbnails directory
-                    }
-
-                    File newsFile = new File(cfile, "news.properties");
-                    if (newsFile.exists()) {
-                        newNewsList.add(newsFile);
-                    }
-
-                    File listFile = new File(cfile, "list.txt");
-                    if (!listFile.exists()) {
-                        continue;
-                    }
-
-                    tempTable.put(diskName.toLowerCase(), new DiskMgr(mainDir, diskName,
-                            allViews[j]));
-                }
+        for (File cfile : children) {
+            String diskName = cfile.getName();
+            if (!cfile.isDirectory()) {
+                continue;
+            }
+            if (diskName.equalsIgnoreCase("thumbs")) {
+                continue; // skip the thumbnails directory
             }
 
-        }
-        catch (Exception e) {
-            throw new JSONException("Failure getting the Disk List within archive: {0}", e, archiveBase);
+            File newsFile = new File(cfile, "news.properties");
+            if (newsFile.exists()) {
+                newNewsList.add(newsFile);
+            }
+
+            File listFile = new File(cfile, "list.txt");
+            if (!listFile.exists()) {
+                continue;
+            }
+
+            tempTable.put(diskName.toLowerCase(), new DiskMgr(cfile));
         }
 
         diskList = tempTable;
@@ -517,10 +497,12 @@ public class DiskMgr {
             return;
         }
         try {
+            /*
             HashCounterIgnoreCase groupCount = new HashCounterIgnoreCase();
             HashCounterIgnoreCase posPatCount = new HashCounterIgnoreCase();
             int extraCount2 = 0;
             long extraSize2 = 0;
+            
             for (ImageInfo i2 : ImageInfo.getImagesByName()) {
                 if (this != i2.diskMgr) {
                     continue; // skip image from other disks
@@ -564,6 +546,7 @@ public class DiskMgr {
             allTagCnts = groupCount;
             posPatCount.writeToFile(new File(mainFolder,"posPat.txt"));
             isChanged = false;
+            */
         }
         catch (Exception e) {
             throw new JSONException("Unable to write summary for disk '{0}", e, diskName);
@@ -604,7 +587,7 @@ public class DiskMgr {
 
     public void assertOnDisk(File fromPath) throws Exception {
         String fromPathStr = fromPath.getAbsolutePath();
-        String containStr  = imageFolder.getAbsolutePath();
+        String containStr  = mainFolder.getAbsolutePath();
         if (!fromPathStr.startsWith(containStr)) {
             throw new JSONException("Initial path MUST start with '{0}', instead received: {1}", 
                     containStr, fromPathStr);
@@ -854,11 +837,11 @@ public class DiskMgr {
         return PosPat.countAllPatternOnDisk(this, pattern);
     }
 
-    public int getTagCount(String pattern) {
-        return allTagCnts.getCount(pattern);
+    public int getTagCount(String tag) {
+        return allTagCnts.getCount(tag);
     }
 
-    public Vector<String> getTagList() {
+    public List<String> getTagList() {
         return allTagCnts.sortedKeys();
     }
 

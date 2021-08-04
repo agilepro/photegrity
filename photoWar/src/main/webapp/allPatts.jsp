@@ -21,6 +21,8 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Random"
 %><%@page import="java.util.Vector"
+%><%@page import="java.util.List"
+%><%@page import="java.util.ArrayList"
 %><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%@page import="com.purplehillsbooks.json.JSONObject"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
@@ -84,36 +86,22 @@
         prevPage = 0;
     }
 
+    HashCounter groupCount = new HashCounter();
+    HashCounter pattCount = new HashCounter();
+    HashCounter symbolCount = new HashCounter();
+
     MongoDB mongo = new MongoDB();
-    JSONArray groupImages = mongo.querySets(query);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
     mongo.close();
 
-    Hashtable allGroups = new Hashtable();
-    Hashtable<String,PatternInfo> localGroups = new Hashtable<String,PatternInfo>();
-    Vector<PatternInfo> sortedPatterns = new Vector<PatternInfo>();
-    for (JSONObject set : groupImages.getJSONObjectList()) {
-        JSONArray tags = set.getJSONArray("tags");
-        JSONArray images = set.getJSONArray("images");
-        String gpatt = set.getString("pattern");
-        for (JSONObject image : images.getJSONObjectList()) {
-            PatternInfo pi = (PatternInfo) localGroups.get(gpatt);
-            if (pi==null) {
-                pi = new PatternInfo(image);
-                localGroups.put(gpatt, pi);
-                sortedPatterns.add(pi);
-            }
-            else {
-                pi.addImage(image);
-            }
-        }
+    List<String> sortedPatterns = new ArrayList<String>();
+    for (String symbol : symbolCount.sortedKeys()) {
+        sortedPatterns.add(symbol);
     }
+    sortGroupsByCount(sortedPatterns, symbolCount);
+    
     String[] colors = {"#FDF5E6", "#FEF9F5"};
-    if (sortBySize) {
-        sortPatternsByCount(sortedPatterns);
-    }
-    else {
-        sortPatternsByName(sortedPatterns);
-    }
+
     Random rand = new Random(System.currentTimeMillis());
     int imageLimit = 30;
 
@@ -157,11 +145,7 @@
     }
     
     String lastPatternName = "";
-    JSONArray allPatterns = new JSONArray();
-    for (PatternInfo pinf : sortedPatterns) {
-        lastPatternName = sortedPatterns.get(0).pattern;
-        allPatterns.put(pinf.getJSON());
-    }
+    JSONObject allPatterns = symbolCount.getJSON();
 
 
 %>
@@ -230,7 +214,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
    </td><td>
       <a href="startGrid.jsp?q=<%=queryOrderPart%>&min=<%=dispMin%>">Grid</a>
    </td><td>
-      <%HTMLWriter.writeHtml(out,query);%>   #<%= groupImages.length() %> -
+      <%HTMLWriter.writeHtml(out,query);%>   #<%= symbolCount.size() %> -
       <img src="pattSelect.gif"> [<%HTMLWriter.writeHtml(out,zingpat);%>]
    </td></tr>
 </table>
@@ -266,7 +250,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
     int row = 0;
     int count = 0;
     lastPatternName = null;
-    for (PatternInfo pi : sortedPatterns) {
+    for (String symbol : sortedPatterns) {
         count++;
         if (count<dispMin) {
             continue;
@@ -275,14 +259,10 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             break;
         }
 
-        lastPatternName = pi.pattern;
-        String limitedPatternName = pi.pattern;
-        String trimmedPattern = pi.pattern.trim();
-        String newQuery = URLEncoder.encode(query+"e("+pi.pattern+")","UTF8");
-        String newQuery2 = myEncode(query+"e("+pi.pattern+")");
-        if (!newQuery.equals(newQuery2) && false) {
-            %><tr><td colspan="9">NOT EQUAL! <br> <%=newQuery%> <br> <%=newQuery2%></td></tr><%
-        }
+        lastPatternName = symbol;
+        String limitedPatternName = symbol;
+        String trimmedPattern = symbol.trim();
+        String newQuery = URLEncoder.encode(query+"x("+symbol+")","UTF8");
         if (limitedPatternName.length() > 46) {
             limitedPatternName = limitedPatternName.substring(0,45)+"...";
         }
@@ -298,13 +278,13 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 
         if (showImages)
         {
-            JSONObject image = null;
-            int setSize = pi.allImages.size();
+            JSONObject image = new JSONObject();
+            int setSize = symbolCount.size();
             %><td width="<%=(thumbsize+10)*imageNum%>"><%
             if ((--imageLimit)>0) {
                 if (imageNum >= setSize) {
                     for (int ni = 0; ni<setSize; ni++) {
-                        image = pi.allImages.elementAt(ni);
+                        //image = "XXXNOTFINISHED";
 %>                  <a href="photo/<%=image.getString("path")%>" target="photo">
                         <img src="thumb/<%=thumbsize%>/<%=image.getString("path")%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
 <%                  }
@@ -313,7 +293,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                     boolean[] repeatGuard = new boolean[setSize];
                     for (int ni = 0; ni<imageNum; ni++)
                     {
-                        int choice = findTarget(pi.allImages, imgChoices[ni]);
+                        int choice = 0; //findTarget(pi.allImages, imgChoices[ni]);
                         if (choice < 0)
                         {
                             choice = rand.nextInt(setSize);
@@ -323,7 +303,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                             choice = rand.nextInt(setSize);
                         }
                         repeatGuard[choice]=true;
-                        image = pi.allImages.elementAt(choice);
+                        //image = pi.allImages.elementAt(choice);
 %>                  <a href="photo/<%=image.getString("path")%>" target="photo">
                         <img src="thumb/<%=thumbsize%>/<%=image.getString("localPath")%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
 <%                  }
@@ -331,21 +311,21 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             }
 %>
             </td>
-          <td><a href="pattern2.jsp?g=<%=URLEncoder.encode(pi.pattern,"UTF8")%>">
-              <%HTMLWriter.writeHtml(out,pi.pattern);%></a><br>
-              <%= pi.count %>
+          <td><a href="show.jsp?q=x(<%=URLEncoder.encode(symbol,"UTF8")%>)">
+              <%HTMLWriter.writeHtml(out,symbol);%></a><br>
+              <%= symbolCount.getCount(symbol) %>
               <a href="show.jsp?q=<%=newQuery%>">S</a>
               <a href="analyzeQuery.jsp?q=<%=newQuery%>">A</a>
               <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
               <a href="queryManip.jsp?q=<%=newQuery%>">M</a>
               <a href="allPatts.jsp?q=<%=newQuery%>">P</a>
-              <%= pi.min %> - <%= pi.max %><br>
+              <%= 0 %> - <%= 0 %><br>
               <a href="selectQuery.jsp?q=<%=newQuery%>&o=<%=order%>" target="suppwindow"><img border=0 src="addicon.gif"></a>
-              <a href="zing.jsp?pat=<%=URLEncoder.encode(pi.pattern,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
+              <a href="zing.jsp?pat=<%=URLEncoder.encode(symbol,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
                  title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a><br>
             <table border="0"><tr>
 <%
-            if (pi.count==1 && image!=null) {
+            if (symbolCount.getCount(symbol)==1 && image!=null) {
 %>
                 <form method="get" action="renameFile.jsp">
                 <td>
@@ -387,7 +367,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             }
             else {
 
-                if (trimmedPattern.length() != pi.pattern.length()) {
+                if (trimmedPattern.length() != symbol.length()) {
 %>
                 </td>
                 <form action="changeSelection.jsp" method="post">
@@ -402,21 +382,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 <td>
 <%
                 }
-                if (pi.hasNegZero) {
-%>
-                </td>
-                <form action="renumberIndices.jsp" method="post">
-                <td>
-                <input type="submit" value="Renumber Indices">
-                <input type="hidden" name="doubleCheck" value="ok">
-                <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>e(<%HTMLWriter.writeHtml(out,lastPatternName);%>)">
-                <input type="hidden" name="dest" value="<%HTMLWriter.writeHtml(out,thisPageURL);%>">
-                </td>
-                </form>
-                <td>
-<%
-                }
-            }
+             }
 %>
 
 
@@ -424,10 +390,10 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
         }
         else {
 %>
-      <td><%= pi.count %></td>
-      <td><a href="pattern2.jsp?g=<%=URLEncoder.encode(pi.pattern,"UTF8")%>"><%HTMLWriter.writeHtml(out,limitedPatternName);%></a></td>
+      <td><%= symbolCount.getCount(symbol) %></td>
+      <td><a href="show.jsp?q=x(<%=URLEncoder.encode(symbol,"UTF8")%>)"><%HTMLWriter.writeHtml(out,limitedPatternName);%></a></td>
 <%
-        if (pi.count>1) {
+        if (symbolCount.getCount(symbol)>1) {
 %>
       <td><a href="show.jsp?q=<%=newQuery%>">S</a></td>
       <td><a href="analyzeQuery.jsp?q=<%=newQuery%>">A</a>
@@ -436,7 +402,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
               <a href="allPatts.jsp?q=<%=newQuery%>">P</a></td>
 <%
         } else {
-            JSONObject image = pi.allImages.elementAt(0);
+            JSONObject image = null; //pi.allImages.elementAt(0);
 %>
       <td><a href="photo/<%=image.getString("path")%>" target="photo">D</a></td>
       <td><a href="show.jsp?q=<%=newQuery%>">S</a>
@@ -446,15 +412,15 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 <%
         }
 %>
-      <td><a href="zing.jsp?pat=<%=URLEncoder.encode(pi.pattern,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
+      <td><a href="zing.jsp?pat=<%=URLEncoder.encode(symbol,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
              title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a></td>
-      <td><a href="allPatts.jsp?q=<%=URLEncoder.encode(query+"b("+pi.pattern+")","UTF8")%>">Exclude</a></td>
-      <td><%= pi.min %> - <%= pi.max %></td>
+      <td><a href="allPatts.jsp?q=<%=URLEncoder.encode(query+"x("+symbol+")","UTF8")%>">Exclude</a></td>
+      <td><%= 0 %> - <%= 0 %></td>
       <td>
 <%
         }
         int cxx = 0;
-        for (PosPat pp : PosPat.findAllPattern(pi.pattern)){
+        for (PosPat pp : PosPat.findAllPattern(symbol)){
             String sym = pp.getSymbol();
             if (cxx++>12) {
                 out.write("...<br/>\n");
@@ -466,9 +432,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             HTMLWriter.writeHtml(out, sym);
             out.write("  ("+pp.getImageCount());
             out.write(")");
-            if (!pp.getDiskMgr().isLoaded) {
-                out.write("<img src=\"load.gif\">");
-            }
+            out.write("<img src=\"load.gif\">");
             out.write("<br/>\n");
         }
 %>

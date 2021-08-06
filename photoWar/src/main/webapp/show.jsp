@@ -100,7 +100,7 @@
         rowMax = rows;
     }
 
-    Hashtable<Integer,Vector<JSONObject>> rowVectors = new Hashtable<Integer,Vector<JSONObject>>();
+    Hashtable<Integer,Vector<ImageInfo>> rowVectors = new Hashtable<Integer,Vector<ImageInfo>>();
 
     int dispMin = UtilityMethods.defParamInt(request, "min", 0);
     if (dispMin < 0) {
@@ -120,51 +120,37 @@
     String lastPath = "";
     Hashtable diskMap = new Hashtable();
     
-    MongoDB mongo = new MongoDB();
-    JSONArray groupImages = mongo.querySets(query);
-    mongo.close();
+    Vector<ImageInfo> groupImages = ImageInfo.imageQuery(query);
      
     int totalCount = -1;
     String queryOrderNoMin = URLEncoder.encode(query,"UTF8")+"&o="+order;
     String queryOrderPart = queryOrderNoMin+"&min="+dispMin;
-    JSONArray justImages = new JSONArray();
-    int recordCount = 0;
-    for (JSONObject setInfo : groupImages.getJSONObjectList()) {
-        if (!setInfo.has("disk")) {
-            throw new Exception("SetInfo does not have a disk: "+setInfo.toString(2));
-        }
-        String diskMgr = setInfo.getString("disk");
-        String localPath = setInfo.getString("path");
-        for (JSONObject image : setInfo.getJSONArray("images").getJSONObjectList()) {
-            justImages.put(image);
-            recordCount++;
-        }
-    }
+    int recordCount = groupImages.size();
+    
+    ImageInfo.sortImages(groupImages, order);
 
 ///////////////////////////////////////
-
+ 
     int rowNum = -1;
     int colNum = 9999;
     int nextStart = 0;
     int lastSize = -1;
-    int minValue = 999;
+    int minValue = 9999;
 
-    for (JSONObject ii : justImages.getJSONObjectList()) {
+    for (ImageInfo ii : groupImages) {
         
         totalCount++;
-        int value = ii.getInt("value");
-        int fileSize = ii.getInt("fileSize");
-        String diskName = ii.getString("disk");
-        if (value<minValue) {
+        int value = ii.value;
+        int fileSize = ii.fileSize;
+        String diskName = ii.diskMgr.diskName;
+        if (value>0 && value<minValue) {
             minValue = value;
         }
 
-        /*
         if (!ii.isNullImage())
         {
             diskMap.put(diskName, ii);
         }
-        */
 
         //if you have not reached the start image, then skip
         if (totalCount < dispMin) {
@@ -220,10 +206,10 @@
             continue;
         }
 
-        Vector<JSONObject> row = rowVectors.get(rowNum);
+        Vector<ImageInfo> row = rowVectors.get(rowNum);
         if (row==null)
         {
-            row = new Vector<JSONObject>();
+            row = new Vector<ImageInfo>();
             rowVectors.put(rowNum, row);
         }
 
@@ -348,40 +334,36 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
 
     for (rowNum=0; rowNum<rowMax; rowNum++)
     {
-        Vector<JSONObject> row = rowVectors.get(rowNum);
+        Vector<ImageInfo> row = rowVectors.get(rowNum);
         if (row==null)
         {
             continue;
         }
         out.write("<tr>");
         boolean firstInRow = true;
-        for (JSONObject ii : row) {
-            ImageInfo ii2 = ImageInfo.genFromJSON(ii);
+        for (ImageInfo ii : row) {
             totalCount++;
 
-            String fileName = ii.getString("fileName");
-            int value = ii.getInt("value");
-            int fileSize = ii.getInt("fileSize");
-            String diskName = ii.getString("disk");
-            String localPath = ii.getString("path");
+            String fileName = ii.fileName;
+            int value = ii.value;
+            int fileSize = ii.fileSize;
+            String diskName = ii.diskMgr.diskName;
+            String localPath = ii.pp.getLocalPath();
             String fullPath = diskName + "/" + localPath + fileName;
             String encodedName = URLEncoder.encode(fileName,"UTF8");
             String encodedPath = URLEncoder.encode(localPath,"UTF8");
             String encodedDisk = URLEncoder.encode(diskName,"UTF8");
             String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
-            String newQ = query+"e("+ii.getString("pattern")+")";
+            String newQ = query+"e("+ii.pp.getPattern()+")";
             String trashIcon = "trash.gif";
-            /*
-            if (ii.isTrashed)
-            {
+
+            if (ii.isTrashed) {
                 trashIcon = "delicon.gif";
             }
-            */
 
 
             String truncName = fileName;
-            if (truncName.length()>30)
-            {
+            if (truncName.length()>30) {
                 truncName = truncName.substring(0,28)+"...";
             }
 
@@ -477,7 +459,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
                 %>)
     <%
 
-                    for (String tag : ii.getJSONArray("tags").getStringList()) {
+                    for (String tag : ii.getTagNames()) {
                         HTMLWriter.writeHtml(out, tag);
                         out.write(" \t ");
                     }

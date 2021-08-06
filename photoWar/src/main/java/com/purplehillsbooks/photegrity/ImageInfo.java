@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -137,7 +138,7 @@ public class ImageInfo
     /********************************************************/
 
 
-    public static void sortImages(Vector<ImageInfo> images, String order)
+    public static void sortImages(List<ImageInfo> images, String order)
         throws Exception
     {
         Comparator<ImageInfo> sc;
@@ -331,7 +332,7 @@ public class ImageInfo
 
                 String key = e3.nextElement();
                 DiskMgr mgr = ht.get(key);
-                if (mgr.isChanged && mgr.isLoaded) {
+                if (mgr.isChanged) {
                     mgr.writeSummary();
                 }
             }
@@ -370,7 +371,7 @@ public class ImageInfo
      * remove all images from a particular disk sitting at a
      * particular relative path
      */
-    public static synchronized void removeDiskPath(DiskMgr dm, String relPath) throws Exception {
+    private static synchronized void removeDiskPath(DiskMgr dm, String relPath) throws Exception {
         /*
         long startTime = System.currentTimeMillis();
         Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
@@ -403,22 +404,6 @@ public class ImageInfo
     }
 
 
-    public static synchronized void acceptNewImages(Vector<ImageInfo> imagesForDisk)
-    {
-        /*
-        imagesByPath = null;
-        imagesBySize = null;
-        imagesByNum  = null;
-        Vector<ImageInfo> newVec = new Vector<ImageInfo>();
-        if (imagesByName != null) {
-            newVec.addAll(imagesByName);
-        }
-        newVec.addAll(imagesForDisk);
-        imagesByName = newVec;
-        unsorted = true;
-        */
-    }
-
 
     public static ImageInfo findImageByPath(File filePath) throws Exception {
         DiskMgr dm = DiskMgr.findDiskMgrFromPath(filePath);
@@ -442,9 +427,6 @@ public class ImageInfo
                 throw new JSONException("findImage was passed a null originalFullPath");
             }
             DiskMgr dm = DiskMgr.getDiskMgr(disk);
-            if (!dm.isLoaded) {
-                throw new JSONException("the disk ({0}) is not loaded, can not find images on it",disk);
-            }
             String relPath = dm.convertFullPathToRelativePath(originalFullPath);
             return findImage2(disk, relPath, name);
         }
@@ -552,9 +534,6 @@ public class ImageInfo
         if (dm2==null) {
             throw new JSONException("Null dm passed to moveImage!");
         }
-        if (!dm2.isLoaded) {
-            throw new JSONException("You can't move to a disk ({0}) that is not loaded...",dm2.diskName);
-        }
         dm2.assertOnDisk(destFolder);
         String newFolderPath = dm2.getRelativePath(destFolder);
         File oldPath = getFilePath();
@@ -570,19 +549,13 @@ public class ImageInfo
                 pp = PosPat.findOrCreate(dm2, newFolderPath, getPattern());
 
                 fileName = dm2.moveFileToDisk(diskMgr, oldFolderPath, fileName, destFolder);
-                if (dm2.isLoaded)
-                {
-                    diskMgr = dm2;
-                    unsplit();
-                    initializeInternals(newFolderPath);
+                diskMgr = dm2;
+                unsplit();
+                initializeInternals(newFolderPath);
 
-                    // but, if not loaded, how to correct stats?
-                    PosPat.registerImage(this);
-                }
-                else
-                {
-                    unPlugImage();
-                }
+                // but, if not loaded, how to correct stats?
+                PosPat.registerImage(this);
+                
                 //check that old one is gone
                 if (oldPath.exists()) {
                     throw new JSONException("Image still exists in old location after move from {0} to {1}",oldPath,destFolder);
@@ -600,21 +573,6 @@ public class ImageInfo
             throw new JSONException("Unable to move image from ({0}) to ({1})",e, oldPath, destFolder);
         }
     }
-
-    /*
-    // diskManager keeps statistics about grops and patterns
-    // this tells a manager to forget about this image for now
-    // usually because name or location is going to change
-    public void eraseStats() throws Exception {
-    }
-
-    // diskManager keeps statistics about grops and patterns
-    // this tells a manager to record this image
-    // done automatically at load time, this is only needed
-    // if you previously erased stats about this image.
-    public void recordStats() throws Exception {
-    }
-    */
 
     public void changePattern(String newPattern) throws Exception
     {
@@ -919,6 +877,9 @@ public class ImageInfo
         File fullPath = new File(parentFolder, fileName);
         
         ImageInfo ii = new ImageInfo(fullPath, dm);
+        if (image.has("random")) {
+            ii.randomValue = image.getInt("random");
+        }
         return ii;
     }
 
@@ -930,6 +891,7 @@ public class ImageInfo
         
         wholeDoc.put("path", pp.getLocalPath());
         wholeDoc.put("pattern", pp.getPattern());
+        wholeDoc.put("random", randGen.nextInt(1000000000));
 
         JSONArray tags = new JSONArray();
         for (String oneTag : tagNames) {

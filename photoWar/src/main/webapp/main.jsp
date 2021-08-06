@@ -132,10 +132,7 @@
         totalFileCount += mgr.extraCount;
         out.write("<tr align=\"right\"><td align=\"left\"><b>");
         HTMLWriter.writeHtml(out, mgr.diskName);
-        if (mgr.isLoaded) {
-            %></b></td><td> &nbsp;  &nbsp;  &nbsp;  &nbsp;<%
-        }
-        else if (mgr.loadingNow) {
+        if (mgr.loadingNow) {
             %></b></td><td><a href="loaddisk.jsp?n=<%UtilityMethods.writeURLEncoded(out, mgr.diskName);%>&dest=main.jsp"
                   title="Load into memory disk named <%HTMLWriter.writeHtml(out, mgr.diskName);%>"><img src="loadplus.gif" border="0"></a> &nbsp;<%
         }

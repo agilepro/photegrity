@@ -259,12 +259,14 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             break;
         }
 
-        lastPatternName = symbol;
+        int lastSlash = symbol.lastIndexOf("/");
+        String pattern = symbol.substring(lastSlash+1);
+        lastPatternName = pattern;
         String limitedPatternName = symbol;
-        String trimmedPattern = symbol.trim();
+        String trimmedPattern = pattern.trim();
         String newQuery = URLEncoder.encode(query+"x("+symbol+")","UTF8");
-        if (limitedPatternName.length() > 46) {
-            limitedPatternName = limitedPatternName.substring(0,45)+"...";
+        if (limitedPatternName.length() > 56) {
+            limitedPatternName = limitedPatternName.substring(0,55)+"...";
         }
         String thisRowColor = colors[(row++)%2];
         if (zingpat.equals(lastPatternName)) {
@@ -397,31 +399,14 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 %>
       <td><%= symbolCount.getCount(symbol) %></td>
       <td><a href="show.jsp?q=x(<%=URLEncoder.encode(symbol,"UTF8")%>)"><%HTMLWriter.writeHtml(out,limitedPatternName);%></a></td>
-<%
-        if (symbolCount.getCount(symbol)>1) {
-%>
       <td><a href="show.jsp?q=<%=newQuery%>">S</a></td>
       <td><a href="analyzeQuery.jsp?q=<%=newQuery%>">A</a>
           <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
           <a href="queryManip.jsp?q=<%=newQuery%>">M</a>
               <a href="allPatts.jsp?q=<%=newQuery%>">P</a></td>
-<%
-        } else {
-            JSONObject image = new JSONObject(); //pi.allImages.elementAt(0);
-            String imagePath = "";
-%>
-      <td><a href="photo/<%=imagePath%>" target="photo">D</a></td>
-      <td><a href="show.jsp?q=<%=newQuery%>">S</a>
-          <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
-          <a href="queryManip.jsp?q=<%=newQuery%>">M</a>
-          <a href="allPatts.jsp?q=<%=newQuery%>">P</a></td>
-<%
-        }
-%>
-      <td><a href="zing.jsp?pat=<%=URLEncoder.encode(symbol,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
+
+      <td><a href="zing.jsp?pat=<%=URLEncoder.encode(pattern,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
              title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a></td>
-      <td><a href="allPatts.jsp?q=<%=URLEncoder.encode(query+"x("+symbol+")","UTF8")%>">Exclude</a></td>
-      <td><%= 0 %> - <%= 0 %></td>
       <td>
 <%
         }

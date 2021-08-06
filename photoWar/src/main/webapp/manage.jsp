@@ -5,6 +5,7 @@
 %><%@page import="java.io.LineNumberReader"
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Enumeration"
+%><%@page import="java.util.List"
 %><%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
@@ -40,8 +41,7 @@
 
     int bigSize = UtilityMethods.getSessionInt(session, "bigSize", 350);
 
-    Vector groupImages = new Vector();
-    groupImages.addAll(ImageInfo.imageQuery(query));
+    List<ImageInfo> groupImages = ImageInfo.imageQuery(query);
     if (order!=null) {
         ImageInfo.sortImages(groupImages, order);
     }
@@ -63,7 +63,7 @@
         if (offset>=groupImages.size()) {
             offset = groupImages.size()-1;
         }
-        ii = (ImageInfo) groupImages.elementAt(offset);
+        ii = (ImageInfo) groupImages.get(offset);
         if (ii == null) {
             //should never get this becuase we tested above for size.
             throw new Exception("No images at position "+offset);

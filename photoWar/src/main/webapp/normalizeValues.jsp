@@ -11,6 +11,9 @@
 <%@page import="java.io.FileWriter" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Hashtable" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
+<%@page import="java.util.List" %>
 <%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
@@ -51,21 +54,19 @@
     long totalBefore = 0;
     long totalAfter = 0;
 
-    Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
-    groupImages.addAll(ImageInfo.imageQuery(query));
+    List<ImageInfo> groupImages = ImageInfo.imageQuery(query);
 
-    ImageInfo sample = groupImages.firstElement();
-    //String testPattern = sample.getPattern();
     boolean foundNegativeZero = false;
-    Vector<ImageInfo> workingSet = new Vector<ImageInfo>();
-    Vector<PosPat> pps = new Vector<PosPat>();
+    List<ImageInfo> workingSet = new Vector<ImageInfo>();
 
+    Set<File> locCleanup = new HashSet<File>();
     for (ImageInfo ii : groupImages) {
 
-        if (ii.value<0) {
+        if (ii.value<=0) {
             //ignore negative for now.
             continue;
         }
+        locCleanup.add(ii.pp.getFolderPath());        
         String priorFileName = ii.fileName;
 
         String threeDigit = Integer.toString(1000+ii.value-minVal+1).substring(1);
@@ -83,23 +84,10 @@
         ii.renameFile(potential);
         
         boolean found = false;
-        for (PosPat pp : pps) {
-            if (pp.getSymbol().equals(ii.pp.getSymbol())) {
-                found = true;
-            }
-        }
-        if (!found) {
-            pps.add(ii.pp);
-        }
     }
 
 
-    //make sure all the DB records are up to date
-    MongoDB mongo = new MongoDB();
-    for (PosPat pp : pps) {
-        mongo.updatePosPat(pp);
-    }
-    mongo.close();
+    DiskMgr.refreshFolders(locCleanup);
 
 
 

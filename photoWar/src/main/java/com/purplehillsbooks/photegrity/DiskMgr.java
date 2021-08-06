@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.servlet.ServletContext;
@@ -27,7 +29,6 @@ public class DiskMgr {
     public File mainFolder;    //root of the 'disk'
     public String mainPath;    //this is a string with the slashes the right way
     
-    public boolean isLoaded = false;
     public boolean loadingNow = false;
     public boolean isChanged = false;
 
@@ -179,6 +180,8 @@ public class DiskMgr {
             MongoDB mongo = new MongoDB();
             mongo.findStatsForDisk(diskName, allTagCnts, allPattCnts, allSymbolCnts);
             mongo.close();
+            
+            extraCount = allTagCnts.getCount(diskNameLowerCase);
         }
         catch (Exception e) {
             throw new JSONException("Can't construct a DiskMgr object for {0}",e,diskPath.getAbsolutePath());
@@ -228,15 +231,6 @@ public class DiskMgr {
         }
         return foundDm;
     }
-
-    public static boolean diskIsLoaded(String name) throws Exception {
-        DiskMgr retval = getDiskMgrOrNull(name);
-        if (retval == null) {
-            return false;
-        }
-        return retval.isLoaded;
-    }
-
 
 
 
@@ -427,15 +421,10 @@ public class DiskMgr {
 
 
     public synchronized void loadDiskImages(Writer out) throws Exception {
-        // avoid loading the same disk twice.
-        if (isLoaded) {
-            return;
-        }
         try {
             //there might already be entries, either from pre-load
             //or from news activity
             PosPat.removeAllFromDisk(this);
-            ImageInfo.removeDiskImages(this);
 
             // now scan the disk for files
             // String auxDirName = mainFolder + "extra";
@@ -448,7 +437,6 @@ public class DiskMgr {
             mongo.clearAllFromDisk(diskName);
             mongo.close();
 
-            isLoaded = true;
             isChanged = false;
             writeSummary();
             storeDiskInMongo(imagesForDisk);
@@ -459,39 +447,29 @@ public class DiskMgr {
     }
 
 
+    
     public static void refreshDiskFolder(File folderPath) throws Exception {
-        
-        DiskMgr dm = DiskMgr.findDiskMgrFromPath(folderPath);
-        
-        long startTime = System.currentTimeMillis();
-        System.out.println("refreshDiskFolder1 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-
-        String relPath = dm.getRelativePath(folderPath);
-        System.out.println("refreshDiskFolder2 - "+(System.currentTimeMillis()-startTime)+"ms - REL "+relPath);
-        //ImageInfo.removeDiskPath(this, relPath);
-        
+        Set<File> fileList = new HashSet<File>();
+        fileList.add(folderPath);
+        refreshFolders(fileList);
+    }
+    
+    public static void refreshFolders(Set<File> fileList) throws Exception {
         MongoDB mongo = new MongoDB();
-        mongo.clearAllFromDiskPath(dm.diskName, relPath);
+        for (File folderPath : fileList) {
+            DiskMgr dm = DiskMgr.findDiskMgrFromPath(folderPath);
+            String relPath = dm.getRelativePath(folderPath);
+            mongo.clearAllFromDiskPath(dm.diskName, relPath);
+            Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
+            dm.scanDiskOneFolder(folderPath, imagesForDisk);
+            dm.storeDiskInMongo(imagesForDisk);
+        }
         mongo.close();
-        
-        Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
-        
-        System.out.println("refreshDiskFolder3 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        dm.scanDiskOneFolder(folderPath, imagesForDisk);
-        System.out.println("refreshDiskFolder4 - "+(System.currentTimeMillis()-startTime)+"ms - found "+imagesForDisk.size()+" images.");
-        
-        dm.storeDiskInMongo(imagesForDisk);
-        
-        System.out.println("refreshDiskFolder9 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
     }
 
 
 
     public synchronized void writeSummary() throws Exception {
-        // avoid writing incorrect data
-        if (!isLoaded) {
-            return;
-        }
         try {
             /*
             HashCounterIgnoreCase groupCount = new HashCounterIgnoreCase();
@@ -659,9 +637,7 @@ public class DiskMgr {
             fos.close();
 
             fromDisk.suppressFile(fromFile);
-            if (isLoaded) {
-                isChanged = true;
-            }
+            isChanged = true;
 
             if (!toFile.exists()) {
                 throw new JSONException("New file did not get created during copy?!? {0}",toFile);

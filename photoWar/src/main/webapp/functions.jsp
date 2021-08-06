@@ -72,11 +72,9 @@
                 int count2 = (Integer) dm.getTagCount(piece);
                 if (count2 > 0) {
                     e_td1.appendChild(e_html.createTextNode("  |  "+dm.diskName+":"+count2+" "));
-                    if (!dm.isLoaded) {
-                        e_a = DOMUtils.createChildElement(e_html, e_td1,   "a",  "load");
-                        e_a.setAttribute("href", "loaddisk.jsp?n="+dm.diskName+"&dest="+URLEncoder.encode(thisPageURL,"UTF8"));
-                        e_a.setAttribute("title", "Load into memory disk named "+dm.diskName);
-                    }
+                    e_a = DOMUtils.createChildElement(e_html, e_td1,   "a",  "load");
+                    e_a.setAttribute("href", "loaddisk.jsp?n="+dm.diskName+"&dest="+URLEncoder.encode(thisPageURL,"UTF8"));
+                    e_a.setAttribute("title", "Load into memory disk named "+dm.diskName);
                 }
             }
         }

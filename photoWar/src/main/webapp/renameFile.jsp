@@ -7,7 +7,6 @@
 <%@page import="java.util.Vector" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
 
@@ -38,6 +37,8 @@
     DiskMgr dm1 = DiskMgr.getDiskMgr(diskName);
     ImageInfo ii = ImageInfo.findImage(diskName, path, fileName);
     ii.renameFile(newName);
+    File loc = ii.pp.getFolderPath();
+    DiskMgr.refreshDiskFolder(loc);
     String go = UtilityMethods.defParam(request, "go", "selection.jsp?msg=File%20Renamed");
     response.sendRedirect(go);
 

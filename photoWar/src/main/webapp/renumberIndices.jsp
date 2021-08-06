@@ -1,7 +1,6 @@
 <%@page errorPage="error.jsp" %>
 <%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.Thumb" %>
@@ -10,6 +9,9 @@
 <%@page import="java.io.FileWriter" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Hashtable" %>
+<%@page import="java.util.List" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
 <%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
@@ -46,19 +48,22 @@
     long totalBefore = 0;
     long totalAfter = 0;
 
-    Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
-    groupImages.addAll(ImageInfo.imageQuery(query));
+    List<ImageInfo> groupImages = ImageInfo.imageQuery(query);
 
-    ImageInfo sample = groupImages.firstElement();
-    String testPattern = sample.getPattern();
+    String testPattern = null;
     boolean foundNegativeZero = false;
     Vector<ImageInfo> workingSet = new Vector<ImageInfo>();
 
+    Set<File> locCleanup = new HashSet<File>();
     for (ImageInfo ii : groupImages) {
 
         if (ii.fileName.indexOf("!")<0) {
             continue;
         }
+        if (testPattern==null) {
+            testPattern = ii.getPattern();
+        }
+        locCleanup.add(ii.pp.getFolderPath());
         out.write("<li> "+ii.value+" - ");
         HTMLWriter.writeHtml(out,ii.fileName);
         out.write("</li>\n");
@@ -78,7 +83,7 @@
     if (!foundNegativeZero) {
             %></ul><p><b>No !00 index found!</b></p><ul><%
     } else {
-        ImageInfo.sortImagesByNum(workingSet);
+        ImageInfo.sortImages(workingSet, "num");
         if (reallyDoIt) {
             %></ul><p><b>Now Renaming Files</b></p><ul><%
         } else {
@@ -99,6 +104,7 @@
             out.write("</li>\n");
         }
     }
+    DiskMgr.refreshFolders(locCleanup);
 
 
 %>

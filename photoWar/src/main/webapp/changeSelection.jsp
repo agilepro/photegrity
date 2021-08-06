@@ -5,6 +5,8 @@
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Vector" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
@@ -57,7 +59,7 @@
     // cause elements to be removed from the original vector
     Vector<ImageInfo> copyImages = new Vector<ImageInfo>();
     copyImages.addAll(ImageInfo.imageQuery(query));
-    Vector<String> allPP = new Vector<String>();
+    Set<File> allPP = new HashSet<File>();
     DiskMgr diskMgr = null;
     
     for (ImageInfo ii : copyImages) {
@@ -73,11 +75,7 @@
             HTMLWriter.writeHtml(out,ii.fileName);
             
             //record that this needs DB update
-            String symbol = ii.getPatternSymbol();
-            if (!allPP.contains(symbol)) {
-                allPP.add(symbol);
-                diskMgr = ii.diskMgr;
-            }
+            allPP.add(ii.pp.getFolderPath());
         }
         else {
             out.write("\n<li><i>ignoring ");
@@ -86,7 +84,7 @@
         }
     }
     
-    diskMgr.updateSymbolsInMongo(allPP);
+    DiskMgr.refreshFolders(allPP);
 
 %>
 <li><b>All Done</b>

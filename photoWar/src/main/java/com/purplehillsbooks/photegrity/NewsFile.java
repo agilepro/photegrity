@@ -387,9 +387,6 @@ public class NewsFile {
 
     private ImageInfo getImageInternal(boolean fail) throws Exception {
         DiskMgr disk = nBunch.getDiskMgr();
-        if (!disk.isLoaded) {
-            return null;
-        }
         String relPath = nBunch.getRelativePath();
 
         //There was a problem with paths ending with dot which is a noop when

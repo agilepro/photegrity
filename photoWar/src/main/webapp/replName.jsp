@@ -159,12 +159,7 @@ Testing:<%if (isTest) {out.write("yes");} else {out.write("no");}%>
         dest = "selection.jsp?msg=Modified%20"+count+"%20Filenames";
     }
     
-    for (File loc : locCleanup) {
-        out.write("\n<li> CLEANING UP: ");
-        HTMLWriter.writeHtml(out, loc.getAbsolutePath());
-        out.write("</li>\n");
-        DiskMgr.refreshDiskFolder(loc);
-    }
+    DiskMgr.refreshFolders(locCleanup);
 %>
 </ul>
 </body>

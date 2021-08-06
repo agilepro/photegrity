@@ -19,6 +19,8 @@ package com.purplehillsbooks.photegrity;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -343,12 +345,9 @@ public class APIHandler {
         JSONArray listIn = objIn.getJSONArray("list");
         JSONArray outList = new JSONArray();
         res.put("list",outList);
-        File sourceToClean = null;
-        File destToClean = null;
-        DiskMgr sourceDM = null;
-        DiskMgr destDM = null;
         int counter = 1;
         
+        Set<File> locCleanup = new HashSet<File>();
         for (int i=0; i<listIn.length();i++) {
             JSONObject op = listIn.getJSONObject(i);
             JSONObject resInts = new JSONObject();
@@ -361,11 +360,10 @@ public class APIHandler {
                 String fn    = op.getString("fn");
                 DiskMgr dm = DiskMgr.getDiskMgr(disk);
                 File sourceFolder = dm.getFilePath(path);
+                locCleanup.add(sourceFolder);
                 if ("del".equals(cmd)) {
                     dm.suppressFile(new File(sourceFolder, fn));
                     resInts.put("del", "success");
-                    sourceToClean = sourceFolder;
-                    sourceDM = dm;
                     System.out.println("BATCH: deleted "+fn);
                 }
                 else if ("move".equals(cmd)) {
@@ -375,6 +373,7 @@ public class APIHandler {
                     String disk2  = op.getString("disk2");
                     DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
                     File destFolder = dm2.getFilePath(path2);
+                    locCleanup.add(destFolder);                    
                     File destFilePath = new File(destFolder, fn2);
                     if (destFilePath.equals(sourceFilePath)) {
                         throw new JSONException("Move command used, but source and dest are the same!  source:{0},  dest:{1}",
@@ -399,11 +398,6 @@ public class APIHandler {
                         throw new JSONException ("Dest file does NOT exist after move {0}", destFilePath.toString());
                     }
                     resInts.put("move", "success");
-
-                    sourceToClean = sourceFolder;
-                    sourceDM = dm;
-                    destToClean = destFolder;
-                    destDM = dm2;
                     System.out.println("BATCH: moved "+fn+ " to " + fn2);
                 }
                 else {
@@ -418,14 +412,10 @@ public class APIHandler {
             outList.put(resInts);
         }
         
-        if (sourceToClean!=null) {
-            DiskMgr.refreshDiskFolder(sourceToClean);
-            res.put("clean1", sourceToClean.toString());
+        for (File loc : locCleanup) {
+            DiskMgr.refreshDiskFolder(loc);
         }
-        if (destToClean!=null) {
-            DiskMgr.refreshDiskFolder(destToClean);
-            res.put("clean2", destToClean.toString());
-        }
+
         return res;
     }
 }

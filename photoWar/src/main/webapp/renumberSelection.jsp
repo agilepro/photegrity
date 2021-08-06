@@ -11,6 +11,7 @@
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
 <%@page import="java.util.Set" %>
 <%@page import="java.util.HashSet" %>
+<%@page import="java.util.List" %>
 <%@page import="com.purplehillsbooks.streams.HTMLWriter" %>
 
 <%
@@ -44,24 +45,18 @@
     if (pos < np.length()-1) {
         postpos = np.substring(pos);
     }
-    Vector copyImages = new Vector();
-    copyImages.addAll(ImageInfo.imageQuery(query));
+    List<ImageInfo> copyImages = ImageInfo.imageQuery(query);
     ImageInfo.sortImages(copyImages, order);
-    Enumeration e2 = copyImages.elements();
     int count = 0;
     int num = 1;
     Set<File> locCleanup = new HashSet<File>();
-    while (e2.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e2.nextElement();
+    for (ImageInfo ii : copyImages) {
         locCleanup.add(ii.pp.getFolderPath());
         // rename it here
         count ++;
         num = ii.nextName(prepos, num);
     }
     for (File loc : locCleanup) {
-        out.write("\n<li> CLEANING UP: ");
-        HTMLWriter.writeHtml(out, loc.getAbsolutePath());
-        out.write("</li>\n");
         DiskMgr.refreshDiskFolder(loc);
     }
 

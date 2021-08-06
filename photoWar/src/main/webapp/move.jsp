@@ -5,13 +5,18 @@
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Vector" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
 <%@page import="com.purplehillsbooks.photegrity.HashCounterIgnoreCase" %>
 <%@page import="com.purplehillsbooks.photegrity.NewsBunch" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.MongoDB"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
 %>
 
 <%
@@ -29,8 +34,7 @@
     HashCounterIgnoreCase newsToUpdate = new HashCounterIgnoreCase();
 
     dest = DiskMgr.fixSlashes(dest);
-    if (!dest.endsWith("/"))
-    {
+    if (!dest.endsWith("/")) {
         dest = dest + "/";
     }
 
@@ -41,23 +45,24 @@
     String disk2 = dest.substring(0, colonpos);
     String destPath = dest.substring(colonpos+1);
     DiskMgr dm2 = DiskMgr.getDiskMgr(disk2);
+    File destinationFolder = dm2.getFilePath(destPath);
 
     session.setAttribute("moveDest", dest);
 
-    Vector groupImages = new Vector();
-    groupImages.addAll(ImageInfo.imageQuery(query));
-    Enumeration e = groupImages.elements();
-    int recordCount = groupImages.size();
+    MongoDB mongo = new MongoDB();
+    JSONArray groupImages = mongo.querySets(query);
+    mongo.close();
+
 
 %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
-<HEAD><TITLE>Move <%=recordCount%></TITLE></HEAD>
+<HEAD><TITLE>Move <%=query%></TITLE></HEAD>
 <BODY BGCOLOR="#FDF5E6">
 <table>
 <tr><td colspan=2>
-<H1>Move <%=recordCount%></H1>
+<H1>Move <%=query%></H1>
 </td></tr>
 <tr><td>Query</td><td><%HTMLWriter.writeHtml(out,query);%></td></tr>
 <tr><td>Destination</td><td><%HTMLWriter.writeHtml(out,dest);%></td></tr>
@@ -68,28 +73,38 @@
 
     int lastNum = 0;
     boolean useRelPath = (destPath.equals("*"));
+    Set<File> locCleanup = new HashSet<File>();
+   
 
-    while (e.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e.nextElement();
-        if (ii == null) {
-            throw new Exception ("null image file where lastnum="+lastNum);
+    for (JSONObject ppSet : groupImages.getJSONObjectList()) {
+        
+        JSONArray images = ppSet.getJSONArray("images");
+        
+        for (JSONObject image : images.getJSONObjectList()) {
+
+            ImageInfo ii = ImageInfo.genFromJSON(image);
+            locCleanup.add(ii.pp.getFolderPath());
+            
+            out.write("\n<li> ");
+            HTMLWriter.writeHtml(out, ii.getFullPath());
+            out.write("/");
+            HTMLWriter.writeHtml(out, ii.fileName);
+            out.write("<br>\n");
+            HTMLWriter.writeHtml(out, dm2.mainFolder.getAbsolutePath());
+            HTMLWriter.writeHtml(out, destPath);
+            out.flush();
+
+            ii = ii.moveImage(dm2, destinationFolder);
+            
+            locCleanup.add(ii.pp.getFolderPath());
         }
-        if (moveNews) {
-            String srcPosPat = ii.getPatternSymbol();
-            newsToUpdate.increment(srcPosPat);
-        }
-
-        out.write("\n<li> ");
-        HTMLWriter.writeHtml(out, ii.getFullPath());
-        out.write("/");
-        HTMLWriter.writeHtml(out, ii.fileName);
-        out.write("<br>\n");
-        HTMLWriter.writeHtml(out, dm2.extraPath);
-        HTMLWriter.writeHtml(out, destPath);
-        out.flush();
-
-        ii.moveImage(disk2, dm2.extraPath + destPath);
-
+    }
+    
+    for (File loc : locCleanup) {
+        out.write("\n<li> CLEANING UP: ");
+        HTMLWriter.writeHtml(out, loc.getAbsolutePath());
+        out.write("</li>\n");
+        DiskMgr.refreshDiskFolder(loc);
     }
 
     Vector destVec = (Vector) session.getAttribute("destVec");
@@ -110,17 +125,6 @@
         destVec.removeElementAt(destVec.size()-1);
     }
 
-    if (moveNews) {
-        for (String posPat : newsToUpdate.sortedKeys() ) {
-            int slashPos = posPat.lastIndexOf("/");
-            if (slashPos>0) {
-                String srcLoc = posPat.substring(0,slashPos+1);
-                String srcPatt = posPat.substring(slashPos+1);
-                out.write("\n<li>Updating News: "+srcLoc+" - "+srcPatt+" - "+dest+"</li>");
-                NewsBunch.trackMovedFiles(srcLoc, srcPatt, dest, srcPatt);
-            }
-        }
-    }
 
 %>
 </ol>

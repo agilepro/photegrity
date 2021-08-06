@@ -34,8 +34,11 @@
     String listName = "";
     String newGroup = UtilityMethods.getSessionString(session, "newGroup", "");
 
+    HashCounter groupCount = new HashCounter();
+    HashCounter pattCount = new HashCounter();
+    HashCounter symbolCount = new HashCounter();
     MongoDB mongo = new MongoDB();
-    JSONArray groupImages = mongo.querySets(query);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
     mongo.close();
 
     String extras = "&o="+order+"&min="+dispMin;
@@ -64,25 +67,17 @@
     Hashtable groupMap = new Hashtable();
     Hashtable diskMap = new Hashtable();
     pathCount = new HashCounter();
-    allPaths = new Hashtable<String,String>();
-    //ImageInfo.sortImages(groupImages, order);
-    int recordCount = groupImages.length();
-
-    long totalSize = 0;
-    int totalCount = 0;
-    for (JSONObject set : groupImages.getJSONObjectList()) {
-        JSONArray tags = set.getJSONArray("tags");
-        JSONArray images = set.getJSONArray("images");
-        String gpatt = set.getString("pattern");
-        for (JSONObject image : images.getJSONObjectList()) {
-
-            String location = image.getString("disk")+":"+image.getString("path");
-            allPaths.put(location, location);
-            pathCount.increment(location);
-            totalSize += image.getInt("fileSize");
-            totalCount++;
-        }
+    long totalCount = 0;
+    for (String symbol : symbolCount.sortedKeys()) {
+        int pos = symbol.lastIndexOf("/");
+        String path = symbol.substring(0,pos+1);
+        pathCount.changeBy(path, symbolCount.getCount(symbol));
+        totalCount = totalCount + symbolCount.getCount(symbol);
     }
+    
+
+
+
 
     Document e_html = DOMUtils.createDocument("html");
     Element  e_head = DOMUtils.createChildElement(e_html, e_html.getDocumentElement(), "head");
@@ -95,7 +90,7 @@
     Element  e_body   = DOMUtils.createChildElement(e_html, e_tr9,    "td");
 
     //Row 1
-    Element e_tr1 = topLine(e_html, e_body, groupImages.length(), query, queryOrder, "queryManip");
+    Element e_tr1 = topLine(e_html, e_body, (int) totalCount, query, queryOrder, "queryManip");
 
 
     Element e_table1 = DOMUtils.createChildElement(e_html, e_body,   "hr");
@@ -106,9 +101,6 @@
     Element e_a   = DOMUtils.createChildElement(e_html, e_td1, "a", "Main ");
     e_a.setAttribute("href", "main.jsp");
     long avgsize = 0;
-    if (totalCount>0) {
-        avgsize = totalSize/totalCount;
-    }
     e_a   = DOMUtils.createChildElement(e_html, e_td1, "a", " 1 ");
     e_a.setAttribute("href", "sel.jsp?set=1");
     e_a.setAttribute("target", "sel1");
@@ -135,7 +127,7 @@
     }
     DOMUtils.addChildText(e_html, sizeHolder, Long.toString(avgsize));
     DOMUtils.addChildText(e_html, e_a, " bytes, ");
-    DOMUtils.addChildText(e_html, e_a, Long.toString(totalSize));
+    DOMUtils.addChildText(e_html, e_a, Long.toString(0));
     DOMUtils.addChildText(e_html, e_a, " bytes total");
 
     e_a   = DOMUtils.createChildElement(e_html, e_td1, "a", "Set Hang Out");
@@ -156,7 +148,7 @@
     e_form.setAttribute("method", "get");
     e_form.setAttribute("target", "_blank");
     inputTag(e_html, e_td1, "hidden", "q",   query);
-    inputTag(e_html, e_td1, "submit", "op", "Move "+recordCount);
+    inputTag(e_html, e_td1, "submit", "op", "Move "+totalCount);
     DOMUtils.addChildText(e_html, e_td1, " to ");
     Element e_input = inputTag(e_html, e_td1, "text", "dest",   moveDest);
     e_input.setAttribute("size", "50");
@@ -167,7 +159,7 @@
     e_tr1   = DOMUtils.createChildElement(e_html, e_table1, "tr");
     e_td1   = DOMUtils.createChildElement(e_html, e_tr1,    "td");
 
-    Set<String> keys = allPaths.keySet();
+    List<String> keys = pathCount.sortedKeys();
     if (keys.size()>0) {
         assignValue(e_html, e_td1, "moveForm.dest.value", keys.iterator().next());
     }
@@ -184,7 +176,7 @@
     e_form.setAttribute("target", "_blank");
     inputTag(e_html, e_td1, "hidden", "q",   query);
     inputTag(e_html, e_td1, "hidden", "dest",   thisURL);
-    inputTag(e_html, e_td1, "submit", "op", "Change "+recordCount);
+    inputTag(e_html, e_td1, "submit", "op", "Change "+totalCount);
     DOMUtils.addChildText(e_html, e_td1, " pattern from ");
     inputTag(e_html, e_td1, "text", "p1",   "");
     DOMUtils.addChildText(e_html, e_td1, " to ");
@@ -199,7 +191,7 @@
     e_form.setAttribute("target", "_blank");
     inputTag(e_html, e_td1, "hidden", "q",   query);
     inputTag(e_html, e_td1, "hidden", "dest",   thisURL);
-    inputTag(e_html, e_td1, "submit", "op", "Renumber "+recordCount);
+    inputTag(e_html, e_td1, "submit", "op", "Renumber "+totalCount);
     DOMUtils.addChildText(e_html, e_td1, " new pattern ");
     inputTag(e_html, e_td1, "text", "np",   np);
 
@@ -211,7 +203,7 @@
     e_form.setAttribute("target", "_blank");
     inputTag(e_html, e_td1, "hidden", "q",   query);
     inputTag(e_html, e_td1, "hidden", "dest",   thisURL);
-    inputTag(e_html, e_td1, "submit", "op", "Insert Tag "+recordCount);
+    inputTag(e_html, e_td1, "submit", "op", "Insert Tag "+totalCount);
     DOMUtils.addChildText(e_html, e_td1, " == ");
     inputTag(e_html, e_td1, "text", "grp",   newGroup);
 
@@ -305,11 +297,9 @@
     }
 
     e_table1 = DOMUtils.createChildElement(e_html, e_body,   "table");
-    Enumeration ep = HashCounter.sort(allPaths.keys());
 
     Hashtable alreadyDone = new Hashtable();
-    while (ep.hasMoreElements()) {
-        String loc = (String) ep.nextElement();
+    for (String loc : pathCount.sortedKeys()) {
         loc = loc.substring(0, loc.length()-1 );
         int start = 0;
         int lastStart=0;

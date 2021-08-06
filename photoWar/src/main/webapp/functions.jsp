@@ -3,6 +3,7 @@
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.Collections"

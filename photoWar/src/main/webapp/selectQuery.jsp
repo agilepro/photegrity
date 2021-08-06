@@ -1,7 +1,6 @@
 <%@page errorPage="error.jsp"
 %><%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"

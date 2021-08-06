@@ -1,7 +1,6 @@
 package com.purplehillsbooks.photegrity;
 
 import java.util.List;
-import java.util.Vector;
 
 import org.bson.Document;
 
@@ -26,11 +25,16 @@ public class MongoDB {
     MongoClient mongoClient;
     MongoDatabase db;
     MongoCollection<org.bson.Document> pospatdb;
+    public int limit = 100;
     
     public MongoDB() {
         mongoClient = MongoClients.create(uri);
         db = mongoClient.getDatabase("photo");
         pospatdb = db.getCollection("pospat");
+    }
+    
+    public void setLimit(int i) {
+        limit = i;
     }
     
     /**
@@ -58,7 +62,7 @@ public class MongoDB {
         }
         return ja;
     }
-    public JSONArray queryRecords(JSONObject query, int limit) throws Exception {
+    public JSONArray queryRecords(JSONObject query) throws Exception {
         Document dq = Document.parse(query.toString(0));
         FindIterable<Document> resultSet = pospatdb.find(dq);
         
@@ -207,7 +211,7 @@ public class MongoDB {
             }
 
             JSONObject mongoQuery = parseQuery(query);
-            JSONArray res = queryRecords(mongoQuery, 100);
+            JSONArray res = queryRecords(mongoQuery);
 
             System.out.println("MONGO: query found: "+res.length()+" records");
             return res;

@@ -2,12 +2,10 @@ package com.purplehillsbooks.photegrity;
 
 import java.io.File;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -32,11 +30,7 @@ public class ImageInfo
     public boolean isIndex = false;
     public boolean isTrashed = false;
 
-    //public static Vector<ImageInfo> imagesByName;
     public static boolean unsorted = true;
-    //private static Vector<ImageInfo> imagesByPath;
-    //private static Vector<ImageInfo> imagesBySize;
-    //private static Vector<ImageInfo> imagesByNum;
     public static Hashtable<String, String> pathCompressor = new  Hashtable<String, String>();
 
     private static ImageInfo nullImage = null;
@@ -142,91 +136,7 @@ public class ImageInfo
 
     /********************************************************/
 
-/*
-    public static synchronized Vector<ImageInfo> getImagesByName()
-        throws Exception
-    {
-        if (imagesByName == null) {
-            imagesByName = new Vector<ImageInfo>();
-            pathCompressor = new Hashtable<String, String>();
-            unsorted = false;
-        }
-        if (unsorted) {
-            Vector<ImageInfo> temp = new Vector<ImageInfo>();
-            for (ImageInfo ii : imagesByName) {
-                temp.add(ii);
-            }
-            ImagesByNameComparator sc1 = new ImagesByNameComparator();
-            Collections.sort(temp, sc1);
-            unsorted = false;
-            imagesByName = temp;
-        }
-        return imagesByName;
-    }
 
-
-    public static synchronized Vector<ImageInfo> getImagesBySize()
-        throws Exception
-    {
-        if (imagesBySize != null) {
-            return imagesBySize;
-        }
-
-        Vector<ImageInfo> v = new Vector<ImageInfo>();
-        for (ImageInfo ii : getImagesByName()) {
-            v.add( ii );
-        }
-
-        ImagesBySizeComparator sc3 = new ImagesBySizeComparator();
-        Collections.sort(v, sc3);
-        imagesBySize = v;
-        return v;
-    }
-
-
-    public static synchronized Vector<ImageInfo> getImagesByNumber() throws Exception {
-        if (imagesByNum != null) {
-            return imagesByNum;
-        }
-
-        Vector<ImageInfo> v = new Vector<ImageInfo>();
-        for (ImageInfo ii : getImagesByName()) {
-            v.add(ii);
-        }
-
-        Collections.sort(v, new ImagesByNumComparator());
-        imagesByNum = v;
-        return v;
-    }
-
-    public static void sortImagesByName(Vector<ImageInfo> images)
-        throws Exception
-    {
-        ImagesByNameComparator sc = new ImagesByNameComparator();
-        Collections.sort(images, sc);
-    }
-
-    public static void sortImagesByPath(Vector<ImageInfo> images)
-        throws Exception
-    {
-        ImagesByPathComparator sc = new ImagesByPathComparator();
-        Collections.sort(images, sc);
-    }
-
-    public static void sortImagesBySize(Vector<ImageInfo> images)
-        throws Exception
-    {
-        ImagesBySizeComparator sc = new ImagesBySizeComparator();
-        Collections.sort(images, sc);
-    }
-
-    public static void sortImagesByNum(Vector<ImageInfo> images)
-        throws Exception
-    {
-        ImagesByNumComparator sc = new ImagesByNumComparator();
-        Collections.sort(images, sc);
-    }
-*/
     public static void sortImages(Vector<ImageInfo> images, String order)
         throws Exception
     {
@@ -254,25 +164,7 @@ public class ImageInfo
         }
         Collections.sort(images, sc);
     }
-/*
-    public static synchronized Vector<ImageInfo> getImagesByPath()
-        throws Exception
-    {
-        if (imagesByPath != null) {
-            return imagesByPath;
-        }
 
-        Vector<ImageInfo> v = new Vector<ImageInfo>();
-        for (ImageInfo ii : getImagesByName()) {
-            v.add( ii );
-        }
-
-        ImagesByPathComparator sc2 = new ImagesByPathComparator();
-        Collections.sort(v, sc2);
-        imagesByPath = v;
-        return imagesByPath;
-    }
-*/
 
     /********************************************************/
 
@@ -535,91 +427,6 @@ public class ImageInfo
         return findImage2(dm.diskName, relPath, filePath.getName());
     }
     
-    /*
-    public static List<ImageInfo> findImagesForPosPat(PosPat pp) throws Exception {
-        String symbol = pp.getSymbol();
-        
-        List<ImageInfo> res = new ArrayList<ImageInfo>();
-        for (ImageInfo ii : getImagesByName()) {
-            if (symbol.equals(ii.pp.getSymbol())) {
-                res.add(ii);
-            }
-        }
-        return res;
-    }
-    */
-
-
-
-    /**
-     * Finds the first image in the list with a name that is equal to or
-     * greater than the search value.
-     * Note: a name passed that is lower than all names, returns 0
-     * a name passed greater than all names, returns vec.size (not a valid index!)
-     */
-    
-    /*
-    private static int findFirstImageWithName(Vector<ImageInfo> vec, String term) {
-
-        int low = 0;
-        int high = vec.size();
-
-        //if the vector is empty, then treat this like the search name is
-        //greater than all, and return the vector size (zero, not a valid index)
-        if (high==0) {
-            return 0;
-        }
-
-        while (high-low > 5) {
-            int mid = (high+low)/2;
-            ImageInfo test = vec.get(mid);
-            int comp = term.compareToIgnoreCase(test.fileName);
-
-            //  x.compareTo(y) return
-            //  negative if x < y
-            //  zero     if x=y
-            //  positive if x > y
-
-            if (comp==0) {
-                low = mid;
-                break;
-            }
-            if (comp<0) {
-                high = mid;
-            }
-            else {
-                low = mid;
-            }
-        }
-
-        //low can be treated now as a starting point to find the exact
-        //point that images with a particular name start
-        ImageInfo test2 = vec.get(low);
-        int comp2 = term.compareToIgnoreCase(test2.fileName);
-
-        //the found image has a greater or equal name, so search backward
-        while (comp2<=0) {
-            if (low==0) {
-                return 0;
-            }
-            low--;
-            test2 = vec.get(low);
-            comp2 = term.compareToIgnoreCase(test2.fileName);
-        }
-
-        //the found image has lower name, so search forward to one
-        //either equal or greater
-        while (comp2>0) {
-            low++;
-            if (low==vec.size()) {
-                return low;
-            }
-            test2 = vec.get(low);
-            comp2 = term.compareToIgnoreCase(test2.fileName);
-        }
-        return low;
-    }
-    */
 
     /**
     *  Don't use this one, use instead the findImage that has the relPath below
@@ -689,292 +496,6 @@ public class ImageInfo
         return new ImageInfo(fullPath, diskMgr);
     }
 
-/*
-    public static ImageInfo findFirstMatch(String disk, String relPath, String pattern, int val)
-            throws Exception
-        {
-            try {
-                if (disk == null) {
-                    throw new JSONException("findImage was passed a null disk name");
-                }
-                if (relPath == null) {
-                    throw new JSONException("findImage was passed a null relPath");
-                }
-                if (pattern == null) {
-                    throw new JSONException("findImage was passed a null file name");
-                }
-                if (relPath.length()>0 && !relPath.endsWith("/")) {
-                    throw new JSONException("relPath must either be a null string, or it must end with a slash!  instead got: {0} ",relPath);
-                }
-                Vector<ImageInfo> vFiles = getImagesByName();
-
-                int last = vFiles.size();
-                if (last == 0) {
-                    throw new JSONException("Searched and not found because there are no images loaded, starting point :{0}",pattern);
-                }
-                int pos = findFirstImageWithName(vFiles, pattern);
-
-                //if the file name is greater than all files in the list, handle that
-                if (pos>=vFiles.size()) {
-                    throw new JSONException("the pattern ({0}) is greater than all files in the index, nothing with that name", pattern);
-                }
-
-                StringBuffer trace = new StringBuffer();
-                trace.append("starting search with pos="+pos+" and last="+last+"\n");
-
-                if (pos>0) {
-                    ImageInfo previous = vFiles.elementAt(pos-1);
-                    trace.append("prev: F("+previous.fileName+")D("+previous.diskMgr.diskName+")P("+previous.getRelativePath()+") \n");
-                    if (pattern.equalsIgnoreCase(previous.pp.getPattern())) {
-                        throw new JSONException("findFirstImageWithName failed to find the first index with name ({0}) \n {1} ",pattern,trace);
-                    }
-                }
-
-                while (pos < last) {
-                    ImageInfo ii = vFiles.elementAt(pos);
-                    int comp = pattern.compareToIgnoreCase(ii.pp.getPattern());
-
-                    //if the file has a pattern greater than searching for, we are done
-                    if (comp<0) {
-                        return null;
-                    }
-                    if (disk.equalsIgnoreCase(ii.diskMgr.diskName) &&
-                            relPath.equalsIgnoreCase(ii.getRelativePath()) &&
-                            pattern.equalsIgnoreCase(ii.pp.getPattern()) &&
-                            val == ii.value) {
-                        return ii;
-                    }
-                    pos++;
-                }
-                throw new JSONException("Searched through to end and not found \n {0}",trace);
-            }
-            catch (Exception e) {
-                throw new JSONException("Unable to find an image with disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
-            }
-        }
-        */
-
-    /*
-    public static List<ImageInfo> findAllMatching(String disk, String relPath, String pattern, int val)
-            throws Exception
-        {
-            try {
-                if (disk == null) {
-                    throw new JSONException("findAllMatching was passed a null disk name");
-                }
-                if (relPath == null) {
-                    throw new JSONException("findAllMatching was passed a null relPath");
-                }
-                if (pattern == null) {
-                    throw new JSONException("findAllMatching was passed a null file name");
-                }
-                if (relPath.length()>0 && !relPath.endsWith("/")) {
-                    throw new JSONException("for findAllMatching relPath must either be a null string, or it must end with a slash!  instead got: {0}",relPath);
-                }
-                Vector<ImageInfo> vFiles = new Vector<ImageInfo> ();
-                for (ImageInfo ii : getImagesByName()){
-                    if (ii.value == val && pattern.equalsIgnoreCase(ii.getPattern())
-                            && relPath.equalsIgnoreCase(ii.getRelativePath())) {
-                        vFiles.add(ii);
-                    }
-                }
-                return vFiles;
-            }
-            catch (Exception e) {
-                throw new JSONException("Error trying to find image for disk={0}, relPath={1}, pattern={2}", e, disk, relPath, pattern);
-            }
-        }
-        */
-/*
-    public static ImageInfo findImageByKey(String key) throws Exception
-    {
-        try {
-            if (key == null) {
-                throw new JSONException("findImage was passed a null key");
-            }
-            int colonPos = key.indexOf(':');
-            if (colonPos < 0) {
-                throw new JSONException("Can't find a colon in key: '{0}'",key);
-            }
-            int slashPos = key.lastIndexOf('/');
-            if (slashPos < 0) {
-                throw new JSONException("Can't find a slash in key: '{0}'",key);
-            }
-            String disk    = key.substring(0, colonPos);
-            String relPath = key.substring(colonPos+1, slashPos+1);
-            String name    = key.substring(slashPos+1);
-            Vector<ImageInfo> vFiles  = getImagesByName();
-
-            int last = vFiles.size();
-            if (last == 0) {
-                throw new JSONException("Searched and not found because there are no images loaded, starting point :{0}",name);
-            }
-            int pos = findFirstImageWithName(vFiles, name);
-
-            // returns a negative if the exact match is not found
-            // that is OK, we don't need an an exact match, so
-            // use the index by negating it.
-            if (pos < 0) {
-                pos = -pos - 1;
-            }
-
-            // problem is that there may be multiple images with the same name, and
-            // the binary search does not always find the first, so back up a bit
-            // to be sure not to miss it.
-            if (pos>10) {
-                pos -= 10;
-            }
-            else {
-                pos = 0;
-            }
-
-            ImageInfo ii2 = vFiles.elementAt(pos);
-            String startName = ii2.fileName;
-
-            while (pos < last) {
-                ImageInfo ii = vFiles.elementAt(pos);
-                if (disk.equals(ii.diskMgr.diskName) &&
-                        name.equalsIgnoreCase(ii.fileName) &&
-                        relPath.equalsIgnoreCase(ii.getRelativePath())) {
-                    return ii;
-                }
-                pos++;
-            }
-            throw new JSONException("Searched and not found, starting point: {0}",startName);
-        }
-        catch (Exception e) {
-            throw new JSONException("Unable to find an image with key={0}",e,key);
-        }
-    }
-    */
-
-    /*
-    public static Vector<PatternInfo> getAllPatternsStartingWith(String start) throws Exception
-    {
-        try {
-            Vector<ImageInfo> vFiles = getImagesByName();
-
-            //the above does not work!  File names can have exclamations
-            //markes in them, and they getstripped out of the pattern.
-            //therefor the file names with the ! will sort in a different
-            //order, and you will not find all of them.
-
-            Vector<PatternInfo> vPatterns = new Vector<PatternInfo>();
-
-            int last = vFiles.size();
-            int pos = findFirstImageWithName(vFiles, start);
-
-            // returns a negative if the exact match is not found
-            // that is OK, we don'tneed an an exact match, so
-            // use the index by negating it.
-            if (pos < 0) {
-                pos = -pos - 1;
-            }
-
-            String terminator = start + "���";   //highest posible matching value...
-            Hashtable<String, PatternInfo> map = new Hashtable<String, PatternInfo>();
-
-            while (pos < last) {
-                ImageInfo ii = vFiles.elementAt(pos);
-                pos++;
-                String lcpatt = ii.getPattern().toLowerCase();
-
-                // stop after the last possible image
-                if (lcpatt.compareToIgnoreCase(terminator) > 0) {
-                    break;
-                }
-
-                PatternInfo pi = map.get(lcpatt);
-                if (pi == null) {
-                    pi = new PatternInfo(ii.getJSON());
-                    map.put(lcpatt, pi);
-                    vPatterns.addElement(pi);
-                }
-                else {
-                    pi.addImage(ii.getJSON());
-                }
-            }
-            return vPatterns;
-        }
-        catch(Exception e) {
-            throw new JSONException("Error in getAllPatternsStartingWith({0})",e,start);
-        }
-    }
-    */
-
-
-    /**
-    * Searches the loaded images that have a particular pattern
-    */
-    /*
-    public static Vector<ImageInfo> getImagesMatchingPattern(String searchPatt) throws Exception
-    {
-        try {
-            Vector<ImageInfo> allImages = getImagesByName();
-            Vector<ImageInfo> res = new Vector<ImageInfo>();
-            for (ImageInfo ii : allImages) {
-                if (ii.getPattern().equalsIgnoreCase(searchPatt)) {
-                    res.add(ii);
-                }
-            }
-            return res;
-        }
-        catch(Exception e) {
-            throw new JSONException("Error in getImagesMatchingPattern({0})",e, searchPatt);
-        }
-    }
-    */
-
-
-    /*
-    public static Vector<PatternInfo> queryImages(String start) throws Exception
-    {
-        try {
-            Vector<ImageInfo> vFiles = getImagesByName();
-            Vector<PatternInfo> vPatterns = new Vector<PatternInfo>();
-
-            int last = vFiles.size();
-            int pos = findFirstImageWithName(vFiles, start);
-
-            // returns a negative if the exact match is not found
-            // that is OK, we don'tneed an an exact match, so
-            // use the index by negating it.
-            if (pos < 0) {
-                pos = -pos - 1;
-            }
-
-            String terminator = start + "���";   //highest posible matching value...
-            Hashtable<String, PatternInfo> map = new Hashtable<String, PatternInfo>();
-
-            while (pos < last) {
-                ImageInfo ii = vFiles.elementAt(pos);
-                pos++;
-
-                // stop after the last possible image
-                if (ii.fileName.compareToIgnoreCase(terminator) > 0) {
-                    //System.out.println("getAllPatt: terminator ("+terminator+"): "+ii.fileName);
-                    break;
-                }
-
-                String lcpatt = ii.getPattern().toLowerCase();
-                PatternInfo pi = map.get(lcpatt);
-                if (pi == null) {
-                    pi = new PatternInfo(ii.getJSON());
-                    map.put(lcpatt, pi);
-                    vPatterns.addElement(pi);
-                }
-                else {
-                    pi.addImage(ii.getJSON());
-                }
-            }
-            return vPatterns;
-        }
-        catch(Exception e) {
-            throw new JSONException("Error in queryImages({0})",e,start);
-        }
-    }
-    */
-
 
 
 
@@ -983,20 +504,6 @@ public class ImageInfo
     private void unPlugImage()
         throws Exception
     {
-        /*
-        if (imagesByName != null) {
-            imagesByName.remove(this);
-        }
-        if (imagesByPath != null) {
-            imagesByPath.remove(this);
-        }
-        if (imagesBySize != null) {
-            imagesBySize.remove(this);
-        }
-        if (imagesByNum != null) {
-            imagesByNum.remove(this);
-        }
-        */
         // just in case this is part of a selection
         for (int i=0; i<memory.length; i++) {
             memory[i].remove(this);
@@ -1024,29 +531,24 @@ public class ImageInfo
         }
     }
 
-    public synchronized void moveImageToLoc(String newLoc)
-        throws Exception
-    {
+    public synchronized ImageInfo moveImageToLoc(String newLoc) throws Exception {
         DiskMgr.assertNoBackSlash(newLoc);
         int colonPos = newLoc.indexOf(":");
         String diskName = newLoc.substring(0, colonPos);
         String diskPath = newLoc.substring(colonPos+1);
         DiskMgr dm = DiskMgr.getDiskMgr(diskName);
-        moveImage(dm, new File(dm.mainFolder,diskPath));
+        return moveImage(dm, new File(dm.mainFolder,diskPath));
     }
 
 
-    public synchronized void moveImage(String destDisk, String destPath)
-        throws Exception
-    {
+    public synchronized ImageInfo moveImage(String destDisk, String destPath) throws Exception {
         DiskMgr.assertNoBackSlash(destPath);
         DiskMgr dm2 = DiskMgr.getDiskMgr(destDisk);
-        moveImage(dm2,new File(destPath));
+        return moveImage(dm2,new File(destPath));
     }
 
-    public void moveImage(DiskMgr dm2, File destFolder)
-        throws Exception
-    {
+    public ImageInfo moveImage(DiskMgr dm2, File destFolder) throws Exception {
+        
         if (dm2==null) {
             throw new JSONException("Null dm passed to moveImage!");
         }
@@ -1091,6 +593,8 @@ public class ImageInfo
             if (!newFilePath.exists()) {
                 throw new JSONException("new image path does not exist after move: {0}",newFilePath);
             }
+            
+            return new ImageInfo(newFilePath, dm2);
         }
         catch (Exception e) {
             throw new JSONException("Unable to move image from ({0}) to ({1})",e, oldPath, destFolder);
@@ -1265,11 +769,11 @@ public class ImageInfo
 
     public synchronized void deleteThumbnails() throws Exception
     {
-        File thumbFile = new File(diskMgr.thumbPath,"100/"+diskMgr.diskName+"/"+getRelativePath()+fileName);
+        File thumbFile = new File(DiskMgr.thumbPath,"100/"+diskMgr.diskName+"/"+getRelativePath()+fileName);
         if (thumbFile.exists()) {
             thumbFile.delete();
         }
-        thumbFile = new File(diskMgr.thumbPath,"350/"+diskMgr.diskName+"/"+getRelativePath()+fileName);
+        thumbFile = new File(DiskMgr.thumbPath,"350/"+diskMgr.diskName+"/"+getRelativePath()+fileName);
         if (thumbFile.exists()) {
             thumbFile.delete();
         }
@@ -1305,227 +809,6 @@ public class ImageInfo
         return res;
     }    
     
-    /*
-    public static Vector<ImageInfo> imageQueryOLDSTYLE(String query)
-        throws Exception
-    {
-        try {
-
-            if (query.length()<4) {
-                throw new JSONException("query is too short, must be letter, an open paren, at least one value char, and a close paren");
-            }
-
-            int pos = 0;
-            char sel = query.charAt(0);
-
-            if (query.charAt(1) != '(') {
-                throw new JSONException("error with query, second character must be an open paren");
-            }
-
-            pos = query.indexOf(')');
-            if (pos<0) {
-                throw new JSONException("Error, can not find the closing paren char");
-            }
-
-            String val = query.substring(2, pos);
-
-            Vector<ImageInfo> vImages = new Vector<ImageInfo>();
-            switch (sel) {
-                case 'g':
-                    for( TagInfo tag:TagInfo.getAllTagsStartingWith(val)) {
-                        if (tag.tagName.equalsIgnoreCase(val)) {
-                            vImages.addAll(tag.allImages);
-                        }
-                    }
-                    break;
-                case 'p':
-                    Vector<PatternInfo> vPatt = ImageInfo.getAllPatternsStartingWith(val);
-                    for (PatternInfo pi : vPatt) {
-                        if (pi.getPattern().equalsIgnoreCase(val)) {
-                            for (JSONObject image : pi.allImages) {
-                                vImages.add(ImageInfo.findImage3(image));
-                            }
-                        }
-                    }
-                    break;
-                case 's':
-                    int numval = Integer.parseInt(val);
-                    if (numval<1) {
-                        throw new JSONException("memory banks are numbered 1 thru {0}, and '{1}' is too small.", MEMORY_SIZE, numval);
-                    }
-                    if (numval>MEMORY_SIZE) {
-                        throw new JSONException("memory banks are numbered 1 thru {0}, and '{1}' is too large.", MEMORY_SIZE, numval);
-                    }
-                    vImages.addAll(ImageInfo.memory[numval-1]);
-                    break;
-                default:
-                    throw new JSONException("query elements must begin with a 'g', 'p', or 's'");
-            }
-
-            int startPos = pos+1;
-            while (startPos<query.length()) {
-                sel = query.charAt(startPos);
-                if (query.charAt(startPos+1) != '(') {
-                    throw new JSONException("error with query, second character must be an open paren at position {0}",(startPos+1));
-                }
-                pos = query.indexOf(')', startPos+2);
-                if (pos<0) {
-                    throw new JSONException("Error, can not find the closing paren char after position {0}",(startPos+2));
-                }
-                val = query.substring(startPos+2, pos);
-                Vector<ImageInfo> oldGrp = vImages;
-                vImages = new Vector<ImageInfo>();
-                switch (sel) {
-                    case 'g':   //tag
-                        for (ImageInfo ii : oldGrp) {
-                            Vector<String> gps = ii.getTagNames();
-                            for (String gname : gps) {
-                                if (gname.equalsIgnoreCase(val)) {
-                                    vImages.add(ii);
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-                    case 'p':   //pattern contains
-                        for (ImageInfo ii : oldGrp) {
-                            String pattName = ii.getPattern();
-                            if (pattName.indexOf(val)>=0) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 's':   //pattern starts with
-                        for (ImageInfo ii : oldGrp) {
-                            String pattName = ii.getPattern();
-                            if (pattName.indexOf(val)==0) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 'e':   //pattern equals
-                        for (ImageInfo ii : oldGrp) {
-                            String pattName = ii.getPattern();
-                            if (pattName.equalsIgnoreCase(val)) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 'd':  //NOT tag
-                        for (ImageInfo ii : oldGrp) {
-                            Vector<String> gps = ii.getTagNames();
-                            boolean notPresent = true;
-                            for (String gname : gps) {
-                                if (gname.startsWith(val)) {
-                                    notPresent = false;
-                                    break;
-                                }
-                            }
-                            if (notPresent) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 'b':   //NOT pattern contains
-                        for (ImageInfo ii : oldGrp) {
-                            String pattName = ii.getPattern();
-                            if (pattName.indexOf(val)<0) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case '!':   //NOT index
-                        for (ImageInfo ii : oldGrp) {
-                            if (!ii.isIndex) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 'i':   //index
-                        for (ImageInfo ii : oldGrp) {
-                            if (ii.isIndex) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 't':   //duplicate sizes
-                        sortImagesBySize(oldGrp);
-                        int lastSize=-1;
-                        ImageInfo savei = null;
-                        for (ImageInfo ii : oldGrp) {
-                            if (ii.fileSize == lastSize) {
-                                if (savei!=null) {
-                                    vImages.add(savei);
-                                    savei = null;
-                                }
-                                vImages.add(ii);
-                            }
-                            else {
-                                savei = ii;
-                                lastSize = ii.fileSize;
-                            }
-                        }
-                        break;
-                    case 'z':   //identical numbers
-                        sortImagesByNum(oldGrp);
-                        int lastVal=-999;
-                        ImageInfo saven = null;
-                        for (ImageInfo ii : oldGrp) {
-                            if (ii.value == lastVal) {
-                                if (saven!=null) {
-                                    vImages.add(saven);
-                                    saven = null;
-                                }
-                                vImages.add(ii);
-                            }
-                            else {
-                                saven = ii;
-                                lastVal = ii.value;
-                            }
-                        }
-                        break;
-                    case 'n':   //number range
-                        int commapos = val.indexOf(",");
-                        if (commapos < 0) {
-                            throw new JSONException("The 'n' query must have a lower integer, a comma, then an upper number to form a number range");
-                        }
-                        String lower = val.substring(0, commapos);
-                        String higher = val.substring(commapos+1);
-                        int ilower = Integer.parseInt(lower);
-                        int ihigher = Integer.parseInt(higher);
-
-                        for (ImageInfo ii : oldGrp) {
-                            if (ii.value >= ilower && ii.value <= ihigher) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    case 'l':   //larger-than specified size
-                        int minsize = Integer.parseInt(val);
-
-                        for (ImageInfo ii : oldGrp) {
-                            if (ii.fileSize >= minsize) {
-                                vImages.add(ii);
-                            }
-                        }
-                        break;
-                    default:
-                        throw new JSONException("secondary query elements must begin with a 'g' for tag, "
-                            +"'d' for NOT tag, 'p' for pattern contains, 'b' for pattern not contains, "
-                            +"'s' pattern starts,  or 'e' for pattern exact, 't' for duplicate size, "
-                            +"'i' for index, and '!' for NOT index, 'n' for numeric range, 'u' for number of tags,"
-                            +"'l' for larger-than size");
-                }
-                startPos = pos+1;
-            }
-            //handle further restrictions here
-            return vImages;
-        }
-        catch(Exception e) {
-            throw new JSONException("Error in queryImages({0})",e, query);
-        }
-    }
-    */
 
 
     /****************  HELPER CLASSES  ***********************/

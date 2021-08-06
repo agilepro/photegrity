@@ -418,12 +418,12 @@ public class APIHandler {
             outList.put(resInts);
         }
         
-        if (sourceToClean!=null && sourceDM!=null) {
-            sourceDM.refreshDiskFolder(sourceToClean);
+        if (sourceToClean!=null) {
+            DiskMgr.refreshDiskFolder(sourceToClean);
             res.put("clean1", sourceToClean.toString());
         }
-        if (destToClean!=null && destDM!=null) {
-            destDM.refreshDiskFolder(destToClean);
+        if (destToClean!=null) {
+            DiskMgr.refreshDiskFolder(destToClean);
             res.put("clean2", destToClean.toString());
         }
         return res;

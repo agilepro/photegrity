@@ -279,14 +279,16 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
         if (showImages)
         {
             JSONObject image = new JSONObject();
+            String imagePath = "";
+            
             int setSize = symbolCount.size();
             %><td width="<%=(thumbsize+10)*imageNum%>"><%
             if ((--imageLimit)>0) {
                 if (imageNum >= setSize) {
                     for (int ni = 0; ni<setSize; ni++) {
                         //image = "XXXNOTFINISHED";
-%>                  <a href="photo/<%=image.getString("path")%>" target="photo">
-                        <img src="thumb/<%=thumbsize%>/<%=image.getString("path")%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
+%>                  <a href="photo/<%=imagePath%>" target="photo">
+                        <img src="thumb/<%=thumbsize%>/<%=imagePath%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
 <%                  }
                 }
                 else {
@@ -304,8 +306,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                         }
                         repeatGuard[choice]=true;
                         //image = pi.allImages.elementAt(choice);
-%>                  <a href="photo/<%=image.getString("path")%>" target="photo">
-                        <img src="thumb/<%=thumbsize%>/<%=image.getString("localPath")%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
+%>                  <a href="photo/<%=imagePath%>" target="photo">
+                        <img src="thumb/<%=thumbsize%>/<%=imagePath%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
 <%                  }
                 }
             }
@@ -326,11 +328,14 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             <table border="0"><tr>
 <%
             if (symbolCount.getCount(symbol)==1 && image!=null) {
+                String imageDisk = "";
+                String imageFileName = "";
+                
 %>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.cover.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="cover">
@@ -338,8 +343,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 </form>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.flogo.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="flogo">
@@ -347,8 +352,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 </form>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.sample.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="sample">
@@ -356,8 +361,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
                 </form>
                 <form method="get" action="renameFile.jsp">
                 <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, image.getString("disk"));%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, image.getString("fileName"));%>">
+                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
+                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
                 <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"!01.jpg");%>">
                 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
                 <input type="submit" value="Single Index">
@@ -402,9 +407,10 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
               <a href="allPatts.jsp?q=<%=newQuery%>">P</a></td>
 <%
         } else {
-            JSONObject image = null; //pi.allImages.elementAt(0);
+            JSONObject image = new JSONObject(); //pi.allImages.elementAt(0);
+            String imagePath = "";
 %>
-      <td><a href="photo/<%=image.getString("path")%>" target="photo">D</a></td>
+      <td><a href="photo/<%=imagePath%>" target="photo">D</a></td>
       <td><a href="show.jsp?q=<%=newQuery%>">S</a>
           <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
           <a href="queryManip.jsp?q=<%=newQuery%>">M</a>

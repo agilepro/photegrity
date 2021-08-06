@@ -234,10 +234,7 @@ public class NewsActionDownloadFile extends NewsAction {
 
             // this code registers this new file in the image system, but only if the
             //disk manager is loaded
-            DiskMgr disk = bunch.getDiskMgr();
-            if (disk != null) {
-                disk.refreshDiskFolder(folder);
-            }
+            DiskMgr.refreshDiskFolder(folder);
 
             writeDuration(out,fileStart);
             //record the total number of bytes written to the file, and time

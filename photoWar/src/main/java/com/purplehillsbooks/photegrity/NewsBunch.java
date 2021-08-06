@@ -899,9 +899,9 @@ public class NewsBunch {
 
         out.write("\n<li>refreshing disk to memory "+oldFolderPath+"</li>");
         //update the disk representation in memory
-        oldDM.refreshDiskFolder(oldFolderPath);
+        DiskMgr.refreshDiskFolder(oldFolderPath);
         out.write("\n<li>refreshing disk to memory "+newFolderPath+"</li>");
-        dm2.refreshDiskFolder(newFolderPath);
+        DiskMgr.refreshDiskFolder(newFolderPath);
         out.write("\n<li>DONE refreshing disk folder</li>");
         System.out.println("changeLocAndTemplate took "+(System.currentTimeMillis()-startTime)+"ms");
     }
@@ -1064,8 +1064,8 @@ public class NewsBunch {
             disk = dm2;
             setRelativePath(destPath);
 
-            dm1.refreshDiskFolder(dm1.getFilePath(sourcePath));
-            dm2.refreshDiskFolder(dm2.getFilePath(destPath));
+            DiskMgr.refreshDiskFolder(dm1.getFilePath(sourcePath));
+            DiskMgr.refreshDiskFolder(dm2.getFilePath(destPath));
             out.write("\n<li>final folder: "+pathInDisk+"</li>");
         }
         catch (Exception e) {

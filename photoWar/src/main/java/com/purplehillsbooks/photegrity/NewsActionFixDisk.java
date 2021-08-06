@@ -36,7 +36,7 @@ public class NewsActionFixDisk extends NewsAction {
         long startTime = System.currentTimeMillis();
         out.write("\nPreparing to refresh "+diskToLoad.diskName+":"+folder);
         out.flush();
-        diskToLoad.refreshDiskFolder(folder);
+        DiskMgr.refreshDiskFolder(folder);
         long secs = (System.currentTimeMillis()-startTime)/1000;
         out.write("\nTook "+secs+" seconds to refresh "+diskToLoad.diskName+":"+folder+" in .");
         out.flush();

@@ -9,6 +9,9 @@
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
+<%@page import="com.purplehillsbooks.streams.HTMLWriter" %>
 
 <%
     request.setCharacterEncoding("UTF-8");
@@ -47,15 +50,21 @@
     Enumeration e2 = copyImages.elements();
     int count = 0;
     int num = 1;
+    Set<File> locCleanup = new HashSet<File>();
     while (e2.hasMoreElements()) {
         ImageInfo ii = (ImageInfo)e2.nextElement();
-        if (ii == null) {
-            throw new Exception ("null image file in selection");
-        }
+        locCleanup.add(ii.pp.getFolderPath());
         // rename it here
         count ++;
         num = ii.nextName(prepos, num);
     }
+    for (File loc : locCleanup) {
+        out.write("\n<li> CLEANING UP: ");
+        HTMLWriter.writeHtml(out, loc.getAbsolutePath());
+        out.write("</li>\n");
+        DiskMgr.refreshDiskFolder(loc);
+    }
+
 
     if (dest == null) {
         dest = "selection.jsp?msg=Renumbered%20"+count+"%20Files";

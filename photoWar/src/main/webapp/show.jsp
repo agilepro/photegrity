@@ -123,13 +123,12 @@
     MongoDB mongo = new MongoDB();
     JSONArray groupImages = mongo.querySets(query);
     mongo.close();
-    
-    //ImageInfo.sortImages(groupImages, order);
-    //Enumeration e2 = groupImages.elements();
+     
     int totalCount = -1;
     String queryOrderNoMin = URLEncoder.encode(query,"UTF8")+"&o="+order;
     String queryOrderPart = queryOrderNoMin+"&min="+dispMin;
     JSONArray justImages = new JSONArray();
+    int recordCount = 0;
     for (JSONObject setInfo : groupImages.getJSONObjectList()) {
         if (!setInfo.has("disk")) {
             throw new Exception("SetInfo does not have a disk: "+setInfo.toString(2));
@@ -138,9 +137,9 @@
         String localPath = setInfo.getString("path");
         for (JSONObject image : setInfo.getJSONArray("images").getJSONObjectList()) {
             justImages.put(image);
+            recordCount++;
         }
     }
-    int recordCount = justImages.length();
 
 ///////////////////////////////////////
 
@@ -357,6 +356,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
         out.write("<tr>");
         boolean firstInRow = true;
         for (JSONObject ii : row) {
+            ImageInfo ii2 = ImageInfo.genFromJSON(ii);
             totalCount++;
 
             String fileName = ii.getString("fileName");

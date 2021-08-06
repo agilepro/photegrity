@@ -213,6 +213,7 @@ public class GridData {
         needsRecalc = true;
     }
 
+    /*
     private void processQueryOldWay() throws Exception {
         flushCache();
         if (query.length() == 0) {
@@ -236,6 +237,7 @@ public class GridData {
         reindex();
         needsRecalc = false;
     }
+    */
     private void processQuery() throws Exception {
         flushCache();
         if (query.length() == 0) {

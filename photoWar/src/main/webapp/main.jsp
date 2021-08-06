@@ -74,9 +74,6 @@
 <a href="sel.jsp?set=3" target="sel3">3</a>
 <a href="sel.jsp?set=4" target="sel4">4</a>
 <a href="sel.jsp?set=5" target="sel5">5</a>
--
-<a href="dumpPosPat.jsp">Index</a>
--
 <a href="compare.jsp">Compare</a>
 <a href="news.jsp">News</a>
 </td></tr>

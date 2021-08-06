@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -325,7 +324,6 @@ public class DiskMgr {
         }
 
         Hashtable<String, DiskMgr> tempTable = new Hashtable<String, DiskMgr>();
-        String archiveBase = null;
         Vector<File> newNewsList = new Vector<File>();
 
         File[] children = rootFolder.listFiles();
@@ -446,11 +444,6 @@ public class DiskMgr {
 
             out.write("\n<li><hr/></li>\n<li>Directories have been scanned, now accepting</li>");
 
-            //ImageInfo.acceptNewImages(imagesForDisk);
-            //out.write("\n<li><hr/></li><li>Accepted, now registering with PosPat list</li>");
-            //PosPat.registerImages(imagesForDisk);
-            //out.write("\n<li><hr/></li>\n<li>All done</li>");
-
             MongoDB mongo = new MongoDB();
             mongo.clearAllFromDisk(diskName);
             mongo.close();
@@ -466,25 +459,28 @@ public class DiskMgr {
     }
 
 
-    public synchronized void refreshDiskFolder(File folderPath) throws Exception {
+    public static void refreshDiskFolder(File folderPath) throws Exception {
+        
+        DiskMgr dm = DiskMgr.findDiskMgrFromPath(folderPath);
+        
         long startTime = System.currentTimeMillis();
         System.out.println("refreshDiskFolder1 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
 
-        String relPath = this.getRelativePath(folderPath);
+        String relPath = dm.getRelativePath(folderPath);
         System.out.println("refreshDiskFolder2 - "+(System.currentTimeMillis()-startTime)+"ms - REL "+relPath);
         //ImageInfo.removeDiskPath(this, relPath);
         
         MongoDB mongo = new MongoDB();
-        mongo.clearAllFromDiskPath(diskName, relPath);
+        mongo.clearAllFromDiskPath(dm.diskName, relPath);
         mongo.close();
         
         Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
         
         System.out.println("refreshDiskFolder3 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
-        scanDiskOneFolder(folderPath, imagesForDisk);
+        dm.scanDiskOneFolder(folderPath, imagesForDisk);
         System.out.println("refreshDiskFolder4 - "+(System.currentTimeMillis()-startTime)+"ms - found "+imagesForDisk.size()+" images.");
         
-        storeDiskInMongo(imagesForDisk);
+        dm.storeDiskInMongo(imagesForDisk);
         
         System.out.println("refreshDiskFolder9 - "+(System.currentTimeMillis()-startTime)+"ms - "+folderPath);
     }
@@ -822,16 +818,6 @@ public class DiskMgr {
         File aFile = new File(path, name);
         return aFile.exists();
     }
-
-    /*
-    public void incrementGroupCount(String newGrp) throws Exception {
-        allTagCnts.increment(newGrp);
-    }
-
-    public void decrementGroupCount(String oldGrp) throws Exception {
-        allTagCnts.decrement(oldGrp);
-    }
-    */
 
     public int getPatternCount(String pattern) {
         return PosPat.countAllPatternOnDisk(this, pattern);

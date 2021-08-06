@@ -91,6 +91,9 @@ public class PosPat {
     public String getSymbol() {
         return diskMgr.getLocator(localPath) + pattern;
     }
+    public String getLocator() {
+        return diskMgr.getLocator(localPath);
+    }
     public static PosPat getPosPatFromSymbol(String symbol) throws Exception {
         int colonPos = symbol.indexOf(':');
         if (colonPos<=0) {

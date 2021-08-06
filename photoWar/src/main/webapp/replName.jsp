@@ -7,9 +7,10 @@
 <%@page import="java.util.Vector" %>
 <%@page import="java.util.regex.Pattern" %>
 <%@page import="java.util.regex.Matcher" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
@@ -64,10 +65,12 @@ Testing:<%if (isTest) {out.write("yes");} else {out.write("no");}%>
 
 
 <%
+    Set<File> locCleanup = new HashSet<File>();
     if (source.equals("?"))
     {
         while (e2.hasMoreElements()) {
             ImageInfo ii = (ImageInfo)e2.nextElement();
+            locCleanup.add(ii.pp.getFolderPath());
             if (ii == null) {
                 throw new Exception ("null image file in selection");
             }
@@ -108,6 +111,7 @@ Testing:<%if (isTest) {out.write("yes");} else {out.write("no");}%>
     {
         while (e2.hasMoreElements()) {
             ImageInfo ii = (ImageInfo)e2.nextElement();
+            locCleanup.add(ii.pp.getFolderPath());
             if (ii == null) {
                 throw new Exception ("null image file in selection");
             }
@@ -151,9 +155,15 @@ Testing:<%if (isTest) {out.write("yes");} else {out.write("no");}%>
         }
     }
 
-    if (dest == null)
-    {
+    if (dest == null) {
         dest = "selection.jsp?msg=Modified%20"+count+"%20Filenames";
+    }
+    
+    for (File loc : locCleanup) {
+        out.write("\n<li> CLEANING UP: ");
+        HTMLWriter.writeHtml(out, loc.getAbsolutePath());
+        out.write("</li>\n");
+        DiskMgr.refreshDiskFolder(loc);
     }
 %>
 </ul>

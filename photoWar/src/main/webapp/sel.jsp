@@ -80,7 +80,10 @@
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
-<HEAD><TITLE>Set <%=set%> (<%= group.size() %> images)</TITLE></HEAD>
+<HEAD>
+<TITLE>Set <%=set%> (<%= group.size() %> images)</TITLE>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</HEAD>
 <BODY BGCOLOR="#FDF5E6">
 
 <a href="main.jsp"><img src="home.gif"></a>
@@ -95,18 +98,23 @@
 Clear:
 <a href="clearSelection.jsp?set=<%=set%>&dest=<%=thisPageEncoded%>">clear<%=set%></a>
 - - - <%=mark%>
-<table>
+<table class="table">
 <tr><th width="<%=thumbsize%>">
-(<a href="sort.jsp?set=<%=set%>&min=<%=dispMin%>">Sort</a>) Set <%=set%> - <a href="show.jsp?q=s(<%=set%>)&o=none">S</a>
+(<a href="sort.jsp?set=<%=set%>&min=<%=dispMin%>">Sort</a>) Set <%=set%> - 
+</th>
+<th width="225">
+<a href="show.jsp?q=$(<%=set%>)&o=none"><i class="glyphicon glyphicon-list-alt"></i></a>
+<a href="queryManip.jsp?q=$(<%=set%>)&o=none"><i class="glyphicon glyphicon-cog"></i></a></a>
 
-
-</th><th width="225"><%= group.size() %> </th><th width="<%=thumbsize%>">
+<%= group.size() %> </th>
 </tr>
 <%
+    String lastPatt = "";
     while (e0.hasMoreElements() ) {
 
         totalCount++;
         ImageInfo i0 = (ImageInfo)e0.nextElement();
+        lastPatt = i0.getPattern();
 
         if (totalCount < dispMin) {
             continue;
@@ -154,9 +162,14 @@ Clear:
 %>
     </tr>
 </table>
-<H1>Selection <%=set%> (<%= group.size() %> images)
+<H1>Memory Set <%=set%> (<%= group.size() %> images)
     <font color=#0000AA>
     <%= msg %> </font></H1>
+<p>Query: $(<%=set%>)</p>
+<form method="get" action="renumber.jsp">
+<input type="hidden" name="q" value="$(<%=set%>)">
+Renumber: <input type="text" name="newName" value="<%=lastPatt%>"/>
+<button type="submit">Renumber</button>
 </BODY>
 </HTML>
 <%@ include file="functions.jsp"%>

@@ -54,7 +54,7 @@
             out.flush();
             out.write("\n<ul>");
             DiskMgr mgr = DiskMgr.getDiskMgr(key);
-            recursiveDelDirs(mgr.extraPath, out);
+            recursiveDelDirs(mgr.mainFolder, out);
             mgr.loadDiskImages(out);
             out.write("\n</ul>");
             ImageInfo.garbageCollect();
@@ -80,21 +80,17 @@
 
 <%!
 
-    public
-    void
-    recursiveDelDirs(String startDir, Writer out)
-        throws Exception
-    {
+    public void recursiveDelDirs(File f1, Writer out) throws Exception {
         try {
-            File f1 = new File(startDir);
             if (!f1.exists()) {
                 out.write("\n<li>Strangely, the file '");
-                HTMLWriter.writeHtml(out, startDir);
+                HTMLWriter.writeHtml(out, f1.getAbsolutePath());
                 out.write("' does not exist.  This is an error.");
                 return;
             }
 
             if (!f1.isDirectory()) {
+               String startDir = f1.getName();
                 if (startDir.endsWith(".-.jpg")) {
                     //trashcan case, delete this file
                     out.write("\n<li>DELETED: ");
@@ -119,58 +115,23 @@
                 }
                 return;
             }
-            String[] flist = f1.list();
+            File[] flist = f1.listFiles();
             if  (flist.length==0) {
                 out.write("\n<li>");
-                HTMLWriter.writeHtml(out, startDir);
+                HTMLWriter.writeHtml(out, f1.getAbsolutePath());
                 out.write(" is empty, so REMOVED!");
                 out.flush();
                 f1.delete();
             }
             else for (int i=0; i<flist.length; i++) {
-                String thisName = startDir+"/"+flist[i];
-                recursiveDelDirs(thisName, out);
+                recursiveDelDirs(flist[i], out);
             }
         }
         catch (Exception e) {
-            throw new JSONException("Unable to scan directory ({0})",e,startDir);
+            throw new JSONException("Unable to scan directory ({0})",e,f1.getAbsolutePath());
         }
     }
 
-    public
-    void
-    checkFileExtensions(String startDir, Writer out)
-        throws Exception
-    {
-        try {
-            File f1 = new File(startDir);
-            if (!f1.exists()) {
-                out.write("\n<li>Strangely, the file '");
-                HTMLWriter.writeHtml(out, startDir);
-                out.write("' does not exist.  This is an error.");
-                return;
-            }
-
-            if (!f1.isDirectory()) {
-                return;
-            }
-            String[] flist = f1.list();
-            if  (flist.length==0) {
-                out.write("\n<li>");
-                HTMLWriter.writeHtml(out, startDir);
-                out.write(" is empty, so REMOVED!");
-                out.flush();
-                f1.delete();
-            }
-            else for (int i=0; i<flist.length; i++) {
-                String thisName = startDir+"/"+flist[i];
-                recursiveDelDirs(thisName, out);
-            }
-        }
-        catch (Exception e) {
-            throw new JSONException("Unable to scan directory ({0})",e,startDir);
-        }
-    }
 
 
 %>

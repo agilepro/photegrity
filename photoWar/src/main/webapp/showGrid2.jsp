@@ -236,7 +236,6 @@ $scope.dataSet = {
                 $scope.imageCount[colName] = Object.keys($scope.dataSet.grid[colName]).length;
             });
             findAllRows();
-            //$scope.$apply();
             $scope.setRow($scope.currentRow);
             $scope.setCol($scope.currentCol);
         }
@@ -313,7 +312,7 @@ $scope.dataSet = {
         $scope.setRowFromValue = function(rowVal) {
             var newTarget = $scope.currentRow;
             for (var i=0; i<$scope.allRows.length; i++) {
-                if (rowVal == $scope.dataSet.rows[i]) {
+                if (rowVal == $scope.allRows[i]) {
                     newTarget = i;
                 }
             }

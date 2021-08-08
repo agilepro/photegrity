@@ -145,8 +145,24 @@
     }
     
     String lastPatternName = "";
-    JSONObject allPatterns = symbolCount.getJSON();
 
+    List<String> displayedPatterns = new ArrayList<String>();
+    
+    int count = 0;
+    for (String symbol : sortedPatterns) {
+        count++;
+        if (count<dispMin) {
+            continue;
+        }
+        if (count>=dispMax) {
+            break;
+        }
+        displayedPatterns.add(symbol);
+        int lastSlash = symbol.lastIndexOf("/");
+        String pattern = symbol.substring(lastSlash+1);
+        lastPatternName = pattern;
+    }
+    
 
 %>
 
@@ -170,7 +186,6 @@
 var fileApp = angular.module('fileApp', []);
 fileApp.controller('fileCtrl', function ($scope, $http) {
     $scope.templatePattern = "<%JavaScriptWriter.encode(out,lastPatternName);%>";
-    $scope.allPatterns = <%allPatterns.write(out,2,2);%>;
     
     $scope.randomName= function() {
         var rez = "";
@@ -248,16 +263,9 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 <table class="spacy">
 <%
     int row = 0;
-    int count = 0;
+
     lastPatternName = null;
-    for (String symbol : sortedPatterns) {
-        count++;
-        if (count<dispMin) {
-            continue;
-        }
-        if (count>=dispMax) {
-            break;
-        }
+    for (String symbol : displayedPatterns) {
 
         int lastSlash = symbol.lastIndexOf("/");
         String pattern = symbol.substring(lastSlash+1);

@@ -213,31 +213,6 @@ public class GridData {
         needsRecalc = true;
     }
 
-    /*
-    private void processQueryOldWay() throws Exception {
-        flushCache();
-        if (query.length() == 0) {
-            // nothing to process, so just ignore this
-            return;
-        }
-        rawData.addAll(ImageInfo.imageQuery(query));
-        ImageInfo.sortImages(rawData, "num");
-
-        Vector<JSONObject> rowVec = null;
-        int rowValue = -99999;
-        for (ImageInfo ii : rawData) {
-            int thisValue = ii.value;
-            if (rowValue != thisValue) {
-                rowVec = new Vector<JSONObject>();
-                grid.add(rowVec);
-                rowValue = thisValue;
-            }
-            rowVec.add(ii.getJSON());
-        }
-        reindex();
-        needsRecalc = false;
-    }
-    */
     private void processQuery() throws Exception {
         flushCache();
         if (query.length() == 0) {

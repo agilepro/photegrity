@@ -63,7 +63,10 @@ public class MongoDB {
         return ja;
     }
     public JSONArray queryRecords(JSONObject query) throws Exception {
-        Document dq = Document.parse(query.toString(0));
+        String queryString = query.toString(0);
+        long startTime = System.currentTimeMillis();
+        
+        Document dq = Document.parse(queryString);
         FindIterable<Document> resultSet = pospatdb.find(dq);
         
         MongoCursor<Document> cursor = resultSet.iterator();
@@ -76,6 +79,8 @@ public class MongoDB {
             JSONObject jo = new JSONObject(d.toJson());
             ja.put(jo);
         }
+        long ms = System.currentTimeMillis()-startTime;
+        System.out.println("MONGO: "+count+" records ("+ms+"ms) from: "+queryString);
         return ja;
     }
     

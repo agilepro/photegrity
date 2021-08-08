@@ -29,7 +29,7 @@
         return;
     }
 
-    List<PosPat> allPatts = PosPat.getAllEntries();
+    List<String> allPatts = DiskMgr.globalPattCnts.sortedKeys();
     int listMax = allPatts.size();
 
     int n = UtilityMethods.defParamInt(request, "n", 0);
@@ -40,7 +40,7 @@
         int max = listMax;
         while (max - min > 1) {
             int middle = (max+min)/2;
-            String item = allPatts.get(middle).getPattern();
+            String item = allPatts.get(middle);
             if (search.compareToIgnoreCase(item) > 0) {
                 min = middle;
             }
@@ -80,10 +80,10 @@
         int innerlast = n+pageLength;
         %><td><ul><%
         while (n<innerlast && n<listMax) {
-            String g = (String) allPatts.get(n).getPattern();
+            String g = (String) allPatts.get(n);
             if (!alreadyPrinted.equals(g)) {
             %>
-            <li> <a href="pattern2.jsp?g=<%=URLEncoder.encode(g,"UTF8")%>"><%=g%></a></li><%
+            <li> <a href="show.jsp?q=p(<%=URLEncoder.encode(g,"UTF8")%>)"><%=g%> (<%=DiskMgr.globalPattCnts.getCount(g)%>)</a></li><%
                 alreadyPrinted = g;
             }
             else {

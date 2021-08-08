@@ -336,6 +336,12 @@
     breakOutQuery(query, e_html, e_body, extras);
     DOMUtils.writeDom(e_html, out);
 %>
+<br/>
+<form method="get" action="queryManip.jsp">
+Query <input type="text" name="q" value="<%=query%>" style="width:400px"/>
+<button type="submit">Search</button>
+</form>
+
 <%!
     Hashtable<String,String> allPaths;
     HashCounter pathCount;

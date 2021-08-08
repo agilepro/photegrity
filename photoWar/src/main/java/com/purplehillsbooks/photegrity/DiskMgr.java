@@ -38,12 +38,12 @@ public class DiskMgr {
 
     public HashCounter allSymbolCnts = null;
     public HashCounterIgnoreCase allTagCnts = null;
-    public HashCounterIgnoreCase allPattCnts = null;
+    public HashCounter allPattCnts = null;
 
     //across all disks
     public static HashCounter globalSymbolCnts = null;
     public static HashCounterIgnoreCase globalTagCnts = null;
-    public static HashCounterIgnoreCase globalPattCnts = null;
+    public static HashCounter globalPattCnts = null;
     
     private static Hashtable<String, DiskMgr> diskList = null;
     private static Vector<File> newsFiles = null;
@@ -95,7 +95,7 @@ public class DiskMgr {
         
         globalSymbolCnts = new HashCounter();
         globalTagCnts    = new HashCounterIgnoreCase();
-        globalPattCnts   = new HashCounterIgnoreCase();
+        globalPattCnts   = new HashCounter();
         
         for (String diskName : diskList.keySet()) {
             DiskMgr oneMgr = diskList.get(diskName);
@@ -175,13 +175,19 @@ public class DiskMgr {
             
             allSymbolCnts = new HashCounter();
             allTagCnts    = new HashCounterIgnoreCase();
-            allPattCnts   = new HashCounterIgnoreCase();
+            allPattCnts   = new HashCounter();
             
             MongoDB mongo = new MongoDB();
             mongo.findStatsForDisk(diskName, allTagCnts, allPattCnts, allSymbolCnts);
             mongo.close();
             
-            extraCount = allTagCnts.getCount(diskNameLowerCase);
+            String simpleKey = diskNameLowerCase;
+            int dotPos = simpleKey.indexOf(".");
+            if (dotPos>0) {
+                simpleKey = simpleKey.substring(0,dotPos);
+            }
+            extraCount = allTagCnts.getCount(simpleKey);
+            System.out.println("    set extraCount to "+extraCount);
         }
         catch (Exception e) {
             throw new JSONException("Can't construct a DiskMgr object for {0}",e,diskPath.getAbsolutePath());
@@ -790,7 +796,7 @@ public class DiskMgr {
         isChanged = true;
     }
 
-    public boolean fileExists(String path, String name) throws Exception {
+    public boolean fileExists(File path, String name) throws Exception {
         File aFile = new File(path, name);
         return aFile.exists();
     }

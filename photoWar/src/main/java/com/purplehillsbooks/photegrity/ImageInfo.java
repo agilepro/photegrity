@@ -519,7 +519,7 @@ public class ImageInfo
         String diskName = newLoc.substring(0, colonPos);
         String diskPath = newLoc.substring(colonPos+1);
         DiskMgr dm = DiskMgr.getDiskMgr(diskName);
-        return moveImage(dm, new File(dm.mainFolder,diskPath));
+        return moveImage(dm, dm.getFilePath(diskPath));
     }
 
 
@@ -690,10 +690,23 @@ public class ImageInfo
         }
 
         newTail.append(".jpg");
-        String finalName = newPatt + Integer.toString(1000+num).substring(1) + newTail;
-        while (diskMgr.fileExists(getFullPath(), finalName)) {
-            num++;
-            finalName = newPatt + Integer.toString(1000+num).substring(1) + newTail;
+        String numberPart = "000";
+        if (num>0) {
+            numberPart = Integer.toString(1000+num).substring(1);
+        }
+        else if (num <= -100) {
+            //for cover, flogo, and sample just copy across, don't change the number
+            numberPart = "000";
+        }
+        else {
+            //for indexes small negative numbers, does not handle the improper !00 negative-zero case.
+            numberPart = "!" + Integer.toString(1000-num).substring(1);
+        }
+        String finalName = newPatt + numberPart + newTail;
+        int fixer = 0;
+        while (diskMgr.fileExists(getFilePath(), finalName)) {
+            finalName = newPatt + numberPart + ((char)('a' + fixer)) + newTail;
+            fixer++;
         }
         renameFile(finalName);
         return num+1;
@@ -752,6 +765,22 @@ public class ImageInfo
 
 
     public static Vector<ImageInfo> imageQuery(String query) throws Exception {
+        if (query.startsWith("$")) {
+            //offset 0 is $
+            //offset 1 must be (
+            //number starts at 2 to wherever the closing paren is
+            int closePos = query.indexOf(")");
+            if (closePos<2) {
+                throw new Exception("Can not understand memory query, missing closing paren?: "+query);
+            }
+            String numVal = query.substring(2,closePos);
+            int memoryNum = UtilityMethods.safeConvertInt(numVal);
+            if (memoryNum<1 || memoryNum>20) {
+                throw new Exception("Can not understand memory query, expect num between 1 and 20: "+query);
+            }
+            MarkedVector mem = memory[memoryNum-1];
+            return mem;
+        }
         MongoDB mongo = new MongoDB();
         JSONArray list = mongo.querySets(query);
         mongo.close();

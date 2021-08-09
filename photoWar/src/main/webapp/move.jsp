@@ -6,6 +6,7 @@
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Vector" %>
 <%@page import="java.util.Set" %>
+<%@page import="java.util.List" %>
 <%@page import="java.util.HashSet" %>
 <%@page import="com.purplehillsbooks.photegrity.HashCounterIgnoreCase" %>
 <%@page import="com.purplehillsbooks.photegrity.NewsBunch" %>
@@ -49,9 +50,7 @@
 
     session.setAttribute("moveDest", dest);
 
-    MongoDB mongo = new MongoDB();
-    JSONArray groupImages = mongo.querySets(query);
-    mongo.close();
+    List<ImageInfo> moveImages = ImageInfo.imageQuery(query);
 
 
 %>
@@ -76,36 +75,26 @@
     Set<File> locCleanup = new HashSet<File>();
    
 
-    for (JSONObject ppSet : groupImages.getJSONObjectList()) {
+    for (ImageInfo ii : moveImages) {
         
-        JSONArray images = ppSet.getJSONArray("images");
+        locCleanup.add(ii.pp.getFolderPath());
         
-        for (JSONObject image : images.getJSONObjectList()) {
+        out.write("\n<li> ");
+        HTMLWriter.writeHtml(out, ii.getFullPath());
+        out.write("/");
+        HTMLWriter.writeHtml(out, ii.fileName);
+        out.write("<br>\n");
+        HTMLWriter.writeHtml(out, dm2.mainFolder.getAbsolutePath());
+        HTMLWriter.writeHtml(out, destPath);
+        out.flush();
 
-            ImageInfo ii = ImageInfo.genFromJSON(image);
-            locCleanup.add(ii.pp.getFolderPath());
-            
-            out.write("\n<li> ");
-            HTMLWriter.writeHtml(out, ii.getFullPath());
-            out.write("/");
-            HTMLWriter.writeHtml(out, ii.fileName);
-            out.write("<br>\n");
-            HTMLWriter.writeHtml(out, dm2.mainFolder.getAbsolutePath());
-            HTMLWriter.writeHtml(out, destPath);
-            out.flush();
-
-            ii = ii.moveImage(dm2, destinationFolder);
-            
-            locCleanup.add(ii.pp.getFolderPath());
-        }
+        ii = ii.moveImage(dm2, destinationFolder);
+        
+        locCleanup.add(ii.pp.getFolderPath());
     }
     
-    for (File loc : locCleanup) {
-        out.write("\n<li> CLEANING UP: ");
-        HTMLWriter.writeHtml(out, loc.getAbsolutePath());
-        out.write("</li>\n");
-        DiskMgr.refreshDiskFolder(loc);
-    }
+
+    DiskMgr.refreshFolders(locCleanup);
 
     Vector destVec = (Vector) session.getAttribute("destVec");
     if (destVec == null) {

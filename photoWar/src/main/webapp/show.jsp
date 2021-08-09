@@ -357,7 +357,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
             String newQ = query+"e("+ii.pp.getPattern()+")";
             String trashIcon = "trash.gif";
 
-            if (ii.isTrashed) {
+            if (ii.isTrashed()) {
                 trashIcon = "delicon.gif";
             }
 

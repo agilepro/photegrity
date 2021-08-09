@@ -130,9 +130,7 @@
         }
         for (ImageInfo ii : rowImages) {
             if (ii!=bestImage) {
-                //throw new Exception("About to suppress '"+ii.fileName);
-                ii.isTrashed = !ii.isTrashed;
-                //ii.suppressImage();
+                ii.toggleTrashImage();
             }
         }
     }

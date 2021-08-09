@@ -28,7 +28,7 @@ public class PosPat {
     private List<String> pathTags = new ArrayList<String>();
     private int imageCount;
     private HashCounterIgnoreCase tags;
-    private static List<PosPat> ppIndex = new ArrayList<PosPat>();
+    private static Hashtable<String,PosPat> ppIndex = new Hashtable<String,PosPat>();
     private static Hashtable<String,String> compressor = new Hashtable<String,String>();
 
 
@@ -154,220 +154,51 @@ public class PosPat {
         return tags.getCount(tag);
     }
 
-    public int incrementImageCount() {
-        return ++imageCount;
-    }
-    public int decrementImageCount() {
-        return --imageCount;
-    }
     public void setImageCount(int val) {
         imageCount = val;
     }
 
-    //requests tend to come repeatedly for the same item in a row, so it is
-    //worth holding on to that to check again.
-    private static PosPat lastFound = null;
-
-    public static synchronized PosPat findExisting(DiskMgr _dm, String _localPath, String _pattern) {
-
-        //requests tend to come repeatedly for the same item in a row, so
-        //check first to see if this request is for the same element again
-        if (lastFound!=null && _dm.equals(lastFound.getDiskMgr())
-                && _localPath.equals(lastFound.getLocalPath())
-                && _pattern.equals(lastFound.getPattern()) ) {
-            return lastFound;
-        }
-
-        int pos = findFirstEntryWithPattern(ppIndex, _pattern);
-        while (true) {
-            if (pos>=ppIndex.size()) {
-                return null;
-            }
-            PosPat pp = ppIndex.get(pos);
-            int comp = _pattern.compareToIgnoreCase(pp.pattern);
-            if (comp<0) {
-                //no more entries with this pattern, nothing found
-                return null;
-            }
-            if (_pattern.equalsIgnoreCase(pp.pattern) &&
-                    _localPath.equalsIgnoreCase(pp.localPath) &&
-                    _dm == pp.diskMgr) {
-                lastFound = pp;
-                return pp;
-            }
-            pos++;
-        }
-    }
-
+    @Deprecated
     public static synchronized PosPat findOrCreate(DiskMgr _dm, String _localPath, String _pattern) throws Exception {
-
-        if (!_localPath.endsWith("/")) {
-            //should we complain?  Or just fix it up?
-            //_localPath = _localPath + "/";
-            throw new RuntimeException("local path MUST end with a slash, but this doesn't: ("+_localPath+")");
+        return findOrCreate(_dm.diskName+":"+_localPath+_pattern);
+    }
+    
+    public static synchronized PosPat findOrCreate(String symbol) throws Exception {
+        PosPat found = ppIndex.get(symbol);
+        if (found!=null) {
+            return found;
         }
-
-        
-        int pos = findFirstEntryWithPattern(ppIndex, _pattern);
-
-        if(pos>0) {
-            PosPat doubleCheck = ppIndex.get(pos-1);
-            if ( doubleCheck.pattern.equalsIgnoreCase(_pattern) ) {
-                throw new JSONException("findFirstEntryWithPattern did not succeed in finding the first entry with pattern ({0})",_pattern);
-            }
+        int colonPos = symbol.indexOf(":");
+        if (colonPos<=0) {
+            throw new Exception("Symbol for PosPat is missing a colon character");
         }
-
-        while (pos<ppIndex.size()) {
-            PosPat pp = ppIndex.get(pos);
-            int compPatt = _pattern.compareToIgnoreCase(pp.pattern);
-            int compPath = _localPath.compareToIgnoreCase(pp.localPath);
-            int compDisk = _dm.diskName.compareToIgnoreCase(pp.diskMgr.diskName);
-            if (compPatt<0) {
-                //no more entries with this pattern, nothing found
-                return insertWithoutSorting(_dm, _localPath, _pattern, pos);
-            }
-            if (compPatt>0) {
-                throw new JSONException("Should never happen, got a pattern '{0}' that is lower than '{1}'", pp.pattern, _pattern);
-            }
-            //for everything else (comp==0) below, means that the patterns equals
-
-            if (compPath>0) {
-                //ignore paths that are lower and go to next
-            }
-            else if (compPath<0) {
-                //found a path that is higher, insert new one here
-                return insertWithoutSorting(_dm, _localPath, _pattern, pos);
-            }
-            else {
-                // compPath is 0 means the path equals
-                if (compDisk==0) {
-                    //found an exact match, return it, don't create anything
-                    return pp;
-                }
-                if (compDisk>0) {
-                    //ignore disks that are lower
-                }
-                else {
-                    //found a disk higher, so this is the place to insert
-                    return insertWithoutSorting(_dm, _localPath, _pattern, pos);
-                }
-            }
-            pos++;
+        String disk = symbol.substring(0, colonPos);
+        DiskMgr diskMgr = DiskMgr.getDiskMgr(disk);
+        int lastSlash = symbol.lastIndexOf("/");
+        if (lastSlash<=colonPos) {
+            throw new Exception("Symbol for PosPat is missing any slash character");
         }
-
-        //reached the end of the index, so add new on at end
-        return addWithoutSorting(_dm, _localPath, _pattern);
+        String path = symbol.substring(colonPos+1, lastSlash+1);
+        String pattern = symbol.substring(lastSlash+1);
+        found = new PosPat(diskMgr, path, pattern);
+        ppIndex.put(symbol, found);
+        return found;
     }
 
-   public static synchronized PosPat findOrCreate0(DiskMgr _dm, String _localPath, String _pattern) throws Exception {
-        PosPat pp = findExisting(_dm, _localPath, _pattern);
-        if (pp==null) {
-            pp = addWithoutSorting(_dm, _localPath, _pattern);
-            sortIndex();
-        }
-        return pp;
-    }
-
-
-    public static synchronized PosPat addWithoutSorting(DiskMgr _dm, String _localPath, String _pattern)  {
-        PosPat pp = new PosPat(_dm, _localPath, _pattern);
-        ArrayList<PosPat> newList = new ArrayList<PosPat>();
-        for (PosPat existing: ppIndex) {
-            newList.add(existing);
-        }
-        newList.add(pp);
-        ppIndex = newList;
-        return pp;
-    }
-    private static synchronized PosPat insertWithoutSorting(DiskMgr _dm, String _localPath,
-            String _pattern, int pos) throws Exception {
-
-        if (!_localPath.endsWith("/")) {
-            //should we complain?  Or just fix it up?
-            //_localPath = _localPath + "/";
-            throw new RuntimeException("local path MUST end with a slash, but this doesn't: ("+_localPath+")");
-        }
-
-        //test code
-        PosPat doubleCheck = ppIndex.get(pos);
-        if ( doubleCheck.diskMgr.diskName.equalsIgnoreCase(_dm.diskName)
-                && doubleCheck.localPath.equalsIgnoreCase(_localPath)
-                && doubleCheck.pattern.equalsIgnoreCase(_pattern) ) {
-            throw new JSONException("Attempt to insert BEFORE an element that is identical");
-        }
-        if (pos>0) {
-            doubleCheck = ppIndex.get(pos-1);
-            if ( doubleCheck.diskMgr.diskName.equalsIgnoreCase(_dm.diskName)
-                    && doubleCheck.localPath.equalsIgnoreCase(_localPath)
-                    && doubleCheck.pattern.equalsIgnoreCase(_pattern) ) {
-                throw new JSONException("Attempt to insert AFTER an element that is identical");
-            }
-        }
-
-        //this is an attempt to insert without ever modifying and existing index
-        //instead, create a new one.
-        PosPat pp = new PosPat(_dm, _localPath, _pattern);
-        ArrayList<PosPat> newList = new ArrayList<PosPat>();
-        int count = 0;
-        for (PosPat existing : ppIndex) {
-            if (pos == count++) {
-                newList.add(pp);
-            }
-            newList.add(existing);
-        }
-        //handle the add-on-the-end case
-        if (pos == count++) {
-            newList.add(pp);
-        }
-        ppIndex = newList;
-        return pp;
-    }
-
-    public static synchronized void registerImage(ImageInfo ii) throws Exception {
-        PosPat pp = findOrCreate(ii.diskMgr, ii.getRelativePath(), ii.getPattern());
-        for (String aGroup : ii.getTagNames()) {
-            pp.addTag(aGroup);
-        }
-        pp.incrementImageCount();
-    }
-    public static synchronized void registerImages(List<ImageInfo> iiList) throws Exception {
-        for (ImageInfo ii : iiList) {
-            PosPat pp = findExisting(ii.diskMgr, ii.getRelativePath(), ii.getPattern());
-            if (pp==null) {
-                pp = new PosPat(ii.diskMgr, ii.getRelativePath(), ii.getPattern());
-                ppIndex.add(pp);
-            }
-            for (String aGroup : ii.getTagNames()) {
-                pp.addTag(aGroup);
-            }
-            pp.incrementImageCount();
-        }
-        sortIndex();
-    }
-    public static synchronized void removeImage(ImageInfo ii) throws Exception {
-        PosPat pp = findExisting(ii.diskMgr, ii.getRelativePath(), ii.getPattern());
-        if (pp==null) {
-            throw new JSONException("Why remove an image that is not in the index!: {0}",ii.getPatternSymbol());
-        }
-        for (String aGroup : ii.getTagNames()) {
-            pp.removeTag(aGroup);
-        }
-        if (pp.decrementImageCount()<=0) {
-            ppIndex.remove(pp);
-        }
-    }
 
     /**
      * clear everything out for garbage collection
      */
     public static void clearAllCache() {
-        ppIndex = new Vector<PosPat>();
+        ppIndex.clear();
     }
 
     /**
      * Find all PosPat objects with a given pattern
      */
     public static List<PosPat> findAllPattern(String _pattern) {
+        throw new RuntimeException("not implemented");
+        /*
         int pos = findFirstEntryWithPattern(ppIndex, _pattern);
         Vector<PosPat> res = new Vector<PosPat>();
         while (true) {
@@ -385,12 +216,14 @@ public class PosPat {
             }
             pos++;
         }
+        */
     }
 
     /**
      * Find all PosPat objects with a given pattern
      */
     public static int countAllPatternOnDisk(DiskMgr dm, String _pattern) {
+        /*
         int pos = findFirstEntryWithPattern(ppIndex, _pattern);
         int count = 0;
         while (true) {
@@ -408,6 +241,8 @@ public class PosPat {
             }
             pos++;
         }
+        */
+        return -1;
     }
 
 
@@ -472,53 +307,20 @@ public class PosPat {
         return low;
     }
 
-    public static synchronized void removeAllFromDisk(DiskMgr dm) throws Exception {
-        List<PosPat> newIndex = new ArrayList<PosPat>();
-        for (PosPat pp : ppIndex) {
-            if (!pp.diskMgr.equals(dm)) {
-                newIndex.add(pp);
-            }
-        }
-        ppIndex = newIndex;
-        sortIndex();  //might not be needed, but just to be sure
-    }
     public static synchronized List<PosPat> getAllForDisk(DiskMgr dm) throws Exception {
         List<PosPat> newIndex = new ArrayList<PosPat>();
-        for (PosPat pp : ppIndex) {
+        for (PosPat pp : ppIndex.values()) {
             if (pp.diskMgr.equals(dm)) {
                 newIndex.add(pp);
             }
         }
         return newIndex;
     }
-    
-    public static synchronized void removeAllDiskPath(DiskMgr dm, String relPath) throws Exception {
-        if (!relPath.endsWith("/")) {
-            //should we complain?  Or just fix it up?
-            //_localPath = _localPath + "/";
-            throw new RuntimeException("local path MUST end with a slash, but this doesn't: "+relPath);
-        }
-        Vector<PosPat> newIndex = new Vector<PosPat>();
-        for (PosPat pp : ppIndex) {
-            if (!pp.diskMgr.equals(dm)) {
-                newIndex.add(pp);
-            }
-            else if (!relPath.equalsIgnoreCase(pp.localPath)) {
-                newIndex.add(pp);
-            }
-        }
-        ppIndex = newIndex;
-        sortIndex();  //might not be needed, but just to be sure
-    }
-
-    public static synchronized void sortIndex() throws Exception {
-        PosPatComparator sc = new PosPatComparator();
-            Collections.sort(ppIndex, sc);
-        }
-
+    /*
     public static List<PosPat> getAllEntries() {
         return ppIndex;
     }
+    */
 
     public static List<PosPat> filterByTag(List<PosPat> input, String tag) {
         Vector<PosPat> res = new Vector<PosPat>();
@@ -698,7 +500,7 @@ public class PosPat {
             if (child.isDirectory()) {
                 continue;
             }
-            ImageInfo ii = new ImageInfo(child, diskMgr);
+            ImageInfo ii = new ImageInfo(child);
             if (pattern.equals(ii.getPattern())) {
                 imageList.add(ii);
             }
@@ -726,6 +528,11 @@ public class PosPat {
         }
         jo.put("tags", tags);
         jo.put("imageCount", imageList.size());
+        long totalSize = 0;
+        for (ImageInfo ii : imageList) {
+            totalSize = totalSize + ii.fileSize;
+        }
+        jo.put("totalSize", totalSize);
         
         JSONArray images = new JSONArray();
         for (ImageInfo ii : imageList) {

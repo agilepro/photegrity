@@ -43,17 +43,7 @@
 <BODY BGCOLOR="#FDF5E6">
 <h3>Disk '<%= diskName %>'
 
-<%
-    if (mgr.isLoaded) {
-        %> (loaded) <a href="diskES.jsp?n=<%=diskName%>&dest=<%=URLEncoder.encode(thisUrl,"UTF8")%>"
-              title="Store into elastic search">StoreES</a> <%
-    }
-    else {
-        %> <a href="loaddisk.jsp?n=<%=diskName%>&dest=<%=URLEncoder.encode(thisUrl,"UTF8")%>"
-              title="Load into memory disk named <%=diskName%>"><img src="load.gif" border="0"></a> <%
-    }
 
-%>
 [<a href="delEmptyDirs.jsp?n=<%=diskName%>">clean</a>]
 <a href="main.jsp"><img src="home.gif" border="0"></a>
 </h3>
@@ -100,7 +90,7 @@
             }
             int count = mgr.getTagCount(key);
 
-            %><li><a href="group.jsp?g=<%=URLEncoder.encode(key,"UTF8")%>"><%=key%></a>: (<%=count%>)
+            %><li><a href="show.jsp?q=g(<%=URLEncoder.encode(key,"UTF8")%>)"><%=key%></a>: (<%=count%>)
             <%
             for (DiskMgr dm : DiskMgr.getAllDiskMgr()) {
                 if (dm.diskName.equals(diskName)) {
@@ -112,10 +102,6 @@
                     HTMLWriter.writeHtml(out, dm.diskName);
                     out.write(":");
                     out.write(Integer.toString(count2));
-                    if (!dm.isLoaded) {
-                        %><a href="loaddisk.jsp?n=<%=dm.diskName%>&dest=<%=URLEncoder.encode(thisUrl,"UTF8")%>"
-                             title="Load into memory disk named <%=dm.diskName%>"><img src="load.gif" border="0"></a>  <%
-                    }
                 }
             }
         }
@@ -145,17 +131,8 @@
         <tr><td>mainFolder</td>
             <td><%=mgr.mainFolder%></td>
         </tr>
-        <tr><td>imageFolder</td>
-            <td><%=mgr.imageFolder%></td>
-        </tr>
-        <tr><td>basePath</td>
-            <td><%=mgr.basePath%></td>
-        </tr>
-        <tr><td>extraPath</td>
-            <td><%=mgr.extraPath%></td>
-        </tr>
-        <tr><td>viewPath</td>
-            <td><%=mgr.viewPath%></td>
+        <tr><td>mainFolder</td>
+            <td><%=mgr.mainFolder%></td>
         </tr>
         </table><%
     }

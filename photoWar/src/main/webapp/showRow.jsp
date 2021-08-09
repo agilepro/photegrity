@@ -177,7 +177,7 @@
         oneColumn.put("patt", sii.getString("pattern"));
         oneColumn.put("symbol", sii.getString("symbol"));
         oneColumn.put("disk", sii.getString("disk"));
-        //oneColumn.put("isTrashed", sii.isTrashed);
+        oneColumn.put("isTrashed", sii.isTrashed());
         oneColumn.put("tags", sii.getJSONArray("tags"));        
         rowData.put(oneColumn);
     }

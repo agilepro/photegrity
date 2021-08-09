@@ -4,6 +4,7 @@
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
+%><%@page import="com.purplehillsbooks.photegrity.MarkedVector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="java.net.URLEncoder"
 %><%@page import="java.util.Collections"
@@ -22,7 +23,7 @@
     {
         //second line
         Element e_table1 = DOMUtils.createChildElement(e_html, e_body,   "table");
-        Vector v = new Vector();
+        Vector<String> v = new Vector<String>();
         String thisPageURL = "queryManip.jsp?q="+URLEncoder.encode(query,"UTF8")+extras;
 
         int startPos = 0;
@@ -181,10 +182,7 @@
     }
 
 
-    public Vector
-    findMemoryBank(HttpServletRequest request)
-        throws Exception
-    {
+    public MarkedVector findMemoryBank(HttpServletRequest request) throws Exception {
         int set = UtilityMethods.defParamInt(request, "set", 1);
         if (set<1) {
             throw new Exception("memory banks are numbered 1 thru 6, and '"+set+"' is too small.");

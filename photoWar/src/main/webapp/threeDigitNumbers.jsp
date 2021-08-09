@@ -1,7 +1,6 @@
 <%@page errorPage="error.jsp" %>
 <%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.Thumb" %>
@@ -10,6 +9,8 @@
 <%@page import="java.io.FileWriter" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Hashtable" %>
+<%@page import="java.util.Set" %>
+<%@page import="java.util.HashSet" %>
 <%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %>
@@ -52,13 +53,15 @@
     boolean foundNegativeZero = false;
     Vector<ImageInfo> workingSet = new Vector<ImageInfo>();
 
+
+    Set<File> locCleanup = new HashSet<File>();
     for (ImageInfo ii : groupImages) {
 
         if (ii.value<0) {
             //ignore negative for now.
             continue;
         }
-
+        locCleanup.add(ii.pp.getFolderPath());
         String threeDigit = Integer.toString(1000+ii.value).substring(1);
         int test = Integer.parseInt(threeDigit);
         if (test!=ii.value) {
@@ -78,6 +81,7 @@
         ii.renameFile(potential);
     }
 
+    DiskMgr.refreshFolders(locCleanup);
 
 
 

@@ -5,10 +5,12 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Enumeration"
 %><%@page import="java.util.Vector"
-%><%@page import="com.purplehillsbooks.photegrity.TagInfo"
+%><%@page import="java.util.List"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
 %><%@page import="com.purplehillsbooks.photegrity.DiskMgr"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%
     request.setCharacterEncoding("UTF-8");
     long starttime = System.currentTimeMillis();
@@ -31,19 +33,16 @@
         return;
     }
 
-    Vector groupImages = new Vector();
-    groupImages.addAll(ImageInfo.imageQuery(query));
-    Enumeration e = groupImages.elements();
+    List<ImageInfo> groupImages = ImageInfo.imageQuery(query);
 
     int lastNum = 0;
 
-    while (e.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e.nextElement();
+    for (ImageInfo ii : groupImages) {
         if (ii == null) {
             throw new Exception ("null image file where lastnum="+lastNum);
         }
-        if (!ii.isNullImage()) {
-            ii.isTrashed=trashAll;
+        if (ii.isTrashed()!=trashAll) {
+            ii.toggleTrashImage();
         }
     }
 

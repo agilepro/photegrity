@@ -197,7 +197,7 @@
             String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
             String stdAndGo = stdParams+"&go="+encodedPath;
             String trashIcon = "trash.gif";
-            if (ii.isTrashed) {
+            if (ii.isTrashed()) {
                 trashIcon = "delicon.gif";
             }
 

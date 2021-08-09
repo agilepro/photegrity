@@ -51,6 +51,7 @@
     String imageURL = "";
     String thumbURL = "";
     String pattern  = "";
+    String relPath  = "";
     int iFileSize = -1;
     ImageInfo ii = ImageInfo.getNullImage();
     Vector<String> imageGroups = new Vector<String>();
@@ -71,6 +72,7 @@
         fileName = ii.fileName;
         diskName = ii.diskMgr.diskNameLowerCase;
         path     = ii.getFullPath();
+        relPath  = ii.getRelativePath();
         imageURL = "photo/"+ii.getRelPath();
         thumbURL = "thumb/"+bigSize+"/"+ii.getRelPath();
         pattern  = ii.getPattern();
@@ -235,7 +237,7 @@ AddGroup: <input type="text" name="newGroup"  value="<%HTMLWriter.writeHtml(out,
 <form method="get" action="renameFile.jsp">
 <td>
 <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, diskName);%>">
-<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, path);%>">
+<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, relPath);%>">
 <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, fileName);%>">
 NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, fileName);%>">
 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPage);%>">
@@ -250,32 +252,32 @@ NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHt
 <form method="get" action="renameFile.jsp">
 <td>
 <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, diskName);%>">
-<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, path);%>">
+<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, relPath);%>">
 <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, fileName);%>">
-<input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.cover.jpg");%>">
+<input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, pattern+"000.cover.jpg");%>">
 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPage);%>">
-<input type="submit" value="Rename: <%HTMLWriter.writeHtml(out, zingpat+"000.cover.jpg");%>">
+<input type="submit" value="Rename: <%HTMLWriter.writeHtml(out, pattern+"000.cover.jpg");%>">
 </td>
 </form>
 
 <form method="get" action="renameFile.jsp">
 <td>
 <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, diskName);%>">
-<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, path);%>">
+<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, relPath);%>">
 <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, fileName);%>">
-<input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.flogo.jpg");%>">
+<input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, pattern+"000.flogo.jpg");%>">
 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPage);%>">
-<input type="submit" value="Rename: <%HTMLWriter.writeHtml(out, zingpat+"000.flogo.jpg");%>">
+<input type="submit" value="Rename: <%HTMLWriter.writeHtml(out, pattern+"000.flogo.jpg");%>">
 </td>
 </form>
 <form method="get" action="renameFile.jsp">
 <td>
 <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, diskName);%>">
-<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, path);%>">
+<input type="hidden" name="p" value="<%HTMLWriter.writeHtml(out, relPath);%>">
 <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, fileName);%>">
-<input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.sample.jpg");%>">
+<input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, pattern+"000.sample.jpg");%>">
 <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPage);%>">
-<input type="submit" value="Rename: <%HTMLWriter.writeHtml(out, zingpat+"000.sample.jpg");%>">
+<input type="submit" value="Rename: <%HTMLWriter.writeHtml(out, pattern+"000.sample.jpg");%>">
 </td>
 </form>
 </tr>

@@ -332,7 +332,7 @@
                     truncName = truncName.substring(0,28)+"...";
                 }
                 String trashIcon = "trash.gif";
-                if (ii.isTrashed)
+                if (ii.isTrashed())
                 {
                     trashIcon = "delicon.gif";
                 }

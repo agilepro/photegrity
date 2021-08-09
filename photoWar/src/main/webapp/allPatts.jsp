@@ -336,74 +336,12 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
               <a href="zing.jsp?pat=<%=URLEncoder.encode(symbol,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
                  title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a><br>
             <table border="0"><tr>
-<%
-            if (symbolCount.getCount(symbol)==1 && image!=null) {
-                String imageDisk = "";
-                String imageFileName = "";
-                
-%>
-                <form method="get" action="renameFile.jsp">
-                <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
-                <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.cover.jpg");%>">
-                <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
-                <input type="submit" value="cover">
-                </td>
-                </form>
-                <form method="get" action="renameFile.jsp">
-                <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
-                <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.flogo.jpg");%>">
-                <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
-                <input type="submit" value="flogo">
-                </td>
-                </form>
-                <form method="get" action="renameFile.jsp">
-                <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
-                <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"000.sample.jpg");%>">
-                <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
-                <input type="submit" value="sample">
-                </td>
-                </form>
-                <form method="get" action="renameFile.jsp">
-                <td>
-                <input type="hidden" name="d" value="<%HTMLWriter.writeHtml(out, imageDisk);%>">
-                <input type="hidden" name="fn" value="<%HTMLWriter.writeHtml(out, imageFileName);%>">
-                <input type="hidden" name="newName" size="80" value="<%HTMLWriter.writeHtml(out, zingpat+"!01.jpg");%>">
-                <input type="hidden" name="go" value="<%HTMLWriter.writeHtml(out, thisPageURL);%>">
-                <input type="submit" value="Single Index">
-                </td>
-                </form>
-<%
-            }
-            else {
 
-                if (trimmedPattern.length() != symbol.length()) {
-%>
-                </td>
-                <form action="changeSelection.jsp" method="post">
-                <td>
-                <input type="submit" value="Trim Pattern">
-                <input type="hidden" name="p2" value="<%HTMLWriter.writeHtml(out,trimmedPattern);%>">
-                <input type="hidden" name="p1" value="<%HTMLWriter.writeHtml(out,lastPatternName);%>">
-                <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
-                <input type="hidden" name="dest" value="<%HTMLWriter.writeHtml(out,thisPageURL);%>">
-                </td>
-                </form>
-                <td>
-<%
-                }
-             }
-%>
 
 
             </tr></table><%
         }
-        else {
+        else {  
 %>
       <td><%= symbolCount.getCount(symbol) %></td>
       <td><a href="show.jsp?q=x(<%=URLEncoder.encode(symbol,"UTF8")%>)"><%HTMLWriter.writeHtml(out,limitedPatternName);%></a></td>

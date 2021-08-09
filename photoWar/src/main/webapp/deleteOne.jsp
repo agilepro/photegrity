@@ -38,9 +38,9 @@
         throw new Exception ("cant find an image with d="+sDiskName+",  fn="+sFileName);
     }
     if (ii.fileName.equals(sFileName) &&
-        ii.getFullPath().equals(sPath) &&
+        ii.getRelativePath().equals(sPath) &&
         ii.diskMgr.diskName.equals(sDiskName)) {
-        ii.isTrashed = !ii.isTrashed;
+        ii.toggleTrashImage();
     }
     else {
         throw new Exception ("Found an image, bit it did not match, with d="+sDiskName+",  fn="+sFileName);

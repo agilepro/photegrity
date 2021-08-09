@@ -5,7 +5,6 @@
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Vector" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
@@ -22,9 +21,6 @@
         return;
     }
 
-    Vector groupImages = new Vector();
-    groupImages.addAll(ImageInfo.getImagesByName());
-    Enumeration e = groupImages.elements();
 
 %>
 
@@ -42,36 +38,13 @@
 </table>
 <hr><ul>
 <%
-
-    int lastNum = 0;
-
-    while (e.hasMoreElements()) {
-        ImageInfo ii = (ImageInfo)e.nextElement();
-        if (ii == null) {
-            throw new Exception ("null image file where lastnum="+lastNum);
-        }
-        if (!ii.isTrashed){
-            continue;
-        }
-        File fullPath = ii.getFilePath();
-        if (!fullPath.exists()) {
-            out.write("\n<li> ~missing~ before delete: "+fullPath+"</li>");
-        }
-        out.write("\n<li> ");
-        HTMLWriter.writeHtml(out, ii.getFilePath().toString());
-        out.flush();
-        if (ii.isNullImage()) {
-            out.write("NULL");
-        }
-        else {
-            System.out.println("Calling suppressImage");
-            ii.suppressImage();
-            System.out.println("Returned from suppressImage");
-            if (fullPath.exists()) {
-                out.write("\n<li> ~failed~ to delete: "+fullPath+"</li>");
-            }            
-        }
+    for (File f : ImageInfo.imageTrashCan) {
+        %><li><%=f.getAbsolutePath()%></li><%
     }
+    ImageInfo.emptyTrashCan();
+    
+    //temp
+    ImageInfo.imageTrashCan.clear();
 
 %>
 <li><b>Trashcan Cleared</b>

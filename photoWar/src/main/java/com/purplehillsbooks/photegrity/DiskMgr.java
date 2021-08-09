@@ -147,7 +147,7 @@ public class DiskMgr {
             
             System.out.println("--Constructing DiskMgr ("+mainFolder+") at ("+(new Date())+")");
 
-
+/*
             File f1 = new File(mainFolder,"stats.txt");
             if (f1.exists()) {
                 FileReader fr = new FileReader(f1);
@@ -159,7 +159,9 @@ public class DiskMgr {
                 extraSize = Long.parseLong(lnr.readLine());
                 fr.close();
             }
+            */
 
+            /*
             HashCounterIgnoreCase allPosPat = new HashCounterIgnoreCase();
             allPosPat.loadFromFile(new File(mainFolder, "posPat.txt"));
             for (String key : allPosPat.keySet()) {
@@ -172,6 +174,7 @@ public class DiskMgr {
                 pp.setImageCount(allPosPat.getCount(key));
             }
             PosPat.sortIndex();
+            */
             
             allSymbolCnts = new HashCounter();
             allTagCnts    = new HashCounterIgnoreCase();
@@ -428,9 +431,6 @@ public class DiskMgr {
 
     public synchronized void loadDiskImages(Writer out) throws Exception {
         try {
-            //there might already be entries, either from pre-load
-            //or from news activity
-            PosPat.removeAllFromDisk(this);
 
             // now scan the disk for files
             // String auxDirName = mainFolder + "extra";

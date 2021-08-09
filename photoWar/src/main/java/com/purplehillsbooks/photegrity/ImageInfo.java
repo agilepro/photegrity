@@ -2,12 +2,15 @@ package com.purplehillsbooks.photegrity;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
@@ -29,13 +32,14 @@ public class ImageInfo
     public int    randomValue;
 
     public boolean isIndex = false;
-    public boolean isTrashed = false;
 
     public static boolean unsorted = true;
     public static Hashtable<String, String> pathCompressor = new  Hashtable<String, String>();
 
     private static ImageInfo nullImage = null;
 
+    public static List<File> imageTrashCan = new ArrayList<File>();
+    
     public static int MEMORY_SIZE = 20;
     public static MarkedVector[] memory = {new MarkedVector(), new MarkedVector(), new MarkedVector(),
                                            new MarkedVector(), new MarkedVector(),
@@ -47,11 +51,15 @@ public class ImageInfo
                                            new MarkedVector(), new MarkedVector()};
     public static Random randGen = new Random();
 
-    public ImageInfo(File filePath, DiskMgr disk)
-        throws Exception
-    {
+    @Deprecated
+    public ImageInfo(File filePath, DiskMgr disk) throws Exception {
+        this(filePath);
+    }
+    
+    
+    public ImageInfo(File filePath) throws Exception {
         try {
-            diskMgr = disk;
+            diskMgr = DiskMgr.findDiskMgrFromPath(filePath);
             tagNames = new Vector<String>();
             randomValue = randGen.nextInt(1000000000);
 
@@ -114,7 +122,7 @@ public class ImageInfo
     public File getFolderPath() throws Exception {
         return pp.getFolderPath();
     }
-    public File getFilePath() throws Exception {
+    public File getFilePath() {
         return pp.getFilePath(fileName);
     }
 
@@ -246,12 +254,6 @@ public class ImageInfo
         }
     }
 
-    /*
-    private void wipeAllConnections() {
-        pp.decrementImageCount();
-    }
-    */
-
 
     public static void parsePathTags(HashCounterIgnoreCase cache, String path) throws Exception {
         String pathlc = path.toLowerCase();
@@ -343,67 +345,6 @@ public class ImageInfo
     }
 
 
-    /**
-     * remove all images from a particular disk
-     */
-    public static synchronized void removeDiskImages(DiskMgr dm) {
-        /*
-        Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
-        if (imagesByName != null) {
-            for (ImageInfo ii : imagesByName) {
-                if (ii.diskMgr != dm) {
-                    imagesForDisk.add(ii);
-                }
-                else {
-                    ii.wipeAllConnections();
-                }
-            }
-        }
-        imagesByName = imagesForDisk;
-        imagesByPath = null;
-        imagesBySize = null;
-        imagesByNum  = null;
-        */
-        unsorted = true;
-    }
-
-    /**
-     * remove all images from a particular disk sitting at a
-     * particular relative path
-     */
-    private static synchronized void removeDiskPath(DiskMgr dm, String relPath) throws Exception {
-        /*
-        long startTime = System.currentTimeMillis();
-        Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
-        Vector<ImageInfo> wipeables = new Vector<ImageInfo>();
-        if (imagesByName != null) {
-            for (ImageInfo ii : imagesByName) {
-                if (ii.diskMgr != dm) {
-                    imagesForDisk.add(ii);
-                }
-                else if (!relPath.equalsIgnoreCase(ii.pp.getLocalPath())) {
-                    imagesForDisk.add(ii);
-                }
-                else {
-                    wipeables.add(ii);
-                }
-            }
-        }
-        System.out.println("removeDiskPath1 - "+(System.currentTimeMillis()-startTime)+"ms - ");
-        startTime = System.currentTimeMillis();
-        for (ImageInfo ii : wipeables) {
-            ii.wipeAllConnections();
-        }
-        System.out.println("removeDiskPath1 - "+(System.currentTimeMillis()-startTime)+"ms - ");
-        imagesByName = imagesForDisk;
-        imagesByPath = null;
-        imagesBySize = null;
-        imagesByNum  = null;
-        */
-        unsorted = true;
-    }
-
-
 
     public static ImageInfo findImageByPath(File filePath) throws Exception {
         DiskMgr dm = DiskMgr.findDiskMgrFromPath(filePath);
@@ -416,22 +357,21 @@ public class ImageInfo
     /**
     *  Don't use this one, use instead the findImage that has the relPath below
     */
-    public static ImageInfo findImage(String disk, String originalFullPath, String name)
+    public static ImageInfo findImage(String disk, String relPath, String name)
         throws Exception
     {
         try {
             if (disk == null) {
                 throw new JSONException("findImage was passed a null disk name");
             }
-            if (originalFullPath == null) {
+            if (relPath == null) {
                 throw new JSONException("findImage was passed a null originalFullPath");
             }
             DiskMgr dm = DiskMgr.getDiskMgr(disk);
-            String relPath = dm.convertFullPathToRelativePath(originalFullPath);
             return findImage2(disk, relPath, name);
         }
         catch (Exception e) {
-            throw new JSONException("Unable to find an image (disk={0})(originalFullPath={1})(name={2})", e, disk, originalFullPath,name);
+            throw new JSONException("Unable to find an image (disk={0})(relPath={1})(name={2})", e, disk, relPath,name);
         }
     }
     
@@ -501,8 +441,6 @@ public class ImageInfo
         System.out.println("SUPPRESSING Image: "+fPath);
         
         try {
-            PosPat.removeImage(this);
-
             diskMgr.suppressFile(fPath);
             deleteThumbnails();
 
@@ -545,16 +483,12 @@ public class ImageInfo
             }
             if (dm2!=diskMgr || !destFolder.equals(oldPath))
             {
-                PosPat.removeImage(this);
                 pp = PosPat.findOrCreate(dm2, newFolderPath, getPattern());
 
                 fileName = dm2.moveFileToDisk(diskMgr, oldFolderPath, fileName, destFolder);
                 diskMgr = dm2;
                 unsplit();
                 initializeInternals(newFolderPath);
-
-                // but, if not loaded, how to correct stats?
-                PosPat.registerImage(this);
                 
                 //check that old one is gone
                 if (oldPath.exists()) {
@@ -636,8 +570,6 @@ public class ImageInfo
         //if there is going to be a problem, lets find out now, but this
         //should never happen now that we find a suitable name
         diskMgr.assertRenamePossible(folderPath, fileName, newName);
-
-        PosPat.removeImage(this);
         deleteThumbnails();
         unsplit();
 
@@ -645,7 +577,6 @@ public class ImageInfo
         fileName = newName;
         unsorted = true;
         initializeInternals(relPath);
-        PosPat.registerImage(this);
     }
 
     public String renamePreserve(String newName) throws Exception
@@ -935,6 +866,31 @@ public class ImageInfo
         wholeDoc.put("value", value);
         wholeDoc.put("fileSize", fileSize);
         return wholeDoc;
+    }
+    
+    public boolean toggleTrashImage() {
+        File fullPath = getFilePath();
+        if (imageTrashCan.contains(fullPath)) {
+            imageTrashCan.remove(fullPath);
+            return false;
+        }
+        imageTrashCan.add(fullPath);
+        return true;
+    }
+    public boolean isTrashed() {
+        File fullPath = getFilePath();
+        return imageTrashCan.contains(fullPath);
+    }
+    public static void emptyTrashCan() throws Exception {
+        Set<File> locCleanup = new HashSet<File>();
+        for (File f : imageTrashCan) {
+            ImageInfo ii = new ImageInfo(f);
+            locCleanup.add(ii.pp.getFolderPath());
+            File filePath = ii.getFilePath();
+            filePath.delete();
+        }
+        imageTrashCan.clear();
+        DiskMgr.refreshFolders(locCleanup);
     }
     
 }

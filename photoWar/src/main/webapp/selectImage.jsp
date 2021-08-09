@@ -7,7 +7,6 @@
 <%@page import="java.util.Vector" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
 
@@ -34,7 +33,7 @@
     ImageInfo ii = ImageInfo.findImage(disk, path, fileName);
     Vector mem = findMemoryBank(request);
     mem.addElement(ii);
-    response.sendRedirect("selection.jsp?msg=Added%201%20File");
+    response.sendRedirect("sel.jsp?msg=Added%201%20File");
 %>
 
     <%@ include file="functions.jsp"%>

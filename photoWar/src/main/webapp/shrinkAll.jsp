@@ -1,7 +1,6 @@
 <%@page errorPage="error.jsp" %>
 <%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
-<%@page import="com.purplehillsbooks.photegrity.TagInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.Thumb" %>
@@ -10,6 +9,7 @@
 <%@page import="java.io.FileWriter" %>
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Hashtable" %>
+<%@page import="java.util.List" %>
 <%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
 %><%@page import="com.purplehillsbooks.photegrity.NewsActionShrink"
@@ -36,9 +36,6 @@
     NewsActionShrink nada = new NewsActionShrink(query);
     nada.addToFrontOfMid();
 
-    if (true) {
-        return;
-    }
 
 
 %>
@@ -47,116 +44,8 @@
 <HTML>
 <HEAD><TITLE>Shrink <%HTMLWriter.writeHtml(out,query);%></TITLE></HEAD>
 <BODY BGCOLOR="#FDF5E6">
-<%
 
-    boolean workToDo = true;
-    int lastNum = 0;
-    long totalBefore = 0;
-    long totalAfter = 0;
+<p>Images are being shrunk in the background</p>
 
-    synchronized (toDoList) {
-        if (toDoList.size()>0) {
-            workToDo = false;
-        }
-        toDoList.add(query);
-    }
-
-    try {
-        while (workToDo)
-        {
-            Vector groupImages = new Vector();
-            groupImages.addAll(ImageInfo.imageQuery(query));
-            Enumeration e = groupImages.elements();
-            int recordCount = groupImages.size();
-
-            %>
-            <H1>Shrink <%=recordCount%></H1>
-            <table>
-            <tr><td><%HTMLWriter.writeHtml(out,query);%></td></tr>
-            </table>
-            <hr><ol>
-            <%
-
-
-
-            while (e.hasMoreElements()) {
-                ImageInfo ii = (ImageInfo)e.nextElement();
-                if (ii == null) {
-                    throw new Exception ("null image file where lastnum="+lastNum);
-                }
-                out.write("\n<li> ");
-                HTMLWriter.writeHtml(out, ii.getFullPath());
-                HTMLWriter.writeHtml(out, ii.fileName);
-                out.write("   ");
-
-                //skip the file if it is small enough (190K)
-                if (ii.fileSize<190000) {
-                    out.write( "skipped</li>" );
-                    continue;
-                }
-
-                out.write(Integer.toString(ii.fileSize));
-                int sizeBefore = ii.fileSize;
-                totalBefore += sizeBefore;
-                out.flush();
-                Thumb.shrinkFile(ii);
-                long percentShrink = (((long)ii.fileSize)*100)/sizeBefore;
-                out.write(" -- ");
-                out.write(Long.toString(percentShrink));
-                out.write("% --> ");
-                out.write(Integer.toString(ii.fileSize));
-                totalAfter += ii.fileSize;
-                out.write( "</li>" );
-            }
-            synchronized (toDoList) {
-                toDoList.remove(0);
-                if (toDoList.size()>0) {
-                    query = (String) toDoList.get(0);
-                }
-                else {
-                    workToDo = false;
-                }
-            }
-            %>
-            </ol><hr>
-            <%
-        }
-    }
-    catch (Exception e) {
-        //something has to clean this out on failure
-        toDoList = new Vector();
-        throw e;
-    }
-    catch (java.lang.OutOfMemoryError e2) {
-        //something has to clean this out on failure
-        toDoList = new Vector();
-        throw e2;
-    }
-
-    if (totalBefore>0) {
-        long duration = System.currentTimeMillis() - starttime;
-        long diffamt = totalBefore-totalAfter;
-        %>
-        <b>All Shrunk</b><%=totalBefore/1000%>K -- <%=(int)((totalAfter*100)/totalBefore)%> --> <%=totalAfter/1000%>K
-            Saved <%=diffamt/1000%>Kbytes.<br>
-
-            <font color="#BBBBBB">page generated in <%=duration%>ms.</font>
-        <%
-    }
-    else {
-        %>
-        <b>None Shrunk</b>  look for other page has <%=toDoList.size()%> more to complete<br>
-
-        <%
-            for (int j=0; j<toDoList.size(); j++) {
-                %>Query: <%=toDoList.get(j)%><br><%
-            }
-    }
-%>
 </BODY>
 </HTML>
-<%!
-
-    static Vector toDoList = new Vector();
-
-%>

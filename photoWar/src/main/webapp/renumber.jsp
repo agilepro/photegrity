@@ -8,6 +8,7 @@
 <%@page import="com.purplehillsbooks.photegrity.ImageInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.PatternInfo" %>
 <%@page import="com.purplehillsbooks.photegrity.DiskMgr" %>
+<%@page import="com.purplehillsbooks.photegrity.PosPat" %>
 <%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
 <%@page import="java.util.Set" %>
 <%@page import="java.util.HashSet" %>
@@ -48,9 +49,7 @@
         count ++;
         num = ii.nextName(newName, num);
     }
-    for (File loc : locCleanup) {
-        DiskMgr.refreshDiskFolder(loc);
-    }
+    DiskMgr.refreshFolders(locCleanup);
 
 
     if (dest == null) {

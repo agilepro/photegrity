@@ -170,7 +170,7 @@
 <html ng-app="fileApp">
 <head>
     <meta charset="UTF-8">
-    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
     <TITLE>P <%=dispMin%>/<%=sortedPatterns.size()%> <%= query %></TITLE>
@@ -354,9 +354,11 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
       <td><a href="zing.jsp?pat=<%=URLEncoder.encode(pattern,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
              title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a></td>
       <td>
+        <a href="masterPatts.jsp?s=<%=pattern%>"><i class="glyphicon glyphicon-search"></i><%=pattern%></a>
 <%
         }
         int cxx = 0;
+        /*
         for (PosPat pp : PosPat.findAllPattern(symbol)){
             String sym = pp.getSymbol();
             if (cxx++>12) {
@@ -372,6 +374,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             out.write("<img src=\"load.gif\">");
             out.write("<br/>\n");
         }
+        */
 %>
         </td>
 <%

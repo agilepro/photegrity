@@ -61,7 +61,7 @@
 <a href="masterPatts.jsp?n=<%=n>maxEntries?n-maxEntries:0%>"><img src="ArrowBack.gif" borderwidth="0"></a>
 <%= n %>
 <a href="masterPatts.jsp?n=<%=n+maxEntries%>"><img src="ArrowFwd.gif" borderwidth="0"></a>
-<a href="pattern3.jsp">dups</a>
+
 </h1>
 <table>
 <tr><td>

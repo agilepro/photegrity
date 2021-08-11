@@ -136,6 +136,7 @@
     int nextStart = 0;
     int lastSize = -1;
     int minValue = 9999;
+    String lastPattern = "";
 
     for (ImageInfo ii : groupImages) {
         
@@ -146,6 +147,7 @@
         if (value>0 && value<minValue) {
             minValue = value;
         }
+        lastPattern = ii.pp.getPattern();
 
         if (!ii.isNullImage())
         {
@@ -354,7 +356,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
             String encodedPath = URLEncoder.encode(localPath,"UTF8");
             String encodedDisk = URLEncoder.encode(diskName,"UTF8");
             String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
-            String newQ = query+"e("+ii.pp.getPattern()+")";
+            String newQ = query+"x("+ii.pp.getSymbol()+")";
             String trashIcon = "trash.gif";
 
             if (ii.isTrashed()) {
@@ -571,6 +573,11 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
         <input type="submit" value="Normalize Minus <%=minValue%>">
         <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
         <input type="hidden" name="min" value="<%=minValue%>">
+    </form></td>
+    <td><form method="GET" action="renumber.jsp">
+        <input type="submit" value="Renumber All <%=recordCount%> Files">
+        <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
+        <input type="text" name="newName" value="<%=lastPattern%>">
     </form></td>
     
 </tr>    

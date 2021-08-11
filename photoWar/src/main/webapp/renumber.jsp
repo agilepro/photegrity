@@ -32,6 +32,9 @@
     String dest = request.getParameter("dest");
 
     String query = UtilityMethods.reqParam(request, pageName, "q");
+    if (query.indexOf("$")<0 && query.indexOf("x(")<0) {
+        throw new Exception("Uh Oh, does not look like a memory set nor a single pospat so rejecting this numbering");
+    }
 
     List<ImageInfo> copyImages = ImageInfo.imageQuery(query);
     //ImageInfo.sortImages(copyImages, "num");

@@ -78,7 +78,7 @@
 Patterns starting with '<%=pattern%>'
 </td>
 <td><a href="masterPatts.jsp?s=<%=URLEncoder.encode(pattern,"UTF8")%>">SimilarTo(<%=pattern%>)</a>
-    <% if (ImageInfo.unsorted) {%>(Unsorted)<%} %></td>
+</td>
 </tr></table>
 
 <table>

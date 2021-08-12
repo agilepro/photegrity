@@ -39,9 +39,9 @@
     {
         throw new Exception ("Found an image, but path ("+ii.getFullPath()+") does not match ("+sPath+")");
     }
-    if (!ii.diskMgr.diskName.equalsIgnoreCase(sDiskName))
+    if (!ii.pp.getDiskMgr().diskName.equalsIgnoreCase(sDiskName))
     {
-        throw new Exception ("Found an image, but disk name name ("+ii.diskMgr.diskName+") does not match ("+sDiskName+")");
+        throw new Exception ("Found an image, but disk name name ("+ii.pp.getDiskMgr().diskName+") does not match ("+sDiskName+")");
     }
 
     Thumb.shrinkFile(ii);

@@ -85,8 +85,7 @@
 </form>
 <form action="masterPatts.jsp" method="get">
   <td><input type="text" name="s" value="">
-  <input type="submit" value="Pattern">
-<% if (ImageInfo.unsorted) {%>(Unsorted)<%} %></td>
+  <input type="submit" value="Pattern"></td>
 </form></tr></table>
 
 <table><tr>

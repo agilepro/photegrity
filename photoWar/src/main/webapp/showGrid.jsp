@@ -309,7 +309,7 @@
                 String column = "";
                 if (!ii.isNullImage())
                 {
-                    column  = ii.diskMgr.diskName+":"+ii.getRelativePath()+ii.getPattern();
+                    column  = ii.getPatternSymbol();
                 }
                 if (!column.equals(colLoc))
                 {
@@ -323,7 +323,7 @@
                 foundOne = true;
                 String encodedName = URLEncoder.encode(ii.fileName,"UTF8");
                 String encodedPath = URLEncoder.encode(ii.getFullPath(),"UTF8");
-                String encodedDisk = URLEncoder.encode(ii.diskMgr.diskName,"UTF8");
+                String encodedDisk = URLEncoder.encode(ii.pp.diskMgr.diskName,"UTF8");
                 String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
 
                 String truncName = ii.fileName;

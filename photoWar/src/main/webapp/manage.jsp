@@ -70,7 +70,7 @@
             throw new Exception("No images at position "+offset);
         }
         fileName = ii.fileName;
-        diskName = ii.diskMgr.diskNameLowerCase;
+        diskName = ii.pp.getDiskMgr().diskNameLowerCase;
         path     = ii.getFullPath();
         relPath  = ii.getRelativePath();
         imageURL = "photo/"+ii.getRelPath();
@@ -209,7 +209,7 @@ if (showImage) {
     %><a href="manage.jsp?q=<%=queryOrderPart%>&show=yes">Show Image</a><%
 }
 
-if (ii!=null && ii.diskMgr != null)
+if (ii!=null)
 {
 %>
 <table><tr>
@@ -338,7 +338,7 @@ NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHt
 </tr>
 <tr>
     <td>diskName:</td>
-    <td><%HTMLWriter.writeHtml(out, ii.diskMgr.diskName);%></td>
+    <td><%HTMLWriter.writeHtml(out, ii.pp.getDiskMgr().diskName);%></td>
 </tr>
 <tr>
     <td>getFolderPath():</td>

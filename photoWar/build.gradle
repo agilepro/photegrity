@@ -28,4 +28,11 @@ dependencies {
     implementation 'org.mongodb:mongodb-driver-sync:4.3.0'
 }
 
-war.baseName = 'photo'
+project.archivesBaseName = 'photo'
+
+
+//java source files are UTF-8
+apply plugin: "java"
+tasks.withType(JavaCompile) {
+  options.encoding = "UTF-8"
+}

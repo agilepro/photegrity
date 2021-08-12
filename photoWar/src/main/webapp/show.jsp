@@ -143,7 +143,7 @@
         totalCount++;
         int value = ii.value;
         int fileSize = ii.fileSize;
-        String diskName = ii.diskMgr.diskName;
+        String diskName = ii.pp.getDiskMgr().diskName;
         if (value>0 && value<minValue) {
             minValue = value;
         }
@@ -349,7 +349,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
             String fileName = ii.fileName;
             int value = ii.value;
             int fileSize = ii.fileSize;
-            String diskName = ii.diskMgr.diskName;
+            String diskName = ii.pp.getDiskMgr().diskName;
             String localPath = ii.pp.getLocalPath();
             String fullPath = diskName + "/" + localPath + fileName;
             String encodedName = URLEncoder.encode(fileName,"UTF8");

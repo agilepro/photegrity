@@ -57,7 +57,6 @@
 <form action="masterPatts.jsp" method="get">
   <input type="text" name="s" value="">
   <input type="submit" value="Pattern">
-<% if (ImageInfo.unsorted) {%>(Unsorted)<%} %>
 </form></td></tr><tr>
 <td><form action="selection.jsp" method="get">
   <input type="submit" value="Show Selection">

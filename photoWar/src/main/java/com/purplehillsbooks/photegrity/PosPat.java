@@ -500,7 +500,7 @@ public class PosPat {
             if (child.isDirectory()) {
                 continue;
             }
-            ImageInfo ii = new ImageInfo(child);
+            ImageInfo ii = ImageInfo.genFromFile(child);
             if (pattern.equals(ii.getPattern())) {
                 imageList.add(ii);
             }

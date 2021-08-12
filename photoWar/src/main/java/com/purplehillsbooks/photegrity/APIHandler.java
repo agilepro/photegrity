@@ -387,7 +387,7 @@ public class APIHandler {
                     }
                     String tempFileName = "TMP"+System.currentTimeMillis()+"-"+(counter++)+".jpg";
                     
-                    ImageInfo ii = new ImageInfo(sourceFilePath, dm);
+                    ImageInfo ii = ImageInfo.genFromFile(sourceFilePath);
                     
                     if (!destFolder.equals(sourceFolder)) {
                         ii.renameFile(tempFileName);

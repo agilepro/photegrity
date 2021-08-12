@@ -154,7 +154,7 @@ public class GridData {
     }
 
     public ImageInfo defaultImage(String cval) throws Exception {
-        return ImageInfo.findImage3(defImage.get(cval));
+        return ImageInfo.genFromJSON(defImage.get(cval));
     }
     public JSONObject defaultImage2(String cval) throws Exception {
         return defImage.get(cval);

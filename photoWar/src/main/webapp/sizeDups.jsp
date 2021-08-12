@@ -64,7 +64,6 @@
     <a href="sizeDups.jsp?p=<%=startSize%><%=pictParam%>&all=all">All-Numbers</a>,
 <%  }  %>
     <a href="main.jsp"><img src="home.gif"></a>
-    <% if (ImageInfo.unsorted) {%>(Unsorted)<%} %>
 </td></tr></table>
 </tr>
 <%
@@ -120,8 +119,8 @@
             <%= jj.value %>
             <a href="<%=viewPath%>" target="photo">
                 <%= jj.tail %></a><br>
-            <%= jj.diskMgr.diskName %><br>
-            <a href="selectImage.jsp?d=<%= jj.diskMgr.diskName %>&f=<%= URLEncoder.encode(jj.fileName,"UTF8") %>&p=<%= URLEncoder.encode(jj.getRelPath()) %>&a=supp" target="suppwindow">
+            <%= jj.pp.diskMgr.diskName %><br>
+            <a href="selectImage.jsp?d=<%= jj.pp.diskMgr.diskName %>&f=<%= URLEncoder.encode(jj.fileName,"UTF8") %>&p=<%= URLEncoder.encode(jj.getRelPath()) %>&a=supp" target="suppwindow">
                 <img border="0" src="addicon.gif"></a><%= jj.getRelPath() %>
             </td></tr>
 <%                  }
@@ -132,8 +131,8 @@
             <%= jj.value %>
             <a href="<%=viewPath%>" target="photo">
                 <%= jj.tail %></a></td>
-            <td bgcolor="#CCCCFF"><%= jj.diskMgr.diskName %></td>
-            <td><a href="selectImage.jsp?d=<%= jj.diskMgr.diskName %>&f=<%= URLEncoder.encode(jj.fileName,"UTF8") %>&p=<%= URLEncoder.encode(jj.getRelPath(),"UTF8") %>&a=supp" target="suppwindow">
+            <td bgcolor="#CCCCFF"><%= jj.pp.diskMgr.diskName %></td>
+            <td><a href="selectImage.jsp?d=<%= jj.pp.diskMgr.diskName %>&f=<%= URLEncoder.encode(jj.fileName,"UTF8") %>&p=<%= URLEncoder.encode(jj.getRelPath(),"UTF8") %>&a=supp" target="suppwindow">
                 <img border=0 src="addicon.gif"></a></td>
             <td><%= jj.getRelPath() %></td>
             </tr>

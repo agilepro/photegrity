@@ -563,7 +563,7 @@
             if (sii!=null) {
                 String encodedName = URLEncoder.encode(sii.fileName,"UTF8");
                 String encodedPath = URLEncoder.encode(sii.getFullPath(),"UTF8");
-                String encodedDisk = URLEncoder.encode(sii.diskMgr.diskName,"UTF8");
+                String encodedDisk = URLEncoder.encode(sii.pp.getDiskMgr().diskName,"UTF8");
                 String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
                 String trashIcon = "trash.gif";
                 if (sii.isTrashed)

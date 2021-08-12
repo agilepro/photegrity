@@ -152,7 +152,7 @@
             while (q.hasMoreElements())
             {
                 ImageInfo i3 = (ImageInfo)q.nextElement();
-                String iLoc = i3.diskMgr.diskName+":"+i3.getRelativePath()+i3.getPattern();
+                String iLoc = i3.getPatternSymbol();
                 //out.write("\n<li>looking for "+iLoc+" at "+destCol+"</li>");
                 boolean isMarked = (selectedColumns.get(iLoc)!=null);
                 if (!isMarked)
@@ -266,7 +266,7 @@
                 while (q.hasMoreElements())
                 {
                     ImageInfo i3 = (ImageInfo)q.nextElement();
-                    String iLoc = i3.diskMgr.diskName+":"+i3.getRelativePath()+i3.getPattern();
+                    String iLoc = i3.getPatternSymbol();
 
                     boolean isMarked = (selectedColumns.get(iLoc)!=null);
                     if (!isMarked)

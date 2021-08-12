@@ -396,7 +396,7 @@ public class DiskMgr {
             String fileNamelc = scanFile.getName().toLowerCase();
 
             if (scanFile.isFile() && (fileNamelc.endsWith(".jpg"))) {
-                ImageInfo ii = new ImageInfo(scanFile, this);
+                ImageInfo ii = ImageInfo.genFromFile(scanFile);
                 answer.addElement(ii);
             }
         }
@@ -417,7 +417,7 @@ public class DiskMgr {
             for (File child : scanFile.listFiles()) {
                 String childName = child.getName();
                 if (child.isFile() && (childName.endsWith(".jpg") || childName.endsWith(".JPG"))) {
-                    ImageInfo ii = new ImageInfo(child, this);
+                    ImageInfo ii = ImageInfo.genFromFile(child);
                     answer.addElement(ii);
                 }
             }

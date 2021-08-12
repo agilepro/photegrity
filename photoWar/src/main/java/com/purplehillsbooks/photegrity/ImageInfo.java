@@ -5,9 +5,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -21,20 +19,17 @@ public class ImageInfo
 {
     public PosPat  pp;  //holds disk and rel path and pattern info
 
-    public DiskMgr diskMgr;  // this image is in this collection
+    private DiskMgr diskMgr;  // this image is in this collection
 
     public String  fileName; // the original and actual filename
-    public int     value;    // numeric value of this file name
+    public int     value;    // numeric value of this file name -300,-200,-100,-10 thru +999
     public String  tail;     // rest of the file name after the number
 
     public int    fileSize;
     private Vector<String> tagNames;
-    public int    randomValue;
+    public int    randomValue;  //each image is assigned a random value for random sorting
 
     public boolean isIndex = false;
-
-    public static boolean unsorted = true;
-    public static Hashtable<String, String> pathCompressor = new  Hashtable<String, String>();
 
     private static ImageInfo nullImage = null;
 
@@ -50,31 +45,6 @@ public class ImageInfo
                                            new MarkedVector(), new MarkedVector(), new MarkedVector(),
                                            new MarkedVector(), new MarkedVector()};
     public static Random randGen = new Random();
-
-    @Deprecated
-    public ImageInfo(File filePath, DiskMgr disk) throws Exception {
-        this(filePath);
-    }
-    
-    
-    public ImageInfo(File filePath) throws Exception {
-        try {
-            diskMgr = DiskMgr.findDiskMgrFromPath(filePath);
-            tagNames = new Vector<String>();
-            randomValue = randGen.nextInt(1000000000);
-
-            fileName = filePath.getName();
-            fileSize = (int) filePath.length();
-
-            File parentFolder = filePath.getParentFile();
-            String relativePath = diskMgr.getRelativePath(parentFolder);
-
-            initializeInternals(relativePath);
-        }
-        catch (Exception e) {
-            throw new JSONException("Unable to create image info for {0}",e,filePath);
-        }
-    }
     
     /**
     * Used only for Null Images
@@ -89,6 +59,57 @@ public class ImageInfo
         randomValue = 0;
         isIndex = false;
     }
+
+    @Deprecated
+    public ImageInfo(File filePath, DiskMgr disk) throws Exception {
+        this(filePath);
+    }
+    
+    
+    private ImageInfo(File filePath) throws Exception {
+        diskMgr = DiskMgr.findDiskMgrFromPath(filePath);
+        tagNames = new Vector<String>();
+        randomValue = randGen.nextInt(1000000000);
+
+        fileName = filePath.getName();
+        fileSize = (int) filePath.length();
+
+        File parentFolder = filePath.getParentFile();
+        String relativePath = diskMgr.getRelativePath(parentFolder);
+
+        initializeInternals(relativePath);
+    }
+    
+    public static ImageInfo genFromFile(File filePath) throws Exception {
+        try {
+            if (!filePath.exists()) {
+                throw new JSONException("File does not exist: ({0})", filePath.getAbsolutePath());
+            }
+            ImageInfo ii = new ImageInfo(filePath);
+            ii.fileSize = (int) filePath.length();
+            return ii;
+        }
+        catch (Exception e) {
+            throw new JSONException("Unable to create image info for file: {0}", e, filePath);
+        }
+        
+    }
+    
+    public static ImageInfo genFromJSON(JSONObject image) throws Exception {
+        String disk = image.getString("disk");
+        DiskMgr dm = DiskMgr.getDiskMgr(disk);
+        String path = image.getString("path");
+        String fileName = image.getString("fileName");
+        File parentFolder = dm.getFilePath(path);
+        File fullPath = new File(parentFolder, fileName);
+        
+        ImageInfo ii = new ImageInfo(fullPath);
+        if (image.has("random")) {
+            ii.randomValue = image.getInt("random");
+        }
+        return ii;
+    }
+
 
     public static ImageInfo getNullImage()
     {
@@ -229,7 +250,7 @@ public class ImageInfo
         }
     }
 
-    public void determineTags() throws Exception {
+    private void determineTags() throws Exception {
         HashCounterIgnoreCase cache = new HashCounterIgnoreCase();
         cache.increment(diskMgr.diskNameLowerCase);  //might include dots in this case
 
@@ -255,7 +276,7 @@ public class ImageInfo
     }
 
 
-    public static void parsePathTags(HashCounterIgnoreCase cache, String path) throws Exception {
+    private static void parsePathTags(HashCounterIgnoreCase cache, String path) throws Exception {
         String pathlc = path.toLowerCase();
         int startPos = 0;
         int pos = 0;
@@ -281,7 +302,8 @@ public class ImageInfo
     }
 
 
-    static public String[] splitString (String start, int expected)
+    /*
+    static private String[] splitString (String start, int expected)
         throws Exception
     {
         try {
@@ -302,16 +324,12 @@ public class ImageInfo
             throw new JSONException("Error in splitString", e);
         }
     }
+    */
 
 
     static public void garbageCollect()
         throws Exception
     {
-        // clear everything up front so that garbage collection will work
-        //imagesByPath = null;
-        //imagesBySize = null;
-        //imagesByName = null;
-        pathCompressor = new Hashtable<String, String>();
         for (int i=0; i<memory.length; i++) {
             memory[i] = new MarkedVector();
         }
@@ -324,7 +342,8 @@ public class ImageInfo
         System.gc();
     }
 
-    static public void saveImageInfo() throws Exception
+    /*
+    static private void saveImageInfo() throws Exception
     {
         try {
             Hashtable<String, DiskMgr> ht = DiskMgr.getDiskList();
@@ -343,38 +362,28 @@ public class ImageInfo
             throw new JSONException("Failure saving image info to allNames.txt", e);
         }
     }
+    */
 
 
 
-    public static ImageInfo findImageByPath(File filePath) throws Exception {
+    /*
+    private static ImageInfo findImageByPath(File filePath) throws Exception {
         DiskMgr dm = DiskMgr.findDiskMgrFromPath(filePath);
         File parentFolder = filePath.getParentFile();
         String relPath = dm.getRelativePath(parentFolder);
         return findImage2(dm.diskName, relPath, filePath.getName());
     }
+    */
     
 
     /**
     *  Don't use this one, use instead the findImage that has the relPath below
     */
-    public static ImageInfo findImage(String disk, String relPath, String name)
-        throws Exception
-    {
-        try {
-            if (disk == null) {
-                throw new JSONException("findImage was passed a null disk name");
-            }
-            if (relPath == null) {
-                throw new JSONException("findImage was passed a null originalFullPath");
-            }
-            DiskMgr dm = DiskMgr.getDiskMgr(disk);
-            return findImage2(disk, relPath, name);
-        }
-        catch (Exception e) {
-            throw new JSONException("Unable to find an image (disk={0})(relPath={1})(name={2})", e, disk, relPath,name);
-        }
+    public static ImageInfo findImage(String disk, String relPath, String name) throws Exception {
+        return findImage2(disk, relPath, name);
     }
     
+    /*
     public static ImageInfo findImage3(JSONObject image) throws Exception {
         String symbol = image.getString("symbol");
         int pos = symbol.indexOf(":");
@@ -384,9 +393,10 @@ public class ImageInfo
         String name = image.getString("fileName");
         return findImage2(diskMgr, relPath, name);
     }
+    */
 
 
-    public static ImageInfo findImage2(String disk, String relPath, String name) throws Exception {
+    private static ImageInfo findImage2(String disk, String relPath, String name) throws Exception {
         if (disk == null) {
             throw new JSONException("findImage was passed a null disk name");
         }
@@ -408,17 +418,8 @@ public class ImageInfo
         if (!parentPath.exists()) {
             throw new JSONException("Attempt to find an image on path ({0}) with name ({1}) but none found", parentPath.getAbsolutePath(), name);
         }
-        return constructImageInfo(diskMgr, fullPath);
+        return ImageInfo.genFromFile(fullPath);
     }
-
-    public static ImageInfo constructImageInfo(DiskMgr diskMgr, File fullPath) throws Exception {
-        if (!fullPath.exists()) {
-            throw new JSONException("Unable to find an image on disk ({0}), path ({1})", diskMgr.diskName, fullPath.getAbsolutePath());
-        }
-        return new ImageInfo(fullPath, diskMgr);
-    }
-
-
 
 
 
@@ -501,7 +502,7 @@ public class ImageInfo
                 throw new JSONException("new image path does not exist after move: {0}",newFilePath);
             }
             
-            return new ImageInfo(newFilePath, dm2);
+            return ImageInfo.genFromFile(newFilePath);
         }
         catch (Exception e) {
             throw new JSONException("Unable to move image from ({0}) to ({1})",e, oldPath, destFolder);
@@ -547,7 +548,6 @@ public class ImageInfo
             newName = newPattern+dummyNumber+fileName.substring(len);
         }
         renameFile(newName);
-        unsorted = true;
     }
 
     public synchronized void renameFile(String newName) throws Exception
@@ -575,7 +575,6 @@ public class ImageInfo
 
         diskMgr.renameDiskFile(folderPath, fileName, newName);
         fileName = newName;
-        unsorted = true;
         initializeInternals(relPath);
     }
 
@@ -712,9 +711,11 @@ public class ImageInfo
             MarkedVector mem = memory[memoryNum-1];
             return mem;
         }
+        long startTime = System.currentTimeMillis();
         MongoDB mongo = new MongoDB();
         JSONArray list = mongo.querySets(query);
         mongo.close();
+        long queryTime = System.currentTimeMillis() - startTime;
         
         Vector<ImageInfo> res = new Vector<ImageInfo>();
         for (JSONObject set : list.getJSONObjectList()) {
@@ -724,6 +725,8 @@ public class ImageInfo
                 res.add(ii);
             }
         }
+        long processTime = System.currentTimeMillis() - startTime - queryTime;
+        System.out.println("IMAGEINFO: query took "+queryTime+"ms and processing took "+processTime+"ms for "+res.size()+" images: "+query);
         return res;
     }    
     
@@ -828,21 +831,6 @@ public class ImageInfo
         }
     }
     
-    public static ImageInfo genFromJSON(JSONObject image) throws Exception {
-        String disk = image.getString("disk");
-        DiskMgr dm = DiskMgr.getDiskMgr(disk);
-        String path = image.getString("path");
-        String fileName = image.getString("fileName");
-        File parentFolder = dm.getFilePath(path);
-        File fullPath = new File(parentFolder, fileName);
-        
-        ImageInfo ii = new ImageInfo(fullPath, dm);
-        if (image.has("random")) {
-            ii.randomValue = image.getInt("random");
-        }
-        return ii;
-    }
-
     
 
     public JSONObject getJSON() throws Exception {
@@ -884,7 +872,7 @@ public class ImageInfo
     public static void emptyTrashCan() throws Exception {
         Set<File> locCleanup = new HashSet<File>();
         for (File f : imageTrashCan) {
-            ImageInfo ii = new ImageInfo(f);
+            ImageInfo ii = ImageInfo.genFromFile(f);
             locCleanup.add(ii.pp.getFolderPath());
             File filePath = ii.getFilePath();
             filePath.delete();

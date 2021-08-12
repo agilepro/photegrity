@@ -22,8 +22,8 @@
     if (sDiskName == null) {
         throw new Exception("page needs a 'd' parameter to specify the disk");
     }
-    String sPath = request.getParameter("p");
-    if (sPath == null) {
+    String localPath = request.getParameter("p");
+    if (localPath == null) {
         throw new Exception("page needs a 'p' parameter to specify the path");
     }
     String sFileName = request.getParameter("fn");
@@ -32,19 +32,21 @@
     }
 
     DiskMgr dm1 = DiskMgr.getDiskMgr(sDiskName);
-    ImageInfo ii = ImageInfo.findImage(sDiskName, sPath, sFileName);
+    File containingPath = dm1.getFilePath(localPath);
+    if (!containingPath.exists()) {
+        throw new Exception("The containing folder does not exist: "+containingPath);
+    }
+    File fullPath = new File(containingPath, sFileName);
+    if (!fullPath.exists()) {
+        throw new Exception("The file path does not exist: "+fullPath);
+    }
+    
+    ImageInfo ii = ImageInfo.genFromFile(fullPath);
 
     if (ii == null) {
         throw new Exception ("cant find an image with d="+sDiskName+",  fn="+sFileName);
     }
-    if (ii.fileName.equals(sFileName) &&
-        ii.getRelativePath().equals(sPath) &&
-        ii.diskMgr.diskName.equals(sDiskName)) {
-        ii.toggleTrashImage();
-    }
-    else {
-        throw new Exception ("Found an image, bit it did not match, with d="+sDiskName+",  fn="+sFileName);
-    }
+    ii.toggleTrashImage();
 
     String go = request.getParameter("go");
     if (go == null) {

@@ -186,7 +186,7 @@
             else if (!ii.isNullImage())
             {
                 encodedName = URLEncoder.encode(ii.fileName,"UTF8");
-                diskName = ii.diskMgr.diskName;
+                diskName = ii.pp.getDiskMgr().diskName;
                 relPath = diskName+"/"+ii.getRelativePath()+ii.fileName;
                 location = diskName+":"+ii.getRelativePath();
                 encodedPath = URLEncoder.encode(ii.getFullPath(),"UTF8");

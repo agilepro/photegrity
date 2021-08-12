@@ -44,7 +44,7 @@
     ImageInfo.emptyTrashCan();
     
     //temp
-    ImageInfo.imageTrashCan.clear();
+    ImageInfo.emptyTrashCan();
 
 %>
 <li><b>Trashcan Cleared</b>

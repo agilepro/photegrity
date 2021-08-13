@@ -57,7 +57,6 @@
 
     int thumbsize = UtilityMethods.getSessionInt(session, "thumbsize", 100);
     int imageNum = UtilityMethods.getSessionInt(session, "imageNum", 3);
-    int rows = (UtilityMethods.getSessionInt(session, "pageSize", 20));
     String iChoice = (String) session.getAttribute("iChoice");
     if (iChoice==null)
     {
@@ -69,13 +68,13 @@
     boolean showImages = (request.getParameter("img")!=null);
     String pictParam = "";
     String imgPart = "";
+    int rows = 18;
     if (showImages) {
         thisPageURL += "&img=1";
         pictParam = "&img=1";
-        rows = (rows+1)/imageNum;
+        rows = 6;
         imgPart = "img=1";
     }
-    rows=4;
 
     if (dispMin < 0) {
         dispMin = 0;
@@ -94,11 +93,19 @@
     mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
     mongo.close();
 
-    List<String> sortedPatterns = new ArrayList<String>();
-    for (String symbol : symbolCount.sortedKeys()) {
-        sortedPatterns.add(symbol);
+    List<String> sortedKeys = symbolCount.sortedKeys();
+    symbolCount.sortKeysByCount(sortedKeys);
+    int lastPageIndex = sortedKeys.size()-rows;
+    if (lastPageIndex<0) {
+        lastPageIndex = 0;
     }
-    sortGroupsByCount(sortedPatterns, symbolCount);
+
+    List<PosPat> displayedPatterns = new ArrayList<PosPat>();
+    for (int i=dispMin; i<dispMax; i++) {
+        if (i<sortedKeys.size()) {
+            displayedPatterns.add(PosPat.findOrCreate(sortedKeys.get(i)));
+        }
+    }
     
     String[] colors = {"#FDF5E6", "#FEF9F5"};
 
@@ -108,36 +115,6 @@
     String queryOrderPart = URLEncoder.encode(query,"UTF8")+"&o="+order;
     String queryOrderFull = queryOrderPart+"&min="+dispMin;
 
-    int maxpagestart = sortedPatterns.size() - rows;
-    if (maxpagestart<0)
-    {
-        maxpagestart=0;
-    }
-
-    int[] imgChoices = new int[imageNum];
-    int commaPos = iChoice.indexOf(",");
-    int startPos = 0;
-    int choiceCnt = 0;
-    while (choiceCnt<imageNum && commaPos>0)
-    {
-        String piece = iChoice.substring(startPos, commaPos);
-        if ("*".equals(piece))
-        {
-            imgChoices[choiceCnt] = -1;
-        }
-        else
-        {
-            imgChoices[choiceCnt] = safeConvertInt(piece);
-        }
-        choiceCnt++;
-        startPos = commaPos+1;
-        commaPos = iChoice.indexOf(",", startPos);
-    }
-    while (choiceCnt<imageNum)
-    {
-        imgChoices[choiceCnt] = -1;
-        choiceCnt++;
-    }
 
     String zingpat = (String) session.getAttribute("zingpat");
     if (zingpat==null) {
@@ -146,23 +123,6 @@
     
     String lastPatternName = "";
 
-    List<String> displayedPatterns = new ArrayList<String>();
-    
-    int count = 0;
-    for (String symbol : sortedPatterns) {
-        count++;
-        if (count<dispMin) {
-            continue;
-        }
-        if (count>=dispMax) {
-            break;
-        }
-        displayedPatterns.add(symbol);
-        int lastSlash = symbol.lastIndexOf("/");
-        String pattern = symbol.substring(lastSlash+1);
-        lastPatternName = pattern;
-    }
-    
 
 %>
 
@@ -173,7 +133,7 @@
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
-    <TITLE>P <%=dispMin%>/<%=sortedPatterns.size()%> <%= query %></TITLE>
+    <TITLE>P <%=dispMin%>/<%=sortedKeys.size()%> <%= query %></TITLE>
     
     <style>
     .spacy tr td {
@@ -241,10 +201,10 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
             <img src="ArrowFRev.gif" border="0"></a>
         <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=prevPage%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowBack.gif" border="0"></a>
-        <%= dispMin %> / <%= sortedPatterns.size() %>
+        <%= dispMin %> / <%= sortedKeys.size() %>
         <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=dispMax%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowFwd.gif" border="0"></a>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%= maxpagestart %><%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%= lastPageIndex %><%=pictParam%>&<%=poPart%>">
             <img src="ArrowFFwd.gif" border="0"></a>
 <%
     String extBase = thisBaseURL + "&min=" + dispMin;
@@ -265,14 +225,17 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
     int row = 0;
 
     lastPatternName = null;
-    for (String symbol : displayedPatterns) {
+    for (PosPat pp : displayedPatterns) {
 
+        String symbol = pp.getSymbol();
+        int count = symbolCount.getCount(symbol);
+        
         int lastSlash = symbol.lastIndexOf("/");
-        String pattern = symbol.substring(lastSlash+1);
+        String pattern = pp.getPattern();
         lastPatternName = pattern;
         String limitedPatternName = symbol;
         String trimmedPattern = pattern.trim();
-        String newQuery = URLEncoder.encode(query+"x("+symbol+")","UTF8");
+        String newQuery = URLEncoder.encode("x("+symbol+")","UTF8");
         if (limitedPatternName.length() > 56) {
             limitedPatternName = limitedPatternName.substring(0,55)+"...";
         }
@@ -286,44 +249,21 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
    </td>
 <%
 
-        if (showImages)
-        {
-            JSONObject image = new JSONObject();
-            String imagePath = "";
-            
-            int setSize = symbolCount.size();
+        if (showImages) {
+            List<ImageInfo> imageList = pp.getSomeRandomImages(imageNum);
+
             %><td width="<%=(thumbsize+10)*imageNum%>"><%
-            if ((--imageLimit)>0) {
-                if (imageNum >= setSize) {
-                    for (int ni = 0; ni<setSize; ni++) {
-                        //image = "XXXNOTFINISHED";
-%>                  <a href="photo/<%=imagePath%>" target="photo">
-                        <img src="thumb/<%=thumbsize%>/<%=imagePath%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
-<%                  }
-                }
-                else {
-                    boolean[] repeatGuard = new boolean[setSize];
-                    for (int ni = 0; ni<imageNum; ni++)
-                    {
-                        int choice = 0; //findTarget(pi.allImages, imgChoices[ni]);
-                        if (choice < 0)
-                        {
-                            choice = rand.nextInt(setSize);
-                        }
-                        while (repeatGuard[choice])
-                        {
-                            choice = rand.nextInt(setSize);
-                        }
-                        repeatGuard[choice]=true;
-                        //image = pi.allImages.elementAt(choice);
-%>                  <a href="photo/<%=imagePath%>" target="photo">
-                        <img src="thumb/<%=thumbsize%>/<%=imagePath%>" width="<%=thumbsize%>" borderwidth="0" border="0"></a>
-<%                  }
-                }
-            }
+            
+            for (ImageInfo ii : imageList) {
+                String imagePath = ii.getRelPath();
+                
+%>              <a href="photo/<%=imagePath%>" target="photo">
+                    <img src="thumb/<%=thumbsize%>/<%=imagePath%>" width="<%=thumbsize%>" 
+                         borderwidth="0" border="0"></a>
+<%          }
 %>
             </td>
-          <td><a href="show.jsp?q=x(<%=URLEncoder.encode(symbol,"UTF8")%>)">
+          <td><a href="show.jsp?q=<%=newQuery%>">
               <%HTMLWriter.writeHtml(out,symbol);%></a><br>
               <%= symbolCount.getCount(symbol) %>
               <a href="show.jsp?q=<%=newQuery%>">S</a>
@@ -358,25 +298,8 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 <%
         }
         int cxx = 0;
-        /*
-        for (PosPat pp : PosPat.findAllPattern(symbol)){
-            String sym = pp.getSymbol();
-            if (cxx++>12) {
-                out.write("...<br/>\n");
-                break;
-            }
-            if (sym.length()>45) {
-                sym = sym.substring(0,45);
-            }
-            HTMLWriter.writeHtml(out, sym);
-            out.write("  ("+pp.getImageCount());
-            out.write(")");
-            out.write("<img src=\"load.gif\">");
-            out.write("<br/>\n");
-        }
-        */
 %>
-        </td>
+      </td>
 <%
         out.flush();
      }
@@ -414,7 +337,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 <a href="main.jsp"><img src="home.gif" border="0"></a>
         <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=prevPage%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowBack.gif" border="0"></a>
-        <%= dispMin %> / <%= sortedPatterns.size() %>
+        <%= dispMin %> / <%= sortedKeys.size() %>
         <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=dispMax%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowFwd.gif" border="0"></a>
 <%

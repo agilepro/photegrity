@@ -137,9 +137,13 @@
     int lastSize = -1;
     int minValue = 9999;
     String lastPattern = "";
+    HashCounter tagsCount = new HashCounter();
 
     for (ImageInfo ii : groupImages) {
         
+        for (String tag : ii.pp.getPathTags()) {
+            tagsCount.increment(tag);
+        }
         totalCount++;
         int value = ii.value;
         int fileSize = ii.fileSize;
@@ -594,9 +598,17 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
   <input type="hidden" name="go" value="show.jsp?q=<%=queryOrderPart%>">
 </form>
 </td></tr></table>
+
+<p>
 <%
     long duration = System.currentTimeMillis() - starttime;
+    
+    for (String tag : tagsCount.sortedKeys()) {
+        %><a href="show.jsp?q=g(<%=tag%>)"><span><%=tag%> (<%=tagsCount.getCount(tag)%>)</span></a><br/><%
+    }
 %>
+</p>
+</td></tr></table>
     <font color="#BBBBBB">page generated in <%=duration%>ms.  </font>
 </BODY>
 </HTML>

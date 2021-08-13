@@ -302,31 +302,6 @@ public class ImageInfo
     }
 
 
-    /*
-    static private String[] splitString (String start, int expected)
-        throws Exception
-    {
-        try {
-            String[] result = new String[expected];
-            int pos = 0;
-            for (int i=0; i<(expected-1); i++) {
-                int nextpos = start.indexOf("\t", pos);
-                if (nextpos < 0) {
-                    throw new JSONException("Did not find the tab number {0} in ({1}) at pos={2}", i, start, pos);
-                }
-                result[i] = start.substring(pos, nextpos);
-                pos = nextpos + 1;
-            }
-            result[expected-1] = start.substring(pos);
-            return result;
-        }
-        catch (Exception e) {
-            throw new JSONException("Error in splitString", e);
-        }
-    }
-    */
-
-
     static public void garbageCollect()
         throws Exception
     {
@@ -341,39 +316,6 @@ public class ImageInfo
         // now garbage collect
         System.gc();
     }
-
-    /*
-    static private void saveImageInfo() throws Exception
-    {
-        try {
-            Hashtable<String, DiskMgr> ht = DiskMgr.getDiskList();
-            Enumeration<String> e3 = HashCounter.sort(ht.keys());
-
-            while (e3.hasMoreElements()) {
-
-                String key = e3.nextElement();
-                DiskMgr mgr = ht.get(key);
-                if (mgr.isChanged) {
-                    mgr.writeSummary();
-                }
-            }
-        }
-        catch (Exception e) {
-            throw new JSONException("Failure saving image info to allNames.txt", e);
-        }
-    }
-    */
-
-
-
-    /*
-    private static ImageInfo findImageByPath(File filePath) throws Exception {
-        DiskMgr dm = DiskMgr.findDiskMgrFromPath(filePath);
-        File parentFolder = filePath.getParentFile();
-        String relPath = dm.getRelativePath(parentFolder);
-        return findImage2(dm.diskName, relPath, filePath.getName());
-    }
-    */
     
 
     /**
@@ -382,18 +324,6 @@ public class ImageInfo
     public static ImageInfo findImage(String disk, String relPath, String name) throws Exception {
         return findImage2(disk, relPath, name);
     }
-    
-    /*
-    public static ImageInfo findImage3(JSONObject image) throws Exception {
-        String symbol = image.getString("symbol");
-        int pos = symbol.indexOf(":");
-        String diskMgr = symbol.substring(0,pos);
-        int pos2 = symbol.lastIndexOf("/");
-        String relPath = symbol.substring(pos+1, pos2);
-        String name = image.getString("fileName");
-        return findImage2(diskMgr, relPath, name);
-    }
-    */
 
 
     private static ImageInfo findImage2(String disk, String relPath, String name) throws Exception {

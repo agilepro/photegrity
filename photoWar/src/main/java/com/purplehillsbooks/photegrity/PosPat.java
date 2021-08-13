@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
@@ -223,6 +224,7 @@ public class PosPat {
      * Find all PosPat objects with a given pattern
      */
     public static int countAllPatternOnDisk(DiskMgr dm, String _pattern) {
+        throw new RuntimeException("not implemented");
         /*
         int pos = findFirstEntryWithPattern(ppIndex, _pattern);
         int count = 0;
@@ -242,70 +244,9 @@ public class PosPat {
             pos++;
         }
         */
-        return -1;
     }
 
 
-    private static int findFirstEntryWithPattern(List<PosPat> vec, String term) {
-
-        int low = 0;
-        int high = vec.size();
-
-        //if the vector is empty, then treat this like the search name is
-        //greater than all, and return the vector size (zero, not a valid index)
-        if (high==0) {
-            return 0;
-        }
-
-        while (high-low > 5) {
-            int mid = (high+low)/2;
-            PosPat test = vec.get(mid);
-            int comp = term.compareToIgnoreCase(test.pattern);
-
-            //  x.compareTo(y) return
-            //  negative if x < y
-            //  zero     if x=y
-            //  positive if x > y
-
-            if (comp==0) {
-                low = mid;
-                break;
-            }
-            if (comp<0) {
-                high = mid;
-            }
-            else {
-                low = mid;
-            }
-        }
-
-        //low can be treated now as a starting point to find the exact
-        //point that images with a particular name start
-        PosPat test2 = vec.get(low);
-        int comp2 = term.compareToIgnoreCase(test2.pattern);
-
-        //the found image has a greater or equal name, so search backward
-        while (comp2<=0) {
-            if (low==0) {
-                return 0;
-            }
-            low--;
-            test2 = vec.get(low);
-            comp2 = term.compareToIgnoreCase(test2.pattern);
-        }
-
-        //the found image has lower name, so search forward to one
-        //either equal or greater
-        while (comp2>0) {
-            low++;
-            if (low==vec.size()) {
-                return low;
-            }
-            test2 = vec.get(low);
-            comp2 = term.compareToIgnoreCase(test2.pattern);
-        }
-        return low;
-    }
 
     public static synchronized List<PosPat> getAllForDisk(DiskMgr dm) throws Exception {
         List<PosPat> newIndex = new ArrayList<PosPat>();
@@ -316,11 +257,6 @@ public class PosPat {
         }
         return newIndex;
     }
-    /*
-    public static List<PosPat> getAllEntries() {
-        return ppIndex;
-    }
-    */
 
     public static List<PosPat> filterByTag(List<PosPat> input, String tag) {
         Vector<PosPat> res = new Vector<PosPat>();
@@ -508,6 +444,42 @@ public class PosPat {
         return imageList;
     }
     
+    public List<ImageInfo> getImagesFromDB() throws Exception {
+        String symbol = getSymbol();
+        MongoDB mongo = new MongoDB();
+        String query = "x("+symbol+")";
+        JSONArray listOfOne = mongo.querySets(query);
+        if (listOfOne.length()<1) {
+            throw new Exception("Could not find any records for this pospat: "+symbol);
+        }
+        JSONObject pp = listOfOne.getJSONObject(0);
+        JSONArray images = pp.getJSONArray("images");
+        
+        List<ImageInfo> imageList =  new ArrayList<ImageInfo>();
+        for (JSONObject image : images.getJSONObjectList()) {
+            imageList.add(ImageInfo.genFromJSON(image));
+        }
+        return imageList;
+    }
+    
+    private static Random rand = new Random();
+    public List<ImageInfo> getSomeRandomImages(int num) throws Exception {
+        List<ImageInfo> completeList = getImagesFromDB();
+        if (completeList.size()==0) {
+            throw new Exception("There are no images for pospat: "+getSymbol());
+        }
+        List<ImageInfo> imageList =  new ArrayList<ImageInfo>();
+        for (ImageInfo ii : completeList) {
+            if (ii.value == -300) {
+                imageList.add(ii);
+            }
+        }
+        while (imageList.size()<num) {
+            int pick = rand.nextInt(completeList.size());
+            imageList.add(completeList.get(pick));
+        }
+        return imageList;
+    }
     
     public JSONObject getFullMongoDoc() throws Exception {
         List<ImageInfo> imageList =  scanDiskForImages();

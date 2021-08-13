@@ -3,8 +3,6 @@ package com.purplehillsbooks.photegrity;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.LineNumberReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;

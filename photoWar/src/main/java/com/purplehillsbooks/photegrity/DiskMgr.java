@@ -834,29 +834,20 @@ public class DiskMgr {
         //now walk through the images by pospat symbol
         for (String ss : allPP) {
             List<ImageInfo> imagesForPP = new ArrayList<ImageInfo>();
+            PosPat pp = null;
             for (ImageInfo ii : imagesForDisk) {
                 String symbol = ii.getPatternSymbol();
                 if (ss.equals(symbol)) {
                     imagesForPP.add(ii);
+                    pp = ii.pp;
                 }
             }
-            if (imagesForPP.size()>0) {
-                System.out.println("DISKMGR: stored "+ss+" in DB");
-                mongo.createPosPatRecord(ss, imagesForPP);
+            if (imagesForPP.size()>0 && pp!=null) {
+                System.out.println("DISKMGR: stored "+ss+" in DB ("+imagesForPP.size()+" images)");
+                mongo.createPosPatRecord(pp, imagesForPP);
             }
         }
 
-        mongo.close();
-    }
-    public void updateSymbolsInMongo(List<String> symbolList) throws Exception {
-        MongoDB mongo = new MongoDB();
-        
-        for (String symbol : symbolList) {
-            PosPat pp = PosPat.getPosPatFromSymbol(symbol);
-            if (pp!=null) {
-                mongo.updatePosPat(pp);
-            }
-        }
         mongo.close();
     }
     

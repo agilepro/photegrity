@@ -604,7 +604,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
     long duration = System.currentTimeMillis() - starttime;
     
     for (String tag : tagsCount.sortedKeys()) {
-        %><a href="show.jsp?q=g(<%=tag%>)"><span><%=tag%> (<%=tagsCount.getCount(tag)%>)</span></a><br/><%
+        %><a href="queryManip.jsp?q=g(<%=tag%>)"><span><%=tag%> (<%=tagsCount.getCount(tag)%>)</span></a><br/><%
     }
 %>
 </p>

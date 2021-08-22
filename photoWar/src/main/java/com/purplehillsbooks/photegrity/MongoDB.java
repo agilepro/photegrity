@@ -103,31 +103,18 @@ public class MongoDB {
         System.out.println("MONGO: removed "+dr.getDeletedCount()+" records disk=("+diskName+") path=("+path+") using "+filter.toString(0));
     }
     
-    public void updatePosPat(PosPat pp) throws Exception {
+    public void createPosPatRecord(PosPat pp, List<ImageInfo> imagesForPP) throws Exception {
         String symbol = pp.getSymbol();
-        
-        //this should identify the existing pos pat record for deleting it if exists
-        JSONObject filter = new JSONObject();
-        filter.put("symbol", symbol);
-        DeleteResult dr = pospatdb.deleteOne(Document.parse(filter.toString(2)));
-        System.out.println("MONGO: removed "+dr.getDeletedCount()+" records using "+filter.toString(0));
-        
-        //now add the new one for this symbol
-        JSONObject jo = pp.getFullMongoDoc();
-        InsertOneResult ior = pospatdb.insertOne(Document.parse(jo.toString(2)));
-        System.out.println("MONGO: added ("+ior.wasAcknowledged()+") record using "+jo.toString(2));
-        
-    }
-    public void createPosPatRecord(String symbol, List<ImageInfo> imagesForPP) throws Exception {
         
         //this should identify the existing pos pat record for deleting it if exists
         JSONObject filter = new JSONObject();
         filter.put("symbol", symbol);
         pospatdb.deleteOne(Document.parse(filter.toString(2)));
         
-        PosPat pp = PosPat.getPosPatFromSymbol(symbol);
         JSONObject jo = pp.getFullMongoDoc(imagesForPP);
-        pospatdb.insertOne(Document.parse(jo.toString(2)));
+        String rep = jo.toString(2);
+        //System.out.println("=============INSERTING===============\n"+rep+"\n=========================");
+        pospatdb.insertOne(Document.parse(rep));
     }
     
     private JSONObject parseQuery(String query) throws Exception {
@@ -189,6 +176,21 @@ public class MongoDB {
                     JSONObject condition = q.requireJSONObject("tags");
                     condition.put("$ne", val.toLowerCase());
                     queryAndList.put(q);
+                    break;
+                case 'k':  
+                    if ("hasSample".equals(val)) {
+                        condition = q.requireJSONObject("hasSample");
+                        condition.put("$eq", true);
+                        queryAndList.put(q);
+                    }
+                    else if ("noSample".equals(val)) {
+                        condition = q.requireJSONObject("hasSample");
+                        condition.put("$ne", true);
+                        queryAndList.put(q);
+                    }
+                    else{
+                        throw new JSONException("keyword 'hasSample' & 'noSample' supported.  Don't understand keyword:  "+val);
+                    }
                     break;
                 default:
                     throw new JSONException("secondary query elements must begin with a 'g' for tag, "
@@ -252,6 +254,7 @@ public class MongoDB {
             filter.put("pattern",  1);
             filter.put("symbol",  1);
             filter.put("imageCount",  1);
+            filter.put("totalSize",  1);
             Document df = Document.parse(filter.toString(0));
             resultSet.projection(df);
             

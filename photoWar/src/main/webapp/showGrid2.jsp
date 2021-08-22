@@ -141,17 +141,15 @@ $scope.dataSet = {
     
     
 %>
-<!DOCTYPE HTML>
-<html ng-app="bunchApp">
+<html>
 <head>
-<TITLE></TITLE>
-
+    <TITLE>GRID</TITLE>
+    <link href="lib/bootstrap.min.css" rel="stylesheet"/>
+    <link href="photoStyle.css" rel="stylesheet"/>
     <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="lib/ui-bootstrap-tpls.min.js"></script>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/bootstrap.min.js"></script>
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     
 <script>
 
@@ -172,6 +170,7 @@ $scope.dataSet = {
         $scope.singleRow = false;
         $scope.currentRow = <%=r%>;
         $scope.currentCol = <%=c%>;
+        $scope.totaltotal = 0;
         $scope.imageCount = {};
         var rowPoz = 0;
         
@@ -542,7 +541,7 @@ $scope.dataSet = {
 </head>
 
 
-<body ng-controller="bunchCtrl">
+<body  ng-app="bunchApp" ng-controller="bunchCtrl">
 
 
 
@@ -559,14 +558,11 @@ $scope.dataSet = {
 </style>
 
 
-<table class="spacey"><tr>
+<table><tr>
    <td>
-       <a href="main.jsp"><img src="home.gif" border="0"></a>
-   </td>
-   <td bgcolor="#FF0000">
       <a href="show.jsp?q=<%=queryOrderPart%>">S</a>
    </td><td>
-      <a href="analyzeQuery.jsp?q=<%=queryOrderPart%>">A</a>
+      <a href="analyzeQuery.jsp?q=<%=queryOrderPart%>" title="Analyze this query">A</a>
    </td><td>
       <a href="xgroups.jsp?q=<%=queryOrderNoMin%>">T</a>
    </td><td>
@@ -575,14 +571,12 @@ $scope.dataSet = {
       <a href="queryManip.jsp?q=<%=queryOrderPart%>">M</a>
    </td><td>
       <a href="manage.jsp?q=<%=queryOrderPart%>">I</a>
+   </td><td bgcolor="#FF0000">
+      <a href="showGrid2.jsp?query=<%=queryOrderPart%>">Grid</a>
    </td><td>
       <a href="compare.jsp">Compare</a>
    </td><td>
-      <a href="showRow.jsp?r=<%=r%>">Row</a>
-   </td><td>
-      <a href="showGrid.jsp?r=<%=r%>">Grid1</a>
-      ({{currentRow}} - {{allRows[currentRow]}}) 
-      ({{currentCol}} - {{allRows[currentRow]}}) 
+      ({{totaltotal}}) <%=query%>  
    </td></tr>
 </table>
 <div>
@@ -706,5 +700,12 @@ $scope.dataSet = {
 <button ng-click="xxx()">FindAllRows</button>
 <pre>{{showCols|json}}</pre>
 <pre>{{showRows|json}}</pre>
+<hr/>
+
+Query <input type="text" name="q" ng-model="query" style="width:400px"/>
+<button ng-click="refresh()">Refresh</button>
+
+<div style="height:200px"></div>
+
 </body>
 </html>

@@ -99,7 +99,7 @@
     if (lastPageIndex<0) {
         lastPageIndex = 0;
     }
-
+    int totalCount = sortedKeys.size();
     List<PosPat> displayedPatterns = new ArrayList<PosPat>();
     for (int i=dispMin; i<dispMax; i++) {
         if (i<sortedKeys.size()) {
@@ -112,8 +112,8 @@
     Random rand = new Random(System.currentTimeMillis());
     int imageLimit = 30;
 
-    String queryOrderPart = URLEncoder.encode(query,"UTF8")+"&o="+order;
-    String queryOrderFull = queryOrderPart+"&min="+dispMin;
+    String queryOrderNoMin = URLEncoder.encode(query,"UTF8")+"&o="+order;
+    String queryOrderPart = queryOrderNoMin+"&min="+dispMin;
 
 
     String zingpat = (String) session.getAttribute("zingpat");
@@ -130,7 +130,8 @@
 <html ng-app="fileApp">
 <head>
     <meta charset="UTF-8">
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <link href="photoStyle.css" rel="stylesheet">
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
     <TITLE>P <%=dispMin%>/<%=sortedKeys.size()%> <%= query %></TITLE>
@@ -177,34 +178,35 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
    <td>
       <a href="show.jsp?q=<%=queryOrderPart%>">S</a>
    </td><td>
-      <a href="analyzeQuery.jsp?q=<%=queryOrderPart%>">A</a>
+      <a href="analyzeQuery.jsp?q=<%=queryOrderPart%>" title="Analyze this query">A</a>
    </td><td>
-      <a href="xgroups.jsp?q=<%=queryOrderPart%>">T</a>
+      <a href="xgroups.jsp?q=<%=queryOrderNoMin%>">T</a>
    </td><td bgcolor="#FF0000">
-      <a href="allPatts.jsp?q=<%=queryOrderPart%>">P</a>
+      <a href="allPatts.jsp?q=<%=queryOrderNoMin%>">P</a>
    </td><td>
       <a href="queryManip.jsp?q=<%=queryOrderPart%>">M</a>
    </td><td>
       <a href="manage.jsp?q=<%=queryOrderPart%>">I</a>
    </td><td>
-      <a href="startGrid.jsp?q=<%=queryOrderPart%>&min=<%=dispMin%>">Grid</a>
+      <a href="showGrid2.jsp?query=<%=queryOrderPart%>">Grid</a>
    </td><td>
-      <%HTMLWriter.writeHtml(out,query);%>   #<%= symbolCount.size() %> -
-      <img src="pattSelect.gif"> [<%HTMLWriter.writeHtml(out,zingpat);%>]
+      <a href="compare.jsp">Compare</a>
+   </td><td>
+      (<%=totalCount%>) <%=query%>  
    </td></tr>
 </table>
 <a href="main.jsp"><img src="home.gif" border="0"></a>
 <a href="allPatts.jsp?q=s(1)">1</a>
 <a href="allPatts.jsp?q=s(2)">2</a>
 <a href="allPatts.jsp?q=s(3)">3</a>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=0<%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderNoMin%>&min=0<%=pictParam%>&<%=poPart%>">
             <img src="ArrowFRev.gif" border="0"></a>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=prevPage%><%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderNoMin%>&min=<%=prevPage%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowBack.gif" border="0"></a>
         <%= dispMin %> / <%= sortedKeys.size() %>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=dispMax%><%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderNoMin%>&min=<%=dispMax%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowFwd.gif" border="0"></a>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%= lastPageIndex %><%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderNoMin%>&min=<%= lastPageIndex %><%=pictParam%>&<%=poPart%>">
             <img src="ArrowFFwd.gif" border="0"></a>
 <%
     String extBase = thisBaseURL + "&min=" + dispMin;
@@ -228,6 +230,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
     for (PosPat pp : displayedPatterns) {
 
         String symbol = pp.getSymbol();
+        
         int count = symbolCount.getCount(symbol);
         
         int lastSlash = symbol.lastIndexOf("/");
@@ -335,10 +338,10 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
     </tr>
 </table>
 <a href="main.jsp"><img src="home.gif" border="0"></a>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=prevPage%><%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderNoMin%>&min=<%=prevPage%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowBack.gif" border="0"></a>
         <%= dispMin %> / <%= sortedKeys.size() %>
-        <a href="allPatts.jsp?q=<%=queryOrderPart%>&min=<%=dispMax%><%=pictParam%>&<%=poPart%>">
+        <a href="allPatts.jsp?q=<%=queryOrderNoMin%>&min=<%=dispMax%><%=pictParam%>&<%=poPart%>">
             <img src="ArrowFwd.gif" border="0"></a>
 <%
     if (showImages) {

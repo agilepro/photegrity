@@ -33,6 +33,9 @@
     int dispMin = UtilityMethods.defParamInt(request, "min", 0);
     String listName = "";
     String newGroup = UtilityMethods.getSessionString(session, "newGroup", "");
+    
+    String queryOrderNoMin = URLEncoder.encode(query,"UTF8")+"&o="+order;
+    String queryOrderPart = queryOrderNoMin+"&min="+dispMin;
 
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
@@ -79,24 +82,21 @@
 
 
 
-    Document e_html = DOMUtils.createDocument("html");
-    Element  e_head = DOMUtils.createChildElement(e_html, e_html.getDocumentElement(), "head");
-    Element  e_title = DOMUtils.createChildElement(e_html, e_head, "title", "M "+query);
-    Element  e_body9 = DOMUtils.createChildElement(e_html, e_html.getDocumentElement(), "body");
-    e_body9.setAttribute("BGCOLOR", "#FDF5E6");
-    Element  e_table9 = DOMUtils.createChildElement(e_html, e_body9,   "table");
+    Document e_html = DOMUtils.createDocument("div");
+
+    Element  e_table9 = DOMUtils.createChildElement(e_html, e_html.getDocumentElement(),   "table");
     e_table9.setAttribute("width", "800");
     Element  e_tr9    = DOMUtils.createChildElement(e_html, e_table9, "tr");
     Element  e_body   = DOMUtils.createChildElement(e_html, e_tr9,    "td");
 
     //Row 1
-    Element e_tr1 = topLine(e_html, e_body, (int) totalCount, query, queryOrder, "queryManip");
+    //Element e_tr1 = topLine(e_html, e_body, (int) totalCount, query, queryOrder, "queryManip");
 
 
     Element e_table1 = DOMUtils.createChildElement(e_html, e_body,   "hr");
 
     e_table1 = DOMUtils.createChildElement(e_html, e_body,   "table");
-    e_tr1    = DOMUtils.createChildElement(e_html, e_table1, "tr");
+    Element e_tr1    = DOMUtils.createChildElement(e_html, e_table1, "tr");
     Element e_td1 = DOMUtils.createChildElement(e_html, e_tr1,    "td");
     Element e_a   = DOMUtils.createChildElement(e_html, e_td1, "a", "Main ");
     e_a.setAttribute("href", "main.jsp");
@@ -334,6 +334,40 @@
 
 
     breakOutQuery(query, e_html, e_body, extras);
+%>
+<html>
+<head>
+    <title>M <%=query%></title>
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <link href="photoStyle.css" rel="stylesheet">
+    <script type="text/javascript" src="lib/angular.js"></script>
+    <script type="text/javascript" src="lib/ui-bootstrap-tpls.min.js"></script>
+    <script type="text/javascript" src="lib/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/bootstrap.min.js"></script>
+</head>
+<body>
+<table><tr>
+   <td>
+      <a href="show.jsp?q=<%=queryOrderPart%>">S</a>
+   </td><td>
+      <a href="analyzeQuery.jsp?q=<%=queryOrderPart%>" title="Analyze this query">A</a>
+   </td><td>
+      <a href="xgroups.jsp?q=<%=queryOrderNoMin%>">T</a>
+   </td><td>
+      <a href="allPatts.jsp?q=<%=queryOrderNoMin%>">P</a>
+   </td><td bgcolor="#FF0000">
+      <a href="queryManip.jsp?q=<%=queryOrderPart%>">M</a>
+   </td><td>
+      <a href="manage.jsp?q=<%=queryOrderPart%>">I</a>
+   </td><td>
+      <a href="showGrid2.jsp?query=<%=queryOrderPart%>">Grid</a>
+   </td><td>
+      <a href="compare.jsp">Compare</a>
+   </td><td>
+      (<%=totalCount%>) <%=query%>  
+   </td></tr>
+</table>
+<%
     DOMUtils.writeDom(e_html, out);
 %>
 <br/>
@@ -377,7 +411,7 @@ Query <input type="text" name="q" value="<%=query%>" style="width:400px"/>
         e_td1.appendChild(e_html.createTextNode(firstSegment));
         Element e_a      = DOMUtils.createChildElement(e_html, e_td1,    "a", midSegment);
         String queryExt = query + "g("+midSegment.toLowerCase()+")";
-        e_a.setAttribute("href", "show.jsp?q="+URLEncoder.encode(queryExt, "UTF8")+extras);
+        e_a.setAttribute("href", "queryManip.jsp?q="+URLEncoder.encode(queryExt, "UTF8")+extras);
         if (lastSegment != null) {
             e_td1.appendChild(e_html.createTextNode(lastSegment));
         }
@@ -410,3 +444,6 @@ Query <input type="text" name="q" value="<%=query%>" style="width:400px"/>
 
     }%>
 <%@ include file="functions.jsp"%>
+
+</body>
+</html>

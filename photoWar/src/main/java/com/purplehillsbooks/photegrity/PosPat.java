@@ -488,6 +488,8 @@ public class PosPat {
     
     public JSONObject getFullMongoDoc(List<ImageInfo> imageList) throws Exception {
         
+        String symbol = getSymbol();
+        
         JSONObject jo = new JSONObject();
         jo.put("disk", diskMgr.diskName);
         
@@ -507,10 +509,37 @@ public class PosPat {
         jo.put("totalSize", totalSize);
         
         JSONArray images = new JSONArray();
+        boolean hasSample = false;
+        int minVal = 9999;
+        int maxVal = 0;
+        int count = 0;
         for (ImageInfo ii : imageList) {
+            if (!symbol.equals(ii.pp.getSymbol())) {
+                //ignore any image passed that is not actually in this PosPat set
+                continue;
+            }
+            if (ii.value==-300) {
+                hasSample = true;
+            }
+            else if (ii.value>0) {
+                if (ii.value<minVal) {
+                    minVal = ii.value;
+                }
+                if (ii.value>maxVal) {
+                    maxVal = ii.value;
+                }
+            }
+            count++;
             images.put(ii.getJSON());
         }
+        if (images.length()==0) {
+            throw new Exception("Attempt to register a ImageSet without any actual images in it:  "+symbol);
+        }
         jo.put("images",  images);
+        jo.put("hasSample",  hasSample);
+        jo.put("max",  maxVal);
+        jo.put("min",  minVal);
+        jo.put("compactness", ((float)maxVal - (float)minVal)/count);
 
         return jo;
    }

@@ -61,6 +61,7 @@
             e_a = DOMUtils.createChildElement(e_html, e_td1, "a",  pieceq);
             e_a.setAttribute("href", "xgroups.jsp?q="+URLEncoder.encode(pieceq,"UTF8"));
 
+            e_td1    = DOMUtils.createChildElement(e_html, e_tr1,    "td");
             e_td1.appendChild(e_html.createTextNode(" patterns:"));
             e_a = DOMUtils.createChildElement(e_html, e_td1, "a",  piece);
             e_a.setAttribute("href", "masterPatts.jsp?s="+URLEncoder.encode(piece,"UTF8"));
@@ -69,13 +70,12 @@
             e_a = DOMUtils.createChildElement(e_html, e_td1, "a",  piece);
             e_a.setAttribute("href", "masterGroups.jsp?s="+URLEncoder.encode(piece,"UTF8"));
 
+
+            e_td1    = DOMUtils.createChildElement(e_html, e_tr1,    "td");
             for (DiskMgr dm : DiskMgr.getAllDiskMgr()) {
                 int count2 = (Integer) dm.getTagCount(piece);
                 if (count2 > 0) {
                     e_td1.appendChild(e_html.createTextNode("  |  "+dm.diskName+":"+count2+" "));
-                    e_a = DOMUtils.createChildElement(e_html, e_td1,   "a",  "load");
-                    e_a.setAttribute("href", "loaddisk.jsp?n="+dm.diskName+"&dest="+URLEncoder.encode(thisPageURL,"UTF8"));
-                    e_a.setAttribute("title", "Load into memory disk named "+dm.diskName);
                 }
             }
         }

@@ -71,7 +71,7 @@
         String tagName = (String) DiskMgr.masterGroups.get(n);
         if (!alreadyPrinted.equals(tagName)) {
         %>
-        <li> <a href="show.jsp?q=g(<%=URLEncoder.encode(tagName, "UTF-8")%>)"><%=tagName%> (<%=DiskMgr.globalTagCnts.getCount(tagName)%>)</a> .<%
+        <li> <a href="queryManip.jsp?q=g(<%=URLEncoder.encode(tagName, "UTF-8")%>)"><%=tagName%> (<%=DiskMgr.globalTagCnts.getCount(tagName)%>)</a> .<%
             alreadyPrinted = tagName;
         }
         else {

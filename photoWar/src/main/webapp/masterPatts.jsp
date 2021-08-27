@@ -83,7 +83,7 @@
             String g = (String) allPatts.get(n);
             if (!alreadyPrinted.equals(g)) {
             %>
-            <li> <a href="show.jsp?q=p(<%=URLEncoder.encode(g,"UTF8")%>)"><%=g%> (<%=DiskMgr.globalPattCnts.getCount(g)%>)</a></li><%
+            <li> <a href="queryManip.jsp?q=p(<%=URLEncoder.encode(g,"UTF8")%>)"><%=g%> (<%=DiskMgr.globalPattCnts.getCount(g)%>)</a></li><%
                 alreadyPrinted = g;
             }
             else {

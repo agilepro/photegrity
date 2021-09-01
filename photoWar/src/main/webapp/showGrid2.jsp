@@ -146,6 +146,7 @@ $scope.dataSet = {
     <TITLE>GRID</TITLE>
     <link href="lib/bootstrap.min.css" rel="stylesheet"/>
     <link href="photoStyle.css" rel="stylesheet"/>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="lib/angular.js"></script>
     <script type="text/javascript" src="lib/ui-bootstrap-tpls.min.js"></script>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
@@ -172,6 +173,8 @@ $scope.dataSet = {
         $scope.currentCol = <%=c%>;
         $scope.totaltotal = 0;
         $scope.imageCount = {};
+        $scope.showSample = true;
+        $scope.showIndex = true;
         var rowPoz = 0;
         
         $scope.fastConvert = {};
@@ -364,8 +367,17 @@ $scope.dataSet = {
             return res;
         }
         
+        function findSampleRow() {
+            for (var i=0; i<$scope.allRows.length; i++) {
+                if ($scope.allRows[i] == "-300") {
+                    return i;
+                }
+            }
+            return -1;
+        }
         
         $scope.setRow = function(rowTarget) {
+            console.log("Settings the Row: "+rowTarget);
             //make sure it is a valid index into allRows
             var maxRow = $scope.allRows.length;
             if (rowTarget > maxRow - $scope.ySize) {
@@ -375,19 +387,31 @@ $scope.dataSet = {
                 rowTarget=0;
             }
             
-            //calculate the stop
-            var max = rowTarget + $scope.ySize;
-            if (max > maxRow) {
-                max = maxRow;
+            //skip over the samples if any
+            if ($scope.allRows[rowTarget]=="-300") {
+                rowTarget++;
             }
             
             var finalList = [];
-            finalList.push($scope.allRows[rowTarget]);
-            var yCount = $scope.ySize-1;
+            var yCount = $scope.ySize;
+            
+            if ($scope.showSample && findSampleRow()>=0) {
+                finalList.push("-300");
+                yCount--;
+            }
+            var rowName = $scope.allRows[rowTarget];
+            if (rowName != "-300") {
+                finalList.push(rowName);
+                yCount--;
+            }
             var pos=rowTarget+1;
             while (yCount>0 && pos<$scope.allRows.length) {
                 var atLeastOne = false;
                 var rowName = $scope.allRows[pos];
+                if (rowName == "-300") {
+                    //skip the sample
+                    continue;
+                }
                 $scope.showCols.forEach( function(col) {
                     var image = $scope.imageOrDefault(col, rowName)[0];
                     if (!image.isDefault) {
@@ -402,6 +426,7 @@ $scope.dataSet = {
             }
             $scope.currentRow = rowTarget;
             $scope.showRows = finalList;
+            console.log("    new rows: ", finalList);
         }
         $scope.setCol = function(colTarget) {
             if ($scope.onlyPinned) {
@@ -532,6 +557,10 @@ $scope.dataSet = {
         $scope.refresh = function() {
             $scope.getData(true);
         }
+        $scope.toggleSample = function() {
+            $scope.showSample = !$scope.showSample;
+            $scope.setRow($scope.currentRow);
+        }
         
     });
     bunchApp.filter('encodeURIComponent', function() {
@@ -609,6 +638,9 @@ $scope.dataSet = {
     </td>
     <td>
     <button ng-hide="onlyPinned && pinCols.length==2" ng-click="refresh()">Refresh</button>
+    <button ng-hide="onlyPinned && pinCols.length==2" ng-click="toggleSample()">
+        <span ng-hide="showSample">Show</span>
+        <span ng-show="showSample">Hide</span> Sample</button> {{showSample}}
     </br>{{currentRow}}-{{currentCol}}
     </td>
     </tr></table>

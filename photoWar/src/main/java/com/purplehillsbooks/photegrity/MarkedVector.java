@@ -1,12 +1,18 @@
 package com.purplehillsbooks.photegrity;
 
+import java.util.List;
+import java.util.Random;
+
 @SuppressWarnings("serial")
 public class MarkedVector extends java.util.Vector<ImageInfo> {
 
-    private int markPos = -1;
+    private int     markPos = -1;
+    public  String  name;
+    public  String  id;
 
-    public MarkedVector() {
+    public MarkedVector(String newName) {
         super();
+        name = newName;
     }
 
     /**
@@ -77,6 +83,29 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
     private void normalizeMark() {
         if (markPos < 0 || markPos >= size()) {
             markPos = -1;
+        }
+    }
+    
+    Random rand = new Random();
+    public void pickUniqueId(List<MarkedVector> others) {
+        while (true) {
+            boolean found = false;
+            StringBuilder sb = new StringBuilder();
+            sb.append((char)(65+rand.nextInt(26)));
+            sb.append((char)(65+rand.nextInt(26)));
+            sb.append((char)(65+rand.nextInt(26)));
+            sb.append((char)(65+rand.nextInt(26)));
+            sb.append((char)(65+rand.nextInt(26)));
+            String trial = sb.toString();
+            for (MarkedVector mv : others) {
+                if (trial.equals(mv.id)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                id = trial;
+                return;
+            }
         }
     }
 

@@ -36,15 +36,23 @@ public class ImageInfo
     public static List<File> imageTrashCan = new ArrayList<File>();
     
     public static int MEMORY_SIZE = 20;
-    public static MarkedVector[] memory = {new MarkedVector(), new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector(), new MarkedVector(),
-                                           new MarkedVector(), new MarkedVector()};
+    
+    public static ArrayList<MarkedVector> customLists = new ArrayList<MarkedVector>();
+    
     public static Random randGen = new Random();
+    
+    
+    public static void initialize() {
+        synchronized(customLists) {
+            if (customLists.size()==0) {
+                for (int i=10; i<30; i++) {
+                    MarkedVector mv = new MarkedVector("Mem"+i);
+                    mv.pickUniqueId(customLists);
+                    customLists.add(mv);
+                }
+            }
+        }
+    }
     
     /**
     * Used only for Null Images
@@ -305,9 +313,7 @@ public class ImageInfo
     static public void garbageCollect()
         throws Exception
     {
-        for (int i=0; i<memory.length; i++) {
-            memory[i] = new MarkedVector();
-        }
+        customLists.clear();
 
         // take care of peer classes
         PosPat.clearAllCache();
@@ -358,16 +364,13 @@ public class ImageInfo
         throws Exception
     {
         // just in case this is part of a selection
-        for (int i=0; i<memory.length; i++) {
-            memory[i].remove(this);
+        for (MarkedVector mv : customLists) {
+            mv.remove(this);
         }
     }
 
 
-    public synchronized void suppressImage()
-        throws Exception
-    {
-        //TODO: replace this with a File object
+    public synchronized void suppressImage() throws Exception {
         File fPath = this.getFilePath();
         System.out.println("SUPPRESSING Image: "+fPath);
         
@@ -377,7 +380,8 @@ public class ImageInfo
 
             unPlugImage();
 
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             throw new JSONException("Unable to suppress image {0}/{1}", e, fPath, fileName);
         }
     }
@@ -634,12 +638,12 @@ public class ImageInfo
                 throw new Exception("Can not understand memory query, missing closing paren?: "+query);
             }
             String numVal = query.substring(2,closePos);
-            int memoryNum = UtilityMethods.safeConvertInt(numVal);
-            if (memoryNum<1 || memoryNum>20) {
-                throw new Exception("Can not understand memory query, expect num between 1 and 20: "+query);
+            for (MarkedVector mv : ImageInfo.customLists) {
+                if (mv.id.equals(numVal)) {
+                    return mv;
+                }
             }
-            MarkedVector mem = memory[memoryNum-1];
-            return mem;
+            throw new Exception("Do not understand memory id: "+numVal);
         }
         long startTime = System.currentTimeMillis();
         MongoDB mongo = new MongoDB();
@@ -802,13 +806,29 @@ public class ImageInfo
     public static void emptyTrashCan() throws Exception {
         Set<File> locCleanup = new HashSet<File>();
         for (File f : imageTrashCan) {
-            ImageInfo ii = ImageInfo.genFromFile(f);
-            locCleanup.add(ii.pp.getFolderPath());
-            File filePath = ii.getFilePath();
-            filePath.delete();
+            if (f.exists()) {
+                try {
+                    ImageInfo ii = ImageInfo.genFromFile(f);
+                    locCleanup.add(ii.pp.getFolderPath());
+                    File filePath = ii.getFilePath();
+                    filePath.delete();
+                }
+                catch (Exception e) {
+                    //if something fails trying to delete something in the trashcan, then ignore it, and forget it
+                }
+            }
         }
         imageTrashCan.clear();
         DiskMgr.refreshFolders(locCleanup);
+    }
+    
+    
+    public List<MarkedVector> getCustomLists() {
+        return customLists;
+    }
+    public void addCustomeList(String name) {
+        MarkedVector newMV = new MarkedVector(name);
+        newMV.pickUniqueId(customLists);
     }
     
 }

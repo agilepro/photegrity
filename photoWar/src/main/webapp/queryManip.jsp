@@ -367,10 +367,12 @@
       (<%=totalCount%>) <%=query%>  
    </td></tr>
 </table>
+<% generateMemButtons(out); %>
 <%
     DOMUtils.writeDom(e_html, out);
 %>
 <br/>
+<% generateStoreButtons(out, query); %>
 <form method="get" action="queryManip.jsp">
 Query <input type="text" name="q" value="<%=query%>" style="width:400px"/>
 <button type="submit">Search</button>

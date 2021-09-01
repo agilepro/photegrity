@@ -183,14 +183,32 @@
 
 
     public MarkedVector findMemoryBank(HttpServletRequest request) throws Exception {
-        int set = UtilityMethods.defParamInt(request, "set", 1);
-        if (set<1) {
-            throw new Exception("memory banks are numbered 1 thru 6, and '"+set+"' is too small.");
+        String set = UtilityMethods.defParam(request, "set", ImageInfo.customLists.get(0).id);
+        return findMemoryById(set);
+    }
+    public MarkedVector findMemoryById(String set) throws Exception {
+        for (MarkedVector mv : ImageInfo.customLists) {
+            if (mv.id.equals(set)) {
+                return mv;
+            }
         }
-        if (set>6) {
-            throw new Exception("memory banks are numbered 1 thru 6, and '"+set+"' is too large.");
+        throw new Exception("Unable to find a memory with id: "+set);
+    }
+    
+    public void generateMemButtons(Writer out) throws Exception {
+        for (int i=0; i<5; i++) {
+            MarkedVector mv = ImageInfo.customLists.get(i);
+            out.write("<a class=\"membutt\" href=\"sel.jsp?set="+mv.id+"\" target=\"sel"+mv.id+"\">"+mv.name+"</a>");
         }
-        return ImageInfo.memory[set-1];
+    }
+    public void generateStoreButtons(Writer out, String query) throws Exception {
+        for (int i=0; i<5; i++) {
+            MarkedVector mv = ImageInfo.customLists.get(i);
+            out.write("<a class=\"memdel\" href=\"clearSelection.jsp?set="+mv.id
+                +"\" target=\"sel"+mv.id+"\">X</a>"
+                +"<a class=\"membutt\" href=\"selectQuery.jsp?set="+mv.id+"&q="
+                +URLEncoder.encode(query)+"\" target=\"sel"+mv.id+"\">TO: "+mv.name+"</a>");
+        }
     }
 
     public void displayThumbnail(Writer out, ImageInfo ii, int thumbsize)

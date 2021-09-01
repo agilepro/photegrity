@@ -23,14 +23,14 @@ public class NewsActionShrink extends NewsAction {
     public NewsActionShrink(String _query) throws Exception {
         query = _query;
         groupImages = new ArrayList<ImageInfo>();
-        Vector<ImageInfo> origOrder = ImageInfo.imageQuery(query);
+        //Vector<ImageInfo> origOrder = ImageInfo.imageQuery(query);
         
         //now scramble them so that they are not done in the same order every time
-        Random r = new Random();
-        while (origOrder.size()>0) {
-            int randomIndex = r.nextInt(origOrder.size());
-            groupImages.add( origOrder.remove(randomIndex) );
-        }
+        //Random r = new Random();
+        //while (origOrder.size()>0) {
+        //    int randomIndex = r.nextInt(origOrder.size());
+        //    groupImages.add( origOrder.remove(randomIndex) );
+        //}
     }
 
     /**

@@ -27,23 +27,23 @@
     String query = UtilityMethods.reqParam(request, pageName, "q");
 
     String dest = request.getParameter("dest");
-    String order = UtilityMethods.reqParam(request, pageName, "o");
+    String order = UtilityMethods.defParam(request, "o", "name");
 
     Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
     groupImages.addAll(ImageInfo.imageQuery(query));
     ImageInfo.sortImages(groupImages, order);
 
     //reset the counter to the beginning
-    Vector mem = findMemoryBank(request);
+    MarkedVector group = findMemoryBank(request);
 
     int lastNum = 0;
     int count = 0;
     for (ImageInfo ii : groupImages) {
-        mem.addElement(ii);
+        group.addElement(ii);
         count++;
     }
-    if (dest == null) {
-        dest = "selection.jsp?msg=Added%20"+count+"%20Files";
+    if (dest==null) {
+        dest = "sel.jsp?set="+group.id;
     }
     response.sendRedirect(dest);
 %>

@@ -12,6 +12,7 @@
 <%@page import="java.util.Enumeration" %>
 <%@page import="java.util.Hashtable" %>
 <%@page import="java.util.Vector" %>
+<%@page import="java.util.ArrayList" %>
 
 <%
     request.setCharacterEncoding("UTF-8");
@@ -34,9 +35,12 @@
         listName = "";
     }
 
-    int set = UtilityMethods.defParamInt(request, "set", 1);
-    MarkedVector group = ImageInfo.memory[set-1];
+    ArrayList<MarkedVector> customLists = new ArrayList<MarkedVector>();
 
+
+    MarkedVector group = findMemoryBank(request);
+    String set = group.id;
+    
     int startPos = group.getMarkPosition();
 
     int dispMin = UtilityMethods.defParamInt(request, "min", startPos);
@@ -87,15 +91,14 @@
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
-<HEAD><TITLE>Set <%=set%> (<%= group.size() %> images)</TITLE></HEAD>
+<HEAD><TITLE>Set <%=set%> (<%= group.size() %> images)</TITLE>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="photoStyle.css" rel="stylesheet">
+</HEAD>
 <BODY BGCOLOR="#FDF5E6">
 
 <a href="main.jsp"><img src="home.gif"></a>
-<a href="sort.jsp?set=1" target="sel1">1</a>
-<a href="sort.jsp?set=2" target="sel2">2</a>
-<a href="sort.jsp?set=3" target="sel3">3</a>
-<a href="sort.jsp?set=4" target="sel4">4</a>
-<a href="sort.jsp?set=5" target="sel5">5</a>
+
         <a href="sort.jsp?set=<%=set%>&min=0">
             <img src="ArrowFRev.gif" border="0"></a>
         <a href="sort.jsp?set=<%=set%>&min=<%=prevPage%>">
@@ -112,48 +115,64 @@ Set <%=set%> - (<%= group.size() %> images)
 (<a href="sel.jsp?set=<%=set%>&min=<%=dispMin%>">list</a>)
 <a href="show.jsp?q=s(<%=set%>)&o=none">S</a><br/>
 
-
+<table><tr>
 <%
     boolean showedImage = false;
-    while (e0.hasMoreElements() )
-    {
-        totalCount++;
-        ImageInfo i0 = (ImageInfo)e0.nextElement();
-
-        if (totalCount < dispMin) {
-            continue;
-        }
-        if (totalCount >= dispMax) {
-            continue;
-        }
-
-
+    ImageInfo i0 = null;
+    if (dispMin<group.size()) {
+        i0 = group.get(dispMin);
+    }
+    group.setMarkPosition(dispMin);
+    String chosenId = "" + group.id;
+    if (i0!=null) {
         String imageURL = i0.getRelPath();
 
-        %><a href="photo/<%=imageURL%>" target="photo">
+        %><td><a href="photo/<%=imageURL%>" target="photo">
               <img src="photo/<%=imageURL%>"
-                   height="350" border="0"></a><br/><%
+                   height="350" border="0"></a><br/></td><%
 
         showedImage = true;
-        group.setMarkPosition(dispMin);
-
-        String editPage = "compedit.jsp?set="+set+"&pos="+totalCount+"&min="
-                          +dispMin+"&go="+thisPageEncoded;
-
-        %>
-
-
-        <%if(!i0.isNullImage()){%>
-        <a href="pattern.jsp?g=<%= URLEncoder.encode(i0.getPattern(),"UTF8") %>"><%= i0.getPattern() %></a>
-            <%= i0.value %>
-            <a href="photo/<%=i0.getRelPath()%>" target="photo">
-                <%= i0.tail %></a>
-        <%}%>
-        (<%= i0.fileSize %>)
-        </tr>
-<%
-        out.flush();
+        int trailer = dispMin;
+        if (++trailer < group.size()) {
+            imageURL = group.get(trailer).getRelPath();
+            %><td><a href="photo/<%=imageURL%>" target="photo">
+                  <img src="thumb/100/<%=imageURL%>"
+                       height="100" border="0"></a><br/></td><%
+        }
+        if (++trailer < group.size()) {
+            imageURL = group.get(trailer).getRelPath();
+            %><td><a href="photo/<%=imageURL%>" target="photo">
+                  <img src="thumb/100/<%=imageURL%>"
+                       height="100" border="0"></a><br/></td><%
+        }
+        if (++trailer < group.size()) {
+            imageURL = group.get(trailer).getRelPath();
+            %><td><a href="photo/<%=imageURL%>" target="photo">
+                  <img src="thumb/100/<%=imageURL%>"
+                       height="100" border="0"></a><br/></td><%
+        }
+        if (++trailer < group.size()) {
+            imageURL = group.get(trailer).getRelPath();
+            %><td><a href="photo/<%=imageURL%>" target="photo">
+                  <img src="thumb/100/<%=imageURL%>"
+                       height="100" border="0"></a><br/></td><%
+        }
     }
+
+    %>
+    </tr></table>
+
+
+    <%if(i0!=null){%>
+    <a href="pattern.jsp?g=<%= URLEncoder.encode(i0.getPattern(),"UTF8") %>"><%= i0.getPattern() %></a>
+        <%= i0.value %>
+        <a href="photo/<%=i0.getRelPath()%>" target="photo">
+            <%= i0.tail %></a>
+       (<%= i0.fileSize %>)
+    <%}%>
+<%
+    out.flush();
+
     if (!showedImage)
     {
         %><img src="photo/unknown.jpg"  height="350" border="0"><br/>no photo at this position in set.<%
@@ -163,40 +182,55 @@ Set <%=set%> - (<%= group.size() %> images)
 <table><tr>
 <%
     int rowCount=0;
-    for (int i=1; i<=ImageInfo.MEMORY_SIZE; i++)
-    {
+    int iii = 0;
+    for (int i=1; i<=ImageInfo.customLists.size(); i++){
+        MarkedVector destSet = ImageInfo.customLists.get(i-1);
+        if (chosenId.equals(destSet.id)) {
+            continue;
+        }
         rowCount++;
-        if (set == i)
-        {
-            %>
-            <td></td>
-            <%
-        }
-        else
-        {
-            MarkedVector destSet = ImageInfo.memory[i-1];
-            int mpos = destSet.getMarkPosition();
-            if (mpos==-1 || mpos>=destSet.size())
-            {
-                mpos=destSet.size()-1;
-            }
-            String imagePath = "default.jpg";
-            if (mpos>-1)
-            {
-                ImageInfo sample = (ImageInfo) destSet.get(mpos);
-                imagePath = sample.getRelPath();
-            }
-            String editPage = "compedit.jsp?set="+set+"&pos="+dispMin+"&min="
-                               +dispMin+"&go="+thisPageEncoded;
 
-            %>
-            <td><%=i%> <a href="<%=editPage%>&op=<%=i%>"><img src="addicon.gif" border="0"></a>
-                <a href="sort.jsp?set=<%=i%>">swap</a> <img src="removeicon.gif" border="0"><br/>
-              <a href="photo/<%=imagePath%>" target="photo">
-                 <img src="thumb/100/<%=imagePath%>" width="<%=thumbsize%>" border="0"></a></td>
-            <%
+            
+        int mpos = destSet.getMarkPosition();
+        if (mpos==-1 || mpos>=destSet.size()) {
+            mpos=destSet.size()-1;
         }
-        if (rowCount>=7)
+        int mpos2 = mpos;
+        int mpos3 = mpos;
+        if (mpos>1) {
+            mpos2=0;
+            mpos3=1;
+        }
+        String imagePath1 = "default.jpg";
+        String imagePath2 = "default.jpg";
+        String imagePath3 = "default.jpg";
+        if (mpos>-1) {
+            ImageInfo sample = (ImageInfo) destSet.get(mpos);
+            imagePath1 = sample.getRelPath();
+            sample = (ImageInfo) destSet.get(mpos2);
+            imagePath2 = sample.getRelPath();
+            sample = (ImageInfo) destSet.get(mpos3);
+            imagePath3 = sample.getRelPath();
+        }
+        String editPage = "compedit.jsp?set="+set+"&pos="+dispMin+"&min="
+                           +dispMin+"&go="+thisPageEncoded;
+
+        %>
+        <td style="padding:5px"><%=i%> 
+          <a href="<%=editPage%>&op=Move&dest=<%=destSet.id%>"><img src="addicon.gif" border="0"></a>
+          <a href="sort.jsp?set=<%=destSet.id%>">swap</a> 
+          <img src="removeicon.gif" border="0">
+          <span><%=destSet.name%> (<%=destSet.id%>)</span><br/>
+          <a href="photo/<%=imagePath1%>" target="photo">
+             <img src="thumb/100/<%=imagePath1%>" width="<%=thumbsize%>" border="0"></a>
+          <a href="photo/<%=imagePath2%>" target="photo">
+             <img src="thumb/100/<%=imagePath2%>" width="<%=thumbsize%>" border="0"></a>
+          <a href="photo/<%=imagePath3%>" target="photo">
+             <img src="thumb/100/<%=imagePath3%>" width="<%=thumbsize%>" border="0"></a>
+        </td>
+        <%
+        
+        if (rowCount>2)
         {
             %></tr><tr><%
             rowCount=0;

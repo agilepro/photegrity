@@ -95,7 +95,7 @@ public class APIServlet extends javax.servlet.http.HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        //don't initialize here.  Instead, initialize in SpringServlet!
+        ImageInfo.initialize();
     }
 
     

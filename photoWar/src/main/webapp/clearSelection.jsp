@@ -19,20 +19,12 @@
         return;
     }
     String dest = request.getParameter("dest");
-    int set = UtilityMethods.defParamInt(request, "set", 1);
+    MarkedVector group = findMemoryBank(request); 
 
-    if (set<1) {
-        throw new Exception("memory banks are numbered 1 thru "+ImageInfo.MEMORY_SIZE+", and '"+set+"' is too small.");
-    }
-    if (set>ImageInfo.MEMORY_SIZE) {
-        throw new Exception("memory banks are numbered 1 thru "+ImageInfo.MEMORY_SIZE+", and '"+set+"' is too large.");
-    }
-    MarkedVector mem = ImageInfo.memory[set-1];
-
-    mem.clear();
-    if (dest == null)
-    {
-        dest = "selection.jsp?msg=Selection%20Cleared";
+    group.clear();
+    if (dest==null) {
+        dest = "sel.jsp?set="+group.id;
     }
     response.sendRedirect(dest);
 %>
+<%@ include file="functions.jsp"%>

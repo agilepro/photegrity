@@ -132,6 +132,7 @@
     <meta charset="UTF-8">
     <link href="lib/bootstrap.min.css" rel="stylesheet">
     <link href="photoStyle.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="lib/angular.js"></script>
     <script src="lib/ui-bootstrap-tpls-0.12.0.js"></script>
     <TITLE>P <%=dispMin%>/<%=sortedKeys.size()%> <%= query %></TITLE>

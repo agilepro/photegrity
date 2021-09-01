@@ -73,8 +73,8 @@
 
     String lastPath = "";
     Hashtable groupMap = new Hashtable();
-    MarkedVector group0 = ImageInfo.memory[columnA-1];
-    MarkedVector group1 = ImageInfo.memory[columnB-1];
+    MarkedVector group0 = ImageInfo.customLists.get(columnA-1);
+    MarkedVector group1 = ImageInfo.customLists.get(columnB-1);
     int marka = group0.getMarkPosition();
     int markb = group1.getMarkPosition();
     int sizea = group0.size();

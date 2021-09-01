@@ -38,7 +38,7 @@
 
     String lastPath = "";
     Hashtable groupMap = new Hashtable();
-    MarkedVector group = ImageInfo.memory[set-1];
+    MarkedVector group = findMemoryBank(request);
     if (pos < 0) {
         throw new Exception("Position in selection set is negative");
     }
@@ -87,33 +87,18 @@
     else if (op.equals("chooseB")) {
         session.setAttribute("columnB", new Integer(set));
     }
+    else if (op.equals("Move")) {
+        String dest = UtilityMethods.defParam(request, "dest", ImageInfo.customLists.get(0).id);
+        MarkedVector destination = findMemoryById(dest);
+        ImageInfo temp = group.elementAt(pos);
+        group.removeElementAt(pos);
+        destination.insertAtMark(temp);        
+    }
     else
-    {
-        found = false;
-    }
-
-    int setNo = 0;
-    while (!found && setNo<ImageInfo.MEMORY_SIZE)
-    {
-        setNo++;
-        if (op.equals(Integer.toString(setNo)))
-        {
-            found=true;
-            doMove(pos, setNo-1, group);
-        }
-    }
-    if (!found)
     {
         throw new Exception("unrecognized operation op="+op);
     }
 
     response.sendRedirect(go);
 %>
-<%!public void doMove(int pos, int dest, MarkedVector group)
-    throws Exception
-{
-    ImageInfo temp = (ImageInfo) group.elementAt(pos);
-    group.removeElementAt(pos);
-    ImageInfo.memory[dest].insertAtMark(temp);
-}%>
 <%@ include file="functions.jsp"%>

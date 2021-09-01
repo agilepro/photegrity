@@ -1,8 +1,11 @@
-<%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1" %>
-<%@page isErrorPage="true" %>
-<%@page import="com.purplehillsbooks.photegrity.UtilityMethods" %>
-<%@page import="java.io.PrintWriter"
+<%@page contentType="text/html;charset=UTF-8" pageEncoding="ISO-8859-1" 
+%><%@page isErrorPage="true" 
+%><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
+%><%@page import="java.io.PrintWriter"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.json.JSONObject"
+%><%@page import="com.purplehillsbooks.json.JSONArray"
+%><%@page import="com.purplehillsbooks.json.JSONException"
 %>
 
 <%
@@ -12,6 +15,7 @@
         exception = new Exception("<<Unknown exception arrived at the error page ... this should never happen. The exception variable was null.>>");
     }
     String msg = exception.toString();
+    JSONObject jo = JSONException.convertToJSON(exception, "Error JSP");
 %>
 
 
@@ -27,13 +31,7 @@ Exception: <% HTMLWriter.writeHtml(out,msg); %>
 <a href="main.jsp"><img src="home.gif"></a>
 <a href="config.jsp">Config</a>
 <pre>
-<%
-   out.flush();
-   PrintWriter pw = new PrintWriter(out);
-   exception.printStackTrace(pw);
-   pw.flush();
-
-   %>
+<%=jo.toString(2)%>
 </pre>
 <hr/>
 </BODY>

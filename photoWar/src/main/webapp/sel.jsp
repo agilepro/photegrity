@@ -50,7 +50,6 @@
     if (moveDest == null) {
         moveDest = "";
     }
-    int set = UtilityMethods.defParamInt(request, "set", 1);
 
     int thumbsize = UtilityMethods.getSessionInt(session, "thumbsize", 100);
     Vector destVec = (Vector) session.getAttribute("destVec");
@@ -62,7 +61,8 @@
     String lastPath = "";
     Hashtable groupMap = new Hashtable();
 
-    MarkedVector group = ImageInfo.memory[set-1];
+    MarkedVector group = findMemoryBank(request);
+    String set = group.id;
 
     Enumeration e0 = group.elements();
     int totalCount = -1;
@@ -82,16 +82,14 @@
 <HTML>
 <HEAD>
 <TITLE>Set <%=set%> (<%= group.size() %> images)</TITLE>
-<link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <link href="photoStyle.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 </HEAD>
 <BODY BGCOLOR="#FDF5E6">
 
 <a href="main.jsp"><img src="home.gif"></a>
-<a href="sel.jsp?set=1" target="sel1">1</a>
-<a href="sel.jsp?set=2" target="sel2">2</a>
-<a href="sel.jsp?set=3" target="sel3">3</a>
-<a href="sel.jsp?set=4" target="sel4">4</a>
-<a href="sel.jsp?set=5" target="sel5">5</a>
+<% generateMemButtons(out); %>
         <a href="sel.jsp?set=<%=set%>&min=<%=prevPage%>"><img src="ArrowBack.gif" borderwidth="0"></a>
         <%= dispMin %>
         <a href="sel.jsp?set=<%=set%>&min=<%=dispMax%>"><img src="ArrowFwd.gif" borderwidth="0"></a>
@@ -141,9 +139,9 @@ Clear:
                    <a href="<%=editPage%>&op=setMark<% if (totalCount!=mark) { %>&mark=<%=totalCount%><%}%>">mark</a><br>
 <%
         for (int i=1; i<=5; i++) {
-            if (set != i) {
+            //if (set != i) {
             %><a href="<%=editPage%>&op=<%=i%>">&gt;<%=i%></a> <%
-            }
+            //}
         }
         %><a href="sort.jsp?set=<%=set%>&min=<%=totalCount%>">sort</a><%
 %><br>

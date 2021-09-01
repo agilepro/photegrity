@@ -4,6 +4,7 @@
 %><%@page import="com.purplehillsbooks.photegrity.HashCounter"
 %><%@page import="com.purplehillsbooks.photegrity.PatternInfo"
 %><%@page import="com.purplehillsbooks.photegrity.ImageInfo"
+%><%@page import="com.purplehillsbooks.photegrity.MarkedVector"
 %><%@page import="com.purplehillsbooks.photegrity.UtilityMethods"
 %><%@page import="com.purplehillsbooks.photegrity.MongoDB"
 %><%@page import="java.io.File"
@@ -284,11 +285,7 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
     <tr valign="top"><td colspan="7">
         <table><tr><td>
             <a href="main.jsp"><img src="home.gif" border="0"></a>
-            <a href="sel.jsp?set=1" target="sel1">1</a>
-            <a href="sel.jsp?set=2" target="sel2">2</a>
-            <a href="sel.jsp?set=3" target="sel3">3</a>
-            <a href="sel.jsp?set=4" target="sel4">4</a>
-            <a href="sel.jsp?set=5" target="sel5">5</a>
+<% generateMemButtons(out); %>
         </td><td>
         <a href="<%=queryOrder%>&min=<%=prevPage%><%=pictParam%>"><img src="ArrowBack.gif" border="0"></a>
         <%=dispMin%> / <%=recordCount%>
@@ -535,9 +532,9 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
 </tr>
 <tr>
     <form action="selectQuery.jsp" method="get">
-        <td> <input type="submit" name="set" value="1">
-            <input type="submit" name="set" value="2">
-            <input type="submit" name="set" value="3">
+        <td>
+<% generateStoreButtons(out, query); %>
+
             <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
             <input type="hidden" name="o" value="<%=order%>">
             <input type="hidden" name="dest" value="show.jsp?<%=requestURL%>">
@@ -613,3 +610,5 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
 </BODY>
 </HTML>
 
+
+<%@ include file="functions.jsp"%>

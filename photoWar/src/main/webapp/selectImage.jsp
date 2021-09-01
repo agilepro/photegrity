@@ -31,7 +31,7 @@
         throw new Exception("page needs a 'p' parameter to specify the path");
     }
     ImageInfo ii = ImageInfo.findImage(disk, path, fileName);
-    Vector mem = findMemoryBank(request);
+    MarkedVector mem = findMemoryBank(request);
     mem.addElement(ii);
     response.sendRedirect("sel.jsp?msg=Added%201%20File");
 %>

@@ -33,3 +33,15 @@ a:link {
 a:visited {
     color: #440044;
 }
+.membutt {
+    border: 1px green solid;
+    border-radius: 10px;
+    padding-left:5px;
+    padding-right:5px;
+}
+.memdel {
+    border: 1px red solid;
+    border-radius: 10px;
+    padding-left:5px;
+    padding-right:5px;
+}

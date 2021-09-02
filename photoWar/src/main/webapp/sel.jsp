@@ -151,7 +151,7 @@ Clear:
             <a href="photo/<%=i0.getRelPath()%>" target="photo">
                 <%= i0.tail %></a>
         <%}%><br>
-        (<%= i0.fileSize %>)
+        (<%= i0.getFileSize() %>)
         </tr>
 <%
 

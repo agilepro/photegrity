@@ -606,11 +606,10 @@ public class DiskMgr {
      * a new or changed disambiguation token. The actual file name used is
      * returned.
      */
-    public String moveFileToDisk(DiskMgr fromDisk, String fromPath, String fileName, File toPath)
+    public String moveFileToDisk(DiskMgr fromDisk, File fPath, String fileName, File toPath)
             throws Exception {
         try {
             assertOnDisk(toPath);
-            File fPath = new File(fromPath);
 
             // suppress moves to the same location
             if (diskName.equalsIgnoreCase(fromDisk.diskName)
@@ -654,7 +653,7 @@ public class DiskMgr {
         }
         catch (Exception e) {
             throw new JSONException("Unable to moveFileTo fromDisk={0}, fromPath={1}, fileName={2}, toPath={3}",
-                    e, fromDisk.diskName, fromPath, fileName, toPath);
+                    e, fromDisk.diskName, fPath.getAbsolutePath(), fileName, toPath);
         }
     }
 

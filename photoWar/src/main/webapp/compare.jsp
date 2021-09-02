@@ -240,7 +240,7 @@ if (false) {%>
                 <%= i1.tail %></a>
         <%}%>
         </td><td>
-        </td><td>(<%= i0.fileSize %>)<br>(<%= i1.fileSize %>)
+        </td><td>(<%= i0.getFileSize() %>)<br>(<%= i1.getFileSize() %>)
         </tr>
 <%
 }

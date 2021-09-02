@@ -90,7 +90,7 @@
 
 
     %><%
-        if (lastSize == ii.fileSize) {
+        if (lastSize == ii.getFileSize()) {
             if (lastImage.value == ii.value || allNumbers) {
                 if (newGroup) {
                     bunch.addElement(lastImage);
@@ -147,7 +147,7 @@
             bunch.clear();
         }
 
-        lastSize = ii.fileSize;
+        lastSize = ii.getFileSize();
         lastImage = ii;
     }
 %>

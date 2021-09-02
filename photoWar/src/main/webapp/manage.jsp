@@ -76,7 +76,7 @@
         imageURL = "photo/"+ii.getRelPath();
         thumbURL = "thumb/"+bigSize+"/"+ii.getRelPath();
         pattern  = ii.getPattern();
-        iFileSize = ii.fileSize;
+        iFileSize = ii.getFileSize();
         imageGroups = ii.getTagNames();
     }
 

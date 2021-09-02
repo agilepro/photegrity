@@ -168,7 +168,7 @@ Set <%=set%> - (<%= group.size() %> images)
         <%= i0.value %>
         <a href="photo/<%=i0.getRelPath()%>" target="photo">
             <%= i0.tail %></a>
-       (<%= i0.fileSize %>)
+       (<%= i0.getFileSize() %>)
     <%}%>
 <%
     out.flush();

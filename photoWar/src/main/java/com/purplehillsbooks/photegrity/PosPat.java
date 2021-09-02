@@ -504,7 +504,7 @@ public class PosPat {
         jo.put("imageCount", imageList.size());
         long totalSize = 0;
         for (ImageInfo ii : imageList) {
-            totalSize = totalSize + ii.fileSize;
+            totalSize = totalSize + ii.getFileSize();
         }
         jo.put("totalSize", totalSize);
         

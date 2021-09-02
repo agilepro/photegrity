@@ -65,7 +65,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
 
             renameFile(tempFile, originalFile, "rename the temp file to the original file name");
 
-            ii.fileSize = (int) originalFile.length();
+            ii.actuallyExists();
         }
     }
 

@@ -25,7 +25,7 @@ public class ImageInfo
     public int     value;    // numeric value of this file name -300,-200,-100,-10 thru +999
     public String  tail;     // rest of the file name after the number
 
-    public int    fileSize;
+    private int    fileSize;
     private Vector<String> tagNames;
     public int    randomValue;  //each image is assigned a random value for random sorting
 
@@ -80,7 +80,7 @@ public class ImageInfo
         randomValue = randGen.nextInt(1000000000);
 
         fileName = filePath.getName();
-        fileSize = (int) filePath.length();
+        fileSize = -1;
 
         File parentFolder = filePath.getParentFile();
         String relativePath = diskMgr.getRelativePath(parentFolder);
@@ -94,7 +94,6 @@ public class ImageInfo
                 throw new JSONException("File does not exist: ({0})", filePath.getAbsolutePath());
             }
             ImageInfo ii = new ImageInfo(filePath);
-            ii.fileSize = (int) filePath.length();
             return ii;
         }
         catch (Exception e) {
@@ -141,13 +140,6 @@ public class ImageInfo
         return pp.getLocalPath();
     }
 
-    /**
-    * @deprecated use getFilePath instead
-    */
-    public String getFullPath() throws Exception {
-        return DiskMgr.fixSlashes(diskMgr.getFilePath(getRelativePath()).toString()+"/");
-    }
-
     public File getFolderPath() throws Exception {
         return pp.getFolderPath();
     }
@@ -168,6 +160,29 @@ public class ImageInfo
     */
     public String fileSizeStr() {
         return Integer.toString(fileSize);
+    }
+    
+    /**
+     * Call this to access the folder and determine
+     * if the file exists.   Also loads the file size.
+     */
+    public boolean actuallyExists() {
+        File filePath = getFilePath();
+        if (filePath.exists()) {
+            fileSize = (int) filePath.length();
+            return true;
+        }
+        fileSize = -1;
+        return false;
+    }
+    public int getFileSize() {
+        if (fileSize<0) {
+            File filePath = getFilePath();
+            if (filePath.exists()) {
+                fileSize = (int) filePath.length();
+            }
+        }
+        return fileSize;
     }
 
 
@@ -410,7 +425,6 @@ public class ImageInfo
         dm2.assertOnDisk(destFolder);
         String newFolderPath = dm2.getRelativePath(destFolder);
         File oldPath = getFilePath();
-        String oldFolderPath = getFullPath();
         try {
             deleteThumbnails();
             if (!oldPath.exists()) {
@@ -420,7 +434,7 @@ public class ImageInfo
             {
                 pp = PosPat.findOrCreate(dm2, newFolderPath, getPattern());
 
-                fileName = dm2.moveFileToDisk(diskMgr, oldFolderPath, fileName, destFolder);
+                fileName = dm2.moveFileToDisk(diskMgr, oldPath, fileName, destFolder);
                 diskMgr = dm2;
                 unsplit();
                 initializeInternals(newFolderPath);

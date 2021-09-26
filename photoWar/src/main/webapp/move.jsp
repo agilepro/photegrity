@@ -80,7 +80,7 @@
         locCleanup.add(ii.pp.getFolderPath());
         
         out.write("\n<li> ");
-        HTMLWriter.writeHtml(out, ii.getFullPath());
+        HTMLWriter.writeHtml(out, ii.getFilePath().getAbsolutePath());
         out.write("/");
         HTMLWriter.writeHtml(out, ii.fileName);
         out.write("<br>\n");

@@ -1,4 +1,3 @@
 #JSP Test Configuration Storage
 #Sun Jan 02 16:56:47 PST 2011
-DBDir=h\:/z/.y/
-LocalDir=xx
+DBDir=/opt/ImageData/

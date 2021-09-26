@@ -86,7 +86,7 @@ Testing:<%if (isTest) {out.write("yes");} else {out.write("no");}%>
             if (isDash=='-' && isNum>='0' && isNum<='9')
             {
                 String newName = oldname.substring(0,namelen-6) + ".jpg";
-                File newFile = new File(ii.getFullPath(),newName);
+                File newFile = new File(ii.getFilePath().getAbsolutePath(),newName);
                 out.write("\n<li>");
                 HTMLWriter.writeHtml(out, oldname);
                 out.write(" --- ");

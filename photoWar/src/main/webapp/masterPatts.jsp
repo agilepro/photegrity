@@ -35,7 +35,10 @@
     int n = UtilityMethods.defParamInt(request, "n", 0);
 
     String search = request.getParameter("s");
-    if (search != null) {
+    if (search == null) {
+        search = "";
+    }
+    else {
         int min = 0;
         int max = listMax;
         while (max - min > 1) {
@@ -66,7 +69,10 @@
 <table>
 <tr><td>
 <a href="main.jsp"><img src="home.gif"></a></td><td>
-<form method="get" action="masterPatts.jsp"><input type="text" name="s"><input type="submit" value="Search"></form>
+<form method="get" action="masterPatts.jsp">
+<input type="text" name="s" value="<%=search%>">
+<input type="submit" value="Search">
+</form>
 
 </tr></table>
 <table><tr>

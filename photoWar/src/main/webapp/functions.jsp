@@ -196,6 +196,9 @@
     }
     
     public void generateMemButtons(Writer out) throws Exception {
+        if (ImageInfo.customLists==null|ImageInfo.customLists.size()<5) {
+            throw new Exception("ImageInfo.customLists has not been initialized correctly.");
+        }
         for (int i=0; i<5; i++) {
             MarkedVector mv = ImageInfo.customLists.get(i);
             out.write("<a class=\"membutt\" href=\"sel.jsp?set="+mv.id+"\" target=\"sel"+mv.id+"\">"+mv.name+"</a>");

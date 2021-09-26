@@ -55,7 +55,7 @@ public class PosPat {
             pathTags.add(possTag);
         }
         for (String possTag : parsePathTags(diskMgr.diskNameLowerCase)) {
-            pathTags.add(possTag);
+            pathTags.add(possTag+"~");
         }
     }
 
@@ -198,52 +198,14 @@ public class PosPat {
      * Find all PosPat objects with a given pattern
      */
     public static List<PosPat> findAllPattern(String _pattern) {
-        throw new RuntimeException("not implemented");
-        /*
-        int pos = findFirstEntryWithPattern(ppIndex, _pattern);
-        Vector<PosPat> res = new Vector<PosPat>();
-        while (true) {
-            if (pos>=ppIndex.size()) {
-                return res;
-            }
-            PosPat pp = ppIndex.get(pos);
-            int comp = _pattern.compareToIgnoreCase(pp.pattern);
-            if (comp<0) {
-                //no more entries with this pattern, nothing found
-                return res;
-            }
-            if (_pattern.equalsIgnoreCase(pp.pattern) && pp.imageCount>0) {
-                res.add(pp);
-            }
-            pos++;
-        }
-        */
+        throw new RuntimeException("findAllPattern not implemented, should be recreated as a DB Query");
     }
 
     /**
      * Find all PosPat objects with a given pattern
      */
     public static int countAllPatternOnDisk(DiskMgr dm, String _pattern) {
-        throw new RuntimeException("not implemented");
-        /*
-        int pos = findFirstEntryWithPattern(ppIndex, _pattern);
-        int count = 0;
-        while (true) {
-            if (pos>=ppIndex.size()) {
-                return count;
-            }
-            PosPat pp = ppIndex.get(pos);
-            int comp = _pattern.compareToIgnoreCase(pp.pattern);
-            if (comp<0) {
-                //no more entries with this pattern, nothing found
-                return count;
-            }
-            if (_pattern.equalsIgnoreCase(pp.pattern) && dm.equals(pp.getDiskMgr())) {
-                count += pp.getImageCount();
-            }
-            pos++;
-        }
-        */
+        throw new RuntimeException("countAllPatternOnDisk not implemented, should be recreated as a DB Query");
     }
 
 
@@ -444,6 +406,23 @@ public class PosPat {
         return imageList;
     }
     
+    public List<JSONObject> getImageRecords() throws Exception {
+        String symbol = getSymbol();
+        MongoDB mongo = new MongoDB();
+        String query = "x("+symbol+")";
+        JSONArray listOfOne = mongo.querySets(query);
+        if (listOfOne.length()<1) {
+            throw new Exception("Could not find any records for this pospat: "+symbol);
+        }
+        JSONObject pp = listOfOne.getJSONObject(0);
+        JSONArray images = pp.getJSONArray("images");
+        
+        List<JSONObject> imageList =  new ArrayList<JSONObject>();
+        for (JSONObject image : images.getJSONObjectList()) {
+            imageList.add(image);
+        }
+        return imageList;
+    }
     public List<ImageInfo> getImagesFromDB() throws Exception {
         String symbol = getSymbol();
         MongoDB mongo = new MongoDB();

@@ -40,8 +40,9 @@
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
     HashCounter symbolCount = new HashCounter();
+    HashCounter sizeTotal = new HashCounter();
     MongoDB mongo = new MongoDB();
-    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount, sizeTotal);
     mongo.close();
 
     String extras = "&o="+order+"&min="+dispMin;
@@ -306,6 +307,7 @@
         int lastPos=0;
         boolean atLeastOne = false;
         while (start<loc.length()) {
+            boolean isDisk = false;
             int nextPos = loc.length();
             int tPos = loc.indexOf("/", start);
             if (tPos > -1 && tPos < nextPos) {
@@ -314,6 +316,7 @@
             tPos = loc.indexOf(":", start);
             if (tPos > -1 && tPos < nextPos) {
                 nextPos = tPos;
+                isDisk = true;
             }
             tPos = loc.indexOf(".", start);
             if (tPos > -1 && tPos < nextPos) {
@@ -321,13 +324,13 @@
             }
             lastStart = start;
             lastPos = nextPos;
-            if (detail(e_html, e_table1, query, extras, loc, start, nextPos, alreadyDone, false)) {
+            if (detail(e_html, e_table1, query, extras, loc, start, nextPos, alreadyDone, false, isDisk)) {
                 atLeastOne = true;
             }
             start = nextPos+1;
         }
         if (!atLeastOne) {
-            detail(e_html, e_table1, query, extras, loc, lastStart, lastPos, alreadyDone, true);
+            detail(e_html, e_table1, query, extras, loc, lastStart, lastPos, alreadyDone, true, false);
         }
 
     }
@@ -383,7 +386,7 @@ Query <input type="text" name="q" value="<%=query%>" style="width:400px"/>
     HashCounter pathCount;
 
     public boolean detail(Document e_html, Element e_table1, String query, String extras,
-                       String loc, int slashPos, int dotPos, Hashtable alreadyDone, boolean force)
+                       String loc, int slashPos, int dotPos, Hashtable alreadyDone, boolean force, boolean isDisk)
         throws Exception
     {
         String firstSegment = loc.substring(0,slashPos);
@@ -412,7 +415,11 @@ Query <input type="text" name="q" value="<%=query%>" style="width:400px"/>
         //e_td1.setAttribute("width", "300");
         e_td1.appendChild(e_html.createTextNode(firstSegment));
         Element e_a      = DOMUtils.createChildElement(e_html, e_td1,    "a", midSegment);
-        String queryExt = query + "g("+midSegment.toLowerCase()+")";
+        String mid = midSegment.toLowerCase();
+        if (isDisk) {
+            mid = mid + "~";
+        }
+        String queryExt = query + "g("+mid+")";
         e_a.setAttribute("href", "queryManip.jsp?q="+URLEncoder.encode(queryExt, "UTF8")+extras);
         if (lastSegment != null) {
             e_td1.appendChild(e_html.createTextNode(lastSegment));

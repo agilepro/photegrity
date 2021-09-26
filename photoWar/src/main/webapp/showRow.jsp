@@ -173,7 +173,7 @@
         }
         oneColumn.put("fileName", sii.getString("fileName"));
         oneColumn.put("relPath",sii.getString("path"));
-        oneColumn.put("fullPath", sii.getFullPath());
+        oneColumn.put("fullPath", sii.getFilePath().getAbsolutePath());
         oneColumn.put("patt", sii.getString("pattern"));
         oneColumn.put("symbol", sii.getString("symbol"));
         oneColumn.put("disk", sii.getString("disk"));
@@ -562,7 +562,7 @@
     <%
             if (sii!=null) {
                 String encodedName = URLEncoder.encode(sii.fileName,"UTF8");
-                String encodedPath = URLEncoder.encode(sii.getFullPath(),"UTF8");
+                String encodedPath = URLEncoder.encode(sii.getFilePath().getAbsolutePath(),"UTF8");
                 String encodedDisk = URLEncoder.encode(sii.pp.getDiskMgr().diskName,"UTF8");
                 String stdParams = "d="+encodedDisk+"&fn="+encodedName+"&p="+encodedPath;
                 String trashIcon = "trash.gif";

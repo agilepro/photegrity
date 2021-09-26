@@ -47,7 +47,6 @@
     props.load(fis);
 
     String[] dirArray = UtilityMethods.splitOnDelimiter((String)props.get("DBDir"), ';');
-    String[] locArray = UtilityMethods.splitOnDelimiter((String)props.get("LocalDir"), ';');
 
     Enumeration e = props.keys();
 %>
@@ -66,7 +65,7 @@
 %>
 
     Directory <%=i%>:  <input type="text" name="dir<%=i%>" value="<%=dirArray[i]%>">
-                  <input type="text" name="loc<%=i%>" value="<%=locArray[i]%>">
+                  
                   <input type="radio" name="del" value="<%=i%>"><br>
 <%
     }

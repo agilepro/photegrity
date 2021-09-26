@@ -20,28 +20,21 @@
         return;
     }
 
-    String sDiskName = UtilityMethods.reqParam(request, "shrinkOne.jsp", "d");
     String sPath = UtilityMethods.reqParam(request, "shrinkOne.jsp", "p");
     String go = UtilityMethods.reqParam(request, "shrinkOne.jsp", "go");
     String sFileName = UtilityMethods.reqParam(request, "shrinkOne.jsp", "fn");
+    File fullPath = new File(sPath);
 
-    DiskMgr dm1 = DiskMgr.getDiskMgr(sDiskName);
-    ImageInfo ii = ImageInfo.findImage(sDiskName, sPath, sFileName);
+    ImageInfo ii = ImageInfo.genFromFile(fullPath);
 
     if (ii == null) {
-        throw new Exception ("cant find an image with d="+sDiskName+",  fn="+sFileName);
+        throw new Exception ("cant find an image at path: "+sPath);
     }
-    if (!ii.fileName.equalsIgnoreCase(sFileName))
-    {
+    if (!ii.fileName.equalsIgnoreCase(sFileName)) {
         throw new Exception ("Found an image, but file name ("+ii.fileName+") does not match ("+sFileName+")");
     }
-    if (!ii.getFullPath().equalsIgnoreCase(sPath))
-    {
-        throw new Exception ("Found an image, but path ("+ii.getFullPath()+") does not match ("+sPath+")");
-    }
-    if (!ii.pp.getDiskMgr().diskName.equalsIgnoreCase(sDiskName))
-    {
-        throw new Exception ("Found an image, but disk name name ("+ii.pp.getDiskMgr().diskName+") does not match ("+sDiskName+")");
+    if (!ii.getFilePath().getAbsolutePath().equalsIgnoreCase(sPath)) {
+        throw new Exception ("Found an image, but path ("+ii.getFilePath().getAbsolutePath()+") does not match ("+sPath+")");
     }
 
     Thumb.shrinkFile(ii);

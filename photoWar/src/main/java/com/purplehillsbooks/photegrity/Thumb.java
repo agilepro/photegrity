@@ -31,6 +31,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
 
         File originalFile = new File(cacheDir, fileName);
         File tempFile = new File(cacheDir, fileName + ".temp");
+        System.out.println("Starting to SHRINK: "+originalFile.getAbsolutePath());
 
 
         // only one file operation on an image should run at a time
@@ -47,14 +48,15 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             // the old file.
             long originalSize = originalFile.length();
             if (originalSize < (tempFile.length() * 1.1)) {
+                System.out.println("    fail SHRINKING: "+originalFile.getAbsolutePath());
+                System.out.println("           oldfile: "+originalSize);
+                System.out.println("      newfile size: "+tempFile.length());
                 tempFile.delete();
                 return;
             }
 
-            // there appears to be a bug which creates blank shrunken files,
-            // which are
-            // about 12K in size. That is too small to be a real photo, so
-            // reject the
+            // there appears to be a bug which creates blank shrunken files, which are
+            // about 12K in size. That is too small to be a real photo, so reject the
             // shrink on this basis.
             if (tempFile.length() < 15000) {
                 tempFile.delete();
@@ -66,6 +68,7 @@ public class Thumb extends javax.servlet.http.HttpServlet {
             renameFile(tempFile, originalFile, "rename the temp file to the original file name");
 
             ii.actuallyExists();
+            System.out.println("    done SHRINKING: "+originalFile.getAbsolutePath());
         }
     }
 

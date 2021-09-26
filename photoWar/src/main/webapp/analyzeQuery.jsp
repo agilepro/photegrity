@@ -71,6 +71,7 @@
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
     HashCounter symbolCount = new HashCounter();
+    HashCounter sizeTotal = new HashCounter();
 
     Vector destVec = (Vector) session.getAttribute("destVec");
     if (destVec == null) {
@@ -80,7 +81,7 @@
     String queryOrderPart = URLEncoder.encode(query,"UTF8")+"&o="+order+"&min="+dispMin;
 
     MongoDB mongo = new MongoDB();
-    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount, sizeTotal);
     mongo.close();
     
 %>

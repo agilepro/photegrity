@@ -60,9 +60,10 @@
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
     HashCounter symbolCount = new HashCounter();
+    HashCounter sizeTotal = new HashCounter();
 
     MongoDB mongo = new MongoDB();
-    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount, sizeTotal);
     mongo.close();
 
     List<String> sortedGroups = groupCount.sortedKeys();

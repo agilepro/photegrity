@@ -71,7 +71,7 @@
         }
         fileName = ii.fileName;
         diskName = ii.pp.getDiskMgr().diskNameLowerCase;
-        path     = ii.getFullPath();
+        path     = ii.getFilePath().getAbsolutePath();
         relPath  = ii.getRelativePath();
         imageURL = "photo/"+ii.getRelPath();
         thumbURL = "thumb/"+bigSize+"/"+ii.getRelPath();
@@ -353,7 +353,7 @@ NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHt
 </tr>
 <tr>
     <td>getFullPath():</td>
-    <td><%HTMLWriter.writeHtml(out, ii.getFullPath());%></td>
+    <td><%HTMLWriter.writeHtml(out, ii.getFilePath().getAbsolutePath());%></td>
 </tr>
 <tr>
     <td>getRelativePath():</td>

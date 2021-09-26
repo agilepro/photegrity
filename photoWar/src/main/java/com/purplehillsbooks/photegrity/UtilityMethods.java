@@ -24,6 +24,9 @@ public class UtilityMethods {
     }
 
     static public String[] splitOnDelimiter(String str, char delim) throws Exception {
+        if (str==null) {
+            throw new Exception("Program Logic Error: splitOnDelimiter called with a null string!");
+        }
         try {
             Vector<String> vec = new Vector<String>();
             int pos = 0;

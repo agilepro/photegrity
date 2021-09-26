@@ -11,7 +11,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.InsertOneResult;
 import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
@@ -21,7 +20,7 @@ import com.purplehillsbooks.json.JSONObject;
  */
 public class MongoDB {
 
-    public final String uri = "mongodb://localhost:27017";
+    public final String uri = "mongodb://192.168.1.23:27017";
     MongoClient mongoClient;
     MongoDatabase db;
     MongoCollection<org.bson.Document> pospatdb;
@@ -162,7 +161,7 @@ public class MongoDB {
                 case 'b':
                     //pattern must not equal this value
                     JSONObject negp = q.requireJSONObject("pattern");
-                    negp.put("$ne", val.toLowerCase());
+                    negp.put("$ne", val);
                     queryAndList.put(q);
                     break;
                 case 's':   
@@ -228,34 +227,34 @@ public class MongoDB {
         }
     }
     
-    public void findStatsForDisk(String diskName, HashCounter tags, HashCounter patterns, HashCounter symbols) throws Exception {
+    public void findStatsForDisk(String diskName, HashCounter tags, HashCounter patterns, HashCounter symbols, HashCounter fileSize) throws Exception {
         //no filter, means you get the entire database
         JSONObject filter = new JSONObject();
         filter.put("disk", diskName);
         
-        queryStats(filter, tags, patterns, symbols);        
+        queryStats(filter, tags, patterns, symbols, fileSize);        
     }
     
-    public void queryStatistics(String query, HashCounter tags, HashCounter patterns, HashCounter symbols) throws Exception {
+    public void queryStatistics(String query, HashCounter tags, HashCounter patterns, HashCounter symbols, HashCounter fileSize) throws Exception {
         JSONObject mongoQuery = parseQuery(query);
-        queryStats(mongoQuery, tags, patterns, symbols);
+        queryStats(mongoQuery, tags, patterns, symbols, fileSize);
     }
     
     
-    public void queryStats(JSONObject mongoQuery, HashCounter tags, HashCounter patterns, HashCounter symbols) throws Exception {
+    public void queryStats(JSONObject mongoQuery, HashCounter tags, HashCounter patterns, HashCounter symbols, HashCounter fileSize) throws Exception {
         System.out.println("MONGO: query statistics for: "+mongoQuery.toString(0));
         try {
 
             Document dq = Document.parse(mongoQuery.toString(0));
             FindIterable<Document> resultSet = pospatdb.find(dq);
             
-            JSONObject filter = new JSONObject();
-            filter.put("tags",  1);
-            filter.put("pattern",  1);
-            filter.put("symbol",  1);
-            filter.put("imageCount",  1);
-            filter.put("totalSize",  1);
-            Document df = Document.parse(filter.toString(0));
+            JSONObject projection = new JSONObject();
+            projection.put("tags",  1);
+            projection.put("pattern",  1);
+            projection.put("symbol",  1);
+            projection.put("imageCount",  1);
+            projection.put("totalSize",  1);
+            Document df = Document.parse(projection.toString(0));
             resultSet.projection(df);
             
             MongoCursor<Document> cursor = resultSet.iterator();
@@ -269,6 +268,12 @@ public class MongoDB {
                 if (jo.has("imageCount")) {
                     imageCount = jo.getInt("imageCount");
                 }
+
+                int kiloBytes = 0;
+                if (jo.has("totalSize")) {
+                    kiloBytes = jo.getInt("totalSize")/1000;
+                }
+                
                 String pattern = jo.getString("pattern");
                 patterns.changeBy(pattern, imageCount);
                 
@@ -278,6 +283,7 @@ public class MongoDB {
                 JSONArray tagArray = jo.getJSONArray("tags");
                 for (String tagValue : tagArray.getStringList()) {
                     tags.changeBy(tagValue, imageCount);
+                    fileSize.changeBy(tagValue, kiloBytes);
                 }
             }
         }

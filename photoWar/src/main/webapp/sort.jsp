@@ -127,9 +127,10 @@ Set <%=set%> - (<%= group.size() %> images)
     if (i0!=null) {
         String imageURL = i0.getRelPath();
 
-        %><td><a href="photo/<%=imageURL%>" target="photo">
+        %><td>
+            <div style="width:350px;height:350px"><a href="photo/<%=imageURL%>" target="photo">
               <img src="photo/<%=imageURL%>"
-                   height="350" border="0"></a><br/></td><%
+                   style="max-height:350px;max-width:350px" border="0"></a></div></td><%
 
         showedImage = true;
         int trailer = dispMin;

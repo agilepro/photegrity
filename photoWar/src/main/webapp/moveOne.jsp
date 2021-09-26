@@ -55,7 +55,7 @@
         throw new Exception ("cant find an image with d="+sDiskName+",  fn="+sFileName);
     }
     if (ii.fileName.equals(sFileName) &&
-        ii.getFullPath().equals(sPath) &&
+        ii.getFilePath().getAbsolutePath().equals(sPath) &&
         ii.diskMgr.diskName.equals(sDiskName)) {
         ii.moveImage(disk2, dm2.extraPath + destPath);
     }

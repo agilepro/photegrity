@@ -19,6 +19,7 @@ import javax.servlet.ServletContext;
 
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
+import com.purplehillsbooks.streams.StreamHelper;
 
 public class DiskMgr {
     public String diskName;
@@ -37,11 +38,13 @@ public class DiskMgr {
     public HashCounter allSymbolCnts = null;
     public HashCounterIgnoreCase allTagCnts = null;
     public HashCounter allPattCnts = null;
+    public HashCounter allSize = null;
 
     //across all disks
     public static HashCounter globalSymbolCnts = null;
     public static HashCounterIgnoreCase globalTagCnts = null;
     public static HashCounter globalPattCnts = null;
+    public static HashCounter globalSize = null;
     
     private static Hashtable<String, DiskMgr> diskList = null;
     private static Vector<File> newsFiles = null;
@@ -58,22 +61,33 @@ public class DiskMgr {
     
     public static void initPhotoServer(ServletContext sc) throws Exception {
         
-        String configPath = sc.getRealPath("/config.txt");
 
-        File f = new File(configPath);
-        if (!f.exists()) {
-            throw new JSONException("Did not find file '{0}'", f.getAbsolutePath());
+        File configFile = new File(sc.getRealPath("/config.txt"));
+        if (!configFile.exists()) {
+            //get the default copy, and put it in place
+            File configBackup = new File(sc.getRealPath("/config_copy.txt"));
+            if (!configBackup.exists()) {
+                throw new JSONException("Did not find file '{0}' or the default copy of it either", configFile.getAbsolutePath());
+            }
+            StreamHelper.copyFileToFile(configBackup, configFile);
+            if (!configFile.exists()) {
+                throw new JSONException("Did not find file '{0}' and unable to create it either", configFile.getAbsolutePath());
+            }
         }
-        FileInputStream fis = new FileInputStream(f);
+        FileInputStream fis = new FileInputStream(configFile);
         Properties props = new Properties();
         props.load(fis);
 
         String dbdir = (String) props.get("DBDir");
         rootFolder = new File(dbdir);
+
+        System.out.println("PHOTO: image rootFolder found at: "+rootFolder.getAbsolutePath());
+        
         if (!rootFolder.exists()) {
             throw new Exception("The main root data folder does not exist: "+rootFolder.getAbsolutePath());
         }
-        thumbPath = new File(rootFolder,"thumbs");
+        
+        thumbPath = new File(rootFolder.getParentFile(),"_thumbs");
         if (!thumbPath.exists()) {
             thumbPath.mkdir();
         }
@@ -94,12 +108,14 @@ public class DiskMgr {
         globalSymbolCnts = new HashCounter();
         globalTagCnts    = new HashCounterIgnoreCase();
         globalPattCnts   = new HashCounter();
+        globalSize       = new HashCounter();
         
         for (String diskName : diskList.keySet()) {
             DiskMgr oneMgr = diskList.get(diskName);
             globalSymbolCnts.addAll(oneMgr.allSymbolCnts);
             globalTagCnts.addAll(oneMgr.allTagCnts);
             globalPattCnts.addAll(oneMgr.allPattCnts);
+            globalSize.addAll(oneMgr.allSize);
         }
         
         masterGroups = globalTagCnts.sortedKeys();
@@ -144,42 +160,15 @@ public class DiskMgr {
             }
             
             System.out.println("--Constructing DiskMgr ("+mainFolder+") at ("+(new Date())+")");
-
-/*
-            File f1 = new File(mainFolder,"stats.txt");
-            if (f1.exists()) {
-                FileReader fr = new FileReader(f1);
-                LineNumberReader lnr = new LineNumberReader(fr);
-
-                lnr.readLine(); //old diskcount value, is always 0 now
-                lnr.readLine(); //old diskSize value, is always 0 now
-                extraCount = Integer.parseInt(lnr.readLine());
-                extraSize = Long.parseLong(lnr.readLine());
-                fr.close();
-            }
-            */
-
-            /*
-            HashCounterIgnoreCase allPosPat = new HashCounterIgnoreCase();
-            allPosPat.loadFromFile(new File(mainFolder, "posPat.txt"));
-            for (String key : allPosPat.keySet()) {
-                int afterSlash = key.lastIndexOf("/")+1;
-                if (afterSlash<1) {
-                    //corrupted value?  ignore it?
-                    continue;
-                }
-                PosPat pp = PosPat.addWithoutSorting(this, key.substring(0,afterSlash), key.substring(afterSlash));
-                pp.setImageCount(allPosPat.getCount(key));
-            }
-            PosPat.sortIndex();
-            */
             
             allSymbolCnts = new HashCounter();
             allTagCnts    = new HashCounterIgnoreCase();
             allPattCnts   = new HashCounter();
+            allSize   = new HashCounter();
             
             MongoDB mongo = new MongoDB();
-            mongo.findStatsForDisk(diskName, allTagCnts, allPattCnts, allSymbolCnts);
+            mongo.findStatsForDisk(diskName, allTagCnts, allPattCnts, allSymbolCnts, allSize);
+            System.out.println("PHOTO: for disk ("+diskName+") found "+allTagCnts.size()+", "+allPattCnts.size()+", "+allSymbolCnts.size());
             mongo.close();
             
             String simpleKey = diskNameLowerCase;
@@ -187,8 +176,9 @@ public class DiskMgr {
             if (dotPos>0) {
                 simpleKey = simpleKey.substring(0,dotPos);
             }
-            extraCount = allTagCnts.getCount(simpleKey);
-            System.out.println("    set extraCount to "+extraCount);
+            extraCount = allTagCnts.getCount(simpleKey+"~");
+            extraSize = allSize.getCount(simpleKey+"~");
+            System.out.println("    set extraCount to "+extraCount+", and size to "+extraSize);
         }
         catch (Exception e) {
             throw new JSONException("Can't construct a DiskMgr object for {0}",e,diskPath.getAbsolutePath());
@@ -224,19 +214,14 @@ public class DiskMgr {
      * equal to the beginning of others.  So the longest match must be found.
      */
     public static DiskMgr findDiskMgrFromPath(File path) {
-        String store = path.toString().toLowerCase();
-        int longestFound = 0;
-        DiskMgr foundDm = null;
+        String store = path.getAbsolutePath().toLowerCase();
         for (DiskMgr dm : getAllDiskMgr()) {
-            String dmPath = dm.mainFolder.toString().toLowerCase();
+            String dmPath = dm.mainFolder.getAbsolutePath().toLowerCase();
             if (store.startsWith(dmPath)) {
-                if (dmPath.length() > longestFound) {
-                    longestFound = dmPath.length();
-                    foundDm = dm;
-                }
+                return dm;
             }
         }
-        return foundDm;
+        return null;
     }
 
 
@@ -331,6 +316,9 @@ public class DiskMgr {
         if (children==null) {
             throw new JSONException("there is apparently no folder named: {0}", rootFolder.getAbsolutePath());
         }
+        if (children.length==0) {
+            System.out.println("PHOTO: the rootFolder folder has NOTHING in it: "+rootFolder.getAbsolutePath());
+        }
 
         for (File cfile : children) {
             String diskName = cfile.getName();
@@ -351,6 +339,7 @@ public class DiskMgr {
                 continue;
             }
 
+            System.out.println("PHOTO: installing images from: "+cfile.getAbsolutePath());
             tempTable.put(diskName.toLowerCase(), new DiskMgr(cfile));
         }
 
@@ -533,12 +522,9 @@ public class DiskMgr {
 
 
     /**
-     * Suppress the file. Either delete the file if it is in the extra
-     * directory, or else make an entry in the supp.txt file in order to hide it
-     * from future manipulations.
+     * Deletes the file after checking that it makes sense
      */
-    public void suppressFile(File theFile) throws Exception {
-        assertOnDisk(theFile);
+    public static void suppressFile(File theFile) throws Exception {
         try {
             if (!theFile.exists()) {
                 return; // the file is already gone
@@ -558,9 +544,8 @@ public class DiskMgr {
             }
         }
         catch (Exception e) {
-            throw new JSONException("Unable to suppress file disk={0}, fullpath={1}", e, diskName, theFile);
+            throw new JSONException("Unable to suppress file fullpath={0}", e, theFile.getAbsolutePath());
         }
-        isChanged = true;
     }
 
     public void assertOnDisk(File fromPath) throws Exception {
@@ -606,41 +591,28 @@ public class DiskMgr {
      * a new or changed disambiguation token. The actual file name used is
      * returned.
      */
-    public String moveFileToDisk(DiskMgr fromDisk, File fPath, String fileName, File toPath)
+    public static String moveFileToNewFolder(String fileName, File sourceFolder, File destFolder)
             throws Exception {
         try {
-            assertOnDisk(toPath);
 
             // suppress moves to the same location
-            if (diskName.equalsIgnoreCase(fromDisk.diskName)
-                    && toPath.equals(fPath)) {
+            if (destFolder.equals(sourceFolder)) {
                 return fileName; // nothing to do
             }
 
-            String newToName = findSuitableName(toPath, fileName);
+            String newToName = findSuitableName(destFolder, fileName);
 
-            File toFile = new File(toPath, newToName);
-            File fromFile = new File(fPath, fileName);
+            File toFile = new File(destFolder, newToName);
+            File fromFile = new File(sourceFolder, fileName);
             if (toFile.exists()) {
                 throw new JSONException(
-                    "New logic of findSuitableName should assure that the destination file does not exist:{0}",
-                            toFile);
+                    "Logic of findSuitableName should assure that the destination file does not exist:{0}",
+                            toFile.getAbsolutePath());
             }
 
-            toPath.mkdirs();
-            FileInputStream fis = new FileInputStream(fromFile);
-            FileOutputStream fos = new FileOutputStream(toFile);
-            byte[] buff = new byte[8192];
-            int amt = fis.read(buff);
-            while (amt > 0) {
-                fos.write(buff, 0, amt);
-                amt = fis.read(buff);
-            }
-            fis.close();
-            fos.close();
-
-            fromDisk.suppressFile(fromFile);
-            isChanged = true;
+            destFolder.mkdirs();
+            StreamHelper.copyFileToFile(fromFile, toFile);
+            DiskMgr.suppressFile(fromFile);
 
             if (!toFile.exists()) {
                 throw new JSONException("New file did not get created during copy?!? {0}",toFile);
@@ -652,8 +624,8 @@ public class DiskMgr {
             return newToName;
         }
         catch (Exception e) {
-            throw new JSONException("Unable to moveFileTo fromDisk={0}, fromPath={1}, fileName={2}, toPath={3}",
-                    e, fromDisk.diskName, fPath.getAbsolutePath(), fileName, toPath);
+            throw new JSONException("Unable to moveFileToNewFolder fileName={1}, fromPath={0}, toPath={2}",
+                    e, sourceFolder.getAbsolutePath(), fileName, destFolder.getAbsolutePath());
         }
     }
 
@@ -662,13 +634,13 @@ public class DiskMgr {
      * always z & y 0 == z 2==yz 4==yzz 6==yyz 8==yzzz 1 == y 3==yy 5==yzy
      * 7==yyy 9==yzzy
      */
-    private String deconflictingToken(int val) {
+    private static String deconflictingToken(int val) {
         StringBuffer res = new StringBuffer(8);
         addDigit(res, val);
         return res.toString();
     }
 
-    private void addDigit(StringBuffer res, int val) {
+    private static void addDigit(StringBuffer res, int val) {
         int bit = val % 2;
         int higher = val / 2;
         if (higher > 0) {
@@ -682,7 +654,7 @@ public class DiskMgr {
         }
     }
 
-    private boolean isDeconflictToken(String possible) {
+    private static boolean isDeconflictToken(String possible) {
         if (possible.length() == 0) {
             return false;
         }
@@ -697,7 +669,7 @@ public class DiskMgr {
         return true;
     }
 
-    public String findSuitableName(File folderPath, String newName) throws Exception {
+    public static String findSuitableName(File folderPath, String newName) throws Exception {
         // first find and pull the suffix off
         int lastDotPos = newName.lastIndexOf(".");
         if (lastDotPos < 0) {
@@ -796,10 +768,6 @@ public class DiskMgr {
     public boolean fileExists(File path, String name) throws Exception {
         File aFile = new File(path, name);
         return aFile.exists();
-    }
-
-    public int getPatternCount(String pattern) {
-        return PosPat.countAllPatternOnDisk(this, pattern);
     }
 
     public int getTagCount(String tag) {

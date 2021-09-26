@@ -103,17 +103,8 @@ public class ImageInfo
     }
     
     public static ImageInfo genFromJSON(JSONObject image) throws Exception {
-        String disk = image.getString("disk");
-        DiskMgr dm = DiskMgr.getDiskMgr(disk);
-        String path = image.getString("path");
-        String fileName = image.getString("fileName");
-        File parentFolder = dm.getFilePath(path);
-        File fullPath = new File(parentFolder, fileName);
-        
-        ImageInfo ii = new ImageInfo(fullPath);
-        if (image.has("random")) {
-            ii.randomValue = image.getInt("random");
-        }
+        ImageInfo ii = new ImageInfo();
+        ii.setFromJSON(image);
         return ii;
     }
 
@@ -372,12 +363,8 @@ public class ImageInfo
         return ImageInfo.genFromFile(fullPath);
     }
 
-
-
     // takes this image out of the collection of images.
-    private void unPlugImage()
-        throws Exception
-    {
+    private void unPlugImage() throws Exception {
         // just in case this is part of a selection
         for (MarkedVector mv : customLists) {
             mv.remove(this);
@@ -390,14 +377,12 @@ public class ImageInfo
         System.out.println("SUPPRESSING Image: "+fPath);
         
         try {
-            diskMgr.suppressFile(fPath);
+            DiskMgr.suppressFile(fPath);
             deleteThumbnails();
-
             unPlugImage();
-
         } 
         catch (Exception e) {
-            throw new JSONException("Unable to suppress image {0}/{1}", e, fPath, fileName);
+            throw new JSONException("Unable to suppress image {0}", e, fPath.getAbsolutePath());
         }
     }
 
@@ -425,6 +410,7 @@ public class ImageInfo
         dm2.assertOnDisk(destFolder);
         String newFolderPath = dm2.getRelativePath(destFolder);
         File oldPath = getFilePath();
+        File sourceFolder = oldPath.getParentFile();
         try {
             deleteThumbnails();
             if (!oldPath.exists()) {
@@ -434,7 +420,8 @@ public class ImageInfo
             {
                 pp = PosPat.findOrCreate(dm2, newFolderPath, getPattern());
 
-                fileName = dm2.moveFileToDisk(diskMgr, oldPath, fileName, destFolder);
+                //sometimes the file name is changed in the move to prevent overwriting
+                fileName = DiskMgr.moveFileToNewFolder(fileName, sourceFolder, destFolder);
                 diskMgr = dm2;
                 unsplit();
                 initializeInternals(newFolderPath);
@@ -642,6 +629,7 @@ public class ImageInfo
     }
 
 
+
     public static Vector<ImageInfo> imageQuery(String query) throws Exception {
         if (query.startsWith("$")) {
             //offset 0 is $
@@ -780,14 +768,31 @@ public class ImageInfo
     }
     
     
-
+    public void setFromJSON(JSONObject image) throws Exception {
+        String symbol = image.getString("disk")+":"+image.getString("path")+image.getString("pattern");
+        pp = PosPat.findOrCreate(symbol);
+        diskMgr = pp.getDiskMgr();
+        fileName = image.getString("fileName");
+        FracturedFileName ffn = FracturedFileName.parseFile(fileName);
+        
+        fileSize = image.getInt("fileSize");
+        tail = ffn.tailPart;
+        value = ffn.getSequenceNumber();
+        if (image.has("random")) {
+            randomValue = image.getInt("random");
+        }
+        else {
+            randomValue = randGen.nextInt(1000000000);
+        }
+        determineTags();
+    }
     public JSONObject getJSON() throws Exception {
         JSONObject wholeDoc = getMinimalJSON();
         wholeDoc.put("disk", pp.getDiskMgr().diskName);
         
         wholeDoc.put("path", pp.getLocalPath());
         wholeDoc.put("pattern", pp.getPattern());
-        wholeDoc.put("random", randGen.nextInt(1000000000));
+        wholeDoc.put("random", randomValue);
 
         JSONArray tags = new JSONArray();
         for (String oneTag : tagNames) {

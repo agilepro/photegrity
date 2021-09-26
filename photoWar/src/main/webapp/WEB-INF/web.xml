@@ -40,16 +40,6 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>wiki-viewer</servlet-name>
-        <servlet-class>com.purplehillsbooks.photegrity.SmartPage</servlet-class>
-        <load-on-startup>6</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>wiki-viewer</servlet-name>
-        <url-pattern>*.sp</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
         <servlet-name>rest-api</servlet-name>
         <servlet-class>com.purplehillsbooks.photegrity.APIServlet</servlet-class>
         <load-on-startup>6</load-on-startup>

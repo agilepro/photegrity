@@ -38,12 +38,14 @@
     boolean groupLoaded = (newsGroup.defaultDiskMgr!=null);
     if (!groupLoaded) {
         Vector<File> files = DiskMgr.getNewsFiles();
-        File parentFile = files.get(0);
-        boolean connect = false;
-        if (!parentFile.exists()) {
-            throw new Exception("The news file path is not valid!:  "+parentFile);
+        if (files.size()>0) {
+            File parentFile = files.get(0);
+            boolean connect = false;
+            if (!parentFile.exists()) {
+                throw new Exception("The news file path is not valid!:  "+parentFile);
+            }
+            newsGroup.openNewsGroupFile(parentFile, connect);
         }
-        newsGroup.openNewsGroupFile(parentFile, connect);
     }
 
 %>
@@ -163,7 +165,7 @@
         }
         %></td>
         <td> <%= mgr.extraCount %> </td>
-        <td> <%= mgr.extraSize/1000000 %>M &nbsp;</td>
+        <td> <%= mgr.extraSize/1000 %>M &nbsp;</td>
         <td align="left"> <%HTMLWriter.writeHtml(out, mgr.mainFolder.toString());%> </td>
      </tr><%
     }
@@ -216,11 +218,11 @@ public String getQuery(String diskName) {
     int start = 0;
     while (pos > start) {
         String part = diskName.substring(start,pos).trim();
-        sb.append("g(").append(part).append(")");
+        sb.append("g(").append(part).append("~)");
         start = pos+1;
         pos = diskName.indexOf(".", start);
     }
-    sb.append("g(").append(diskName.substring(start)).append(")");
+    sb.append("g(").append(diskName.substring(start)).append("~)");
     String x = sb.toString();
     return x;
 }

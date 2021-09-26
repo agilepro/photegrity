@@ -189,7 +189,7 @@
                 diskName = ii.pp.getDiskMgr().diskName;
                 relPath = diskName+"/"+ii.getRelativePath()+ii.fileName;
                 location = diskName+":"+ii.getRelativePath();
-                encodedPath = URLEncoder.encode(ii.getFullPath(),"UTF8");
+                encodedPath = URLEncoder.encode(ii.getFilePath().getAbsolutePath(),"UTF8");
                 encodedDisk = URLEncoder.encode(diskName,"UTF8");
                 newQ = query+"e("+ii.getPattern()+")";
             }

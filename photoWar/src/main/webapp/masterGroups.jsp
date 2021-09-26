@@ -58,7 +58,10 @@
 <table>
 <tr><td>
 <a href="main.jsp"><img src="home.gif"></a></td><td>
-<form method="get" action="masterGroups.jsp"><input type="text" name="s"><input type="submit" value="Search"></form>
+<form method="get" action="masterGroups.jsp">
+<input type="text" name="s" value="<%=search%>">
+<input type="submit" value="Search">
+</form>
 </tr></table>
 <ul>
 <%

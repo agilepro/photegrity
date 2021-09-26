@@ -88,9 +88,10 @@
     HashCounter groupCount = new HashCounter();
     HashCounter pattCount = new HashCounter();
     HashCounter symbolCount = new HashCounter();
+    HashCounter sizeTotal = new HashCounter();
 
     MongoDB mongo = new MongoDB();
-    mongo.queryStatistics(query, groupCount, pattCount, symbolCount);
+    mongo.queryStatistics(query, groupCount, pattCount, symbolCount, sizeTotal);
     mongo.close();
 
     List<String> sortedKeys = symbolCount.sortedKeys();
@@ -240,6 +241,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
         String limitedPatternName = symbol;
         String trimmedPattern = pattern.trim();
         String newQuery = URLEncoder.encode("x("+symbol+")","UTF8");
+        String excludeQuery = URLEncoder.encode(query+"b("+pattern+")","UTF8");
         if (limitedPatternName.length() > 56) {
             limitedPatternName = limitedPatternName.substring(0,55)+"...";
         }
@@ -254,11 +256,10 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 <%
 
         if (showImages) {
-            List<ImageInfo> imageList = pp.getSomeRandomImages(imageNum);
 
             %><td width="<%=(thumbsize+10)*imageNum%>"><%
             
-            for (ImageInfo ii : imageList) {
+            for (ImageInfo ii : pp.getSomeRandomImages(imageNum)) {
                 String imagePath = ii.getRelPath();
                 
 %>              <a href="photo/<%=imagePath%>" target="photo">
@@ -268,22 +269,18 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 %>
             </td>
           <td><a href="show.jsp?q=<%=newQuery%>">
-              <%HTMLWriter.writeHtml(out,symbol);%></a><br>
+              <%HTMLWriter.writeHtml(out,symbol);%></a><br/>
               <%= symbolCount.getCount(symbol) %>
               <a href="show.jsp?q=<%=newQuery%>">S</a>
               <a href="analyzeQuery.jsp?q=<%=newQuery%>">A</a>
               <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
               <a href="queryManip.jsp?q=<%=newQuery%>">M</a>
               <a href="allPatts.jsp?q=<%=newQuery%>">P</a>
-              <%= 0 %> - <%= 0 %><br>
+              <a href="allPatts.jsp?q=<%=excludeQuery%>">X</a><br/>
               <a href="selectQuery.jsp?q=<%=newQuery%>&o=<%=order%>" target="suppwindow"><img border=0 src="addicon.gif"></a>
               <a href="zing.jsp?pat=<%=URLEncoder.encode(symbol,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
-                 title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a><br>
-            <table border="0"><tr>
-
-
-
-            </tr></table><%
+                 title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a></td>
+<%
         }
         else {  
 %>
@@ -293,23 +290,23 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
       <td><a href="analyzeQuery.jsp?q=<%=newQuery%>">A</a>
           <a href="xgroups.jsp?q=<%=newQuery%>">T</a>
           <a href="queryManip.jsp?q=<%=newQuery%>">M</a>
-              <a href="allPatts.jsp?q=<%=newQuery%>">P</a></td>
+          <a href="allPatts.jsp?q=<%=newQuery%>">P</a>
+          <a href="allPatts.jsp?q=<%=excludeQuery%>">X</a></td>
 
       <td><a href="zing.jsp?pat=<%=URLEncoder.encode(pattern,"UTF8")%>&go=<%=URLEncoder.encode(thisPageURL,"UTF8")%>"
              title="Select this pattern for use elsewhere"><img src="pattSelect.gif" border="0"></a></td>
       <td>
         <a href="masterPatts.jsp?s=<%=pattern%>"><i class="glyphicon glyphicon-search"></i><%=pattern%></a>
+      </td>
 <%
         }
         int cxx = 0;
-%>
-      </td>
-<%
+        %></tr><%
         out.flush();
      }
 %>
-
 </table>
+
 <img src="bar.jpg" border="0"><br>
 <table>
     <tr><form action="changeSelection.jsp" method="get">

@@ -10,12 +10,16 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
     id 'war'
+    id 'com.bmuschko.docker-remote-api' version '6.7.0'
 }
+apply plugin: 'com.bmuschko.docker-remote-api'
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
+
+
 
 dependencies {
     // Use JUnit test framework.
@@ -26,7 +30,24 @@ dependencies {
     
     compileOnly 'org.apache.tomcat:tomcat-catalina:8.5.46'
     implementation 'org.mongodb:mongodb-driver-sync:4.3.0'
+    
+    // https://mvnrepository.com/artifact/com.bmuschko/gradle-docker-plugin
+    implementation 'com.bmuschko:gradle-docker-plugin:6.7.0'  
 }
+
+task copyWar(type: Copy) {
+    dependsOn   'war'
+    from        "build/libs/photo.war"
+    into        'build/docker'
+}
+//task buildDockerImage(type: DockerBuildImage) {
+//    dependsOn   copyWar
+//    inputDir = file('docker/myapp')
+//    images.add('test/myapp:latest')
+//}
+ 
+//build.dependsOn buildDockerImage
+build.dependsOn copyWar
 
 project.archivesBaseName = 'photo'
 

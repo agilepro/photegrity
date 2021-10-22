@@ -6,6 +6,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Date;
 
+import com.purplehillsbooks.json.JSONException;
+
 public class NewsBackground extends Thread {
     private Writer out;
     public static NewsBackground singleton = null;
@@ -129,8 +131,9 @@ public class NewsBackground extends Thread {
                 }
                 String msg = UtilityMethods.getErrorString(e);
                 try {
-                    out.write("\n*** ("+sequentialErrorCount+") ");
-                    out.write(msg);
+                    //out.write("\n*** ("+sequentialErrorCount+") ");
+                    //out.write(msg);
+                    JSONException.traceException(out, e, "Failure in NewsBackground operation ("+sequentialErrorCount+") ");
                     out.write("\n==========");
                     if (msg.contains("Unable to authenticate")) {
                         out.write("\nSleeping 20 seconds...<br/>");

@@ -215,13 +215,19 @@ public class DiskMgr {
      */
     public static DiskMgr findDiskMgrFromPath(File path) {
         String store = path.getAbsolutePath().toLowerCase();
+        DiskMgr dmFound = null;
+        int foundlength=0;
         for (DiskMgr dm : getAllDiskMgr()) {
             String dmPath = dm.mainFolder.getAbsolutePath().toLowerCase();
             if (store.startsWith(dmPath)) {
-                return dm;
+                int thisLen = dmPath.length();
+                if (thisLen > foundlength) {
+                    foundlength = thisLen;
+                    dmFound = dm;
+                }
             }
         }
-        return null;
+        return dmFound;
     }
 
 

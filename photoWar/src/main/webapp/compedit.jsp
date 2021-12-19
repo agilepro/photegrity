@@ -94,6 +94,18 @@
         group.removeElementAt(pos);
         destination.insertAtMark(temp);        
     }
+    else if (op.equals("MoveAll")) {
+        int markPos = group.getMarkPosition();
+        if (markPos>0) {
+            String dest = UtilityMethods.defParam(request, "dest", ImageInfo.customLists.get(0).id);
+            MarkedVector destination = findMemoryById(dest);
+            while (group.size()>markPos) {
+                ImageInfo temp = group.elementAt(markPos);
+                group.removeElementAt(markPos);
+                destination.insertAtMark(temp);
+            }
+        }
+    }
     else
     {
         throw new Exception("unrecognized operation op="+op);

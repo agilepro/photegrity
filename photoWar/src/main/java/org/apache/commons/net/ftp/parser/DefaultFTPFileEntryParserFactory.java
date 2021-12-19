@@ -46,7 +46,7 @@ public class DefaultFTPFileEntryParserFactory
     private static final Pattern JAVA_QUALIFIED_NAME_PATTERN = Pattern.compile(JAVA_QUALIFIED_NAME);
 
     /**
-     * This default implementation of the FTPFileEntryParserFactory
+     * <p>This default implementation of the FTPFileEntryParserFactory
      * interface works according to the following logic:
      * First it attempts to interpret the supplied key as a fully
      * qualified classname (default package is not allowed) of a class implementing the
@@ -54,7 +54,7 @@ public class DefaultFTPFileEntryParserFactory
      * object of this class is instantiated and is returned;
      * otherwise it attempts to interpret the key as an identirier
      * commonly used by the FTP SYST command to identify systems.
-     * <p/>
+     * </p><p>
      * If <code>key</code> is not recognized as a fully qualified
      * classname known to the system, this method will then attempt
      * to see whether it <b>contains</b> a string identifying one of
@@ -63,7 +63,7 @@ public class DefaultFTPFileEntryParserFactory
      * which are returned by the SYST command on the systems which
      * the corresponding parser successfully parses.  This enables
      * this factory to be used in the auto-detection system.
-     * <p/>
+     * </p>
      *
      * @param key    should be a fully qualified classname corresponding to
      *               a class implementing the FTPFileEntryParser interface<br/>

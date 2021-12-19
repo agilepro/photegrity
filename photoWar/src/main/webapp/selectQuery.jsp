@@ -26,7 +26,6 @@
     //    s(#)    get from storate area #
     String query = UtilityMethods.reqParam(request, pageName, "q");
 
-    String dest = request.getParameter("dest");
     String order = UtilityMethods.defParam(request, "o", "name");
 
     Vector<ImageInfo> groupImages = new Vector<ImageInfo>();
@@ -36,12 +35,20 @@
     //reset the counter to the beginning
     MarkedVector group = findMemoryBank(request);
 
+    String clearItStr = UtilityMethods.defParam(request, "clear", "no");
+    boolean clearIt = "yes".equals(clearItStr);
+    if (clearIt) {
+        group.clear();
+    }
+
     int lastNum = 0;
     int count = 0;
     for (ImageInfo ii : groupImages) {
         group.addElement(ii);
         count++;
     }
+    
+    String dest = request.getParameter("dest");
     if (dest==null) {
         dest = "sel.jsp?set="+group.id;
     }

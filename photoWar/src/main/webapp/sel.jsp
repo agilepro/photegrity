@@ -72,7 +72,7 @@
     }
 
     String thisPage = "sel.jsp?set="+set+"&min="+dispMin;
-    String thisPageEncoded = URLEncoder.encode(thisPage, "UTF8");
+    String thisPageEncoded = URLEncoder.encode(thisPage, "UTF-8");
 
     int mark = group.getMarkPosition();
 %>
@@ -85,6 +85,13 @@
     <link href="lib/bootstrap.min.css" rel="stylesheet">
     <link href="photoStyle.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+    .selectedRow {
+        background-color:#FFAABB;
+        border-top:4px red solid;
+    }
+    </style>
 </HEAD>
 <BODY BGCOLOR="#FDF5E6">
 
@@ -97,14 +104,14 @@ Clear:
 <a href="clearSelection.jsp?set=<%=set%>&dest=<%=thisPageEncoded%>">clear<%=set%></a>
 - - - <%=mark%>
 <table class="table">
-<tr><th width="<%=thumbsize%>">
-(<a href="sort.jsp?set=<%=set%>&min=<%=dispMin%>">Sort</a>) Set <%=set%> - 
+<tr><th width="<%=thumbsize+20%>">
+(<a href="sort.jsp?set=<%=set%>&min=<%=dispMin%>">Sort</a>) Set <%=group.name%> - 
 </th>
 <th width="225">
 <a href="show.jsp?q=$(<%=set%>)&o=none"><i class="glyphicon glyphicon-list-alt"></i></a>
 <a href="queryManip.jsp?q=$(<%=set%>)&o=none"><i class="glyphicon glyphicon-cog"></i></a></a>
 
-<%= group.size() %> </th>
+(<%= group.getMarkPosition() %>/<%= group.size() %> images)</th>
 </tr>
 <%
     String lastPatt = "";
@@ -126,7 +133,7 @@ Clear:
         }
 
 
-        %><tr <% if (totalCount==mark) { %>bgcolor="#FFAABB"<% } %> ><td><%
+        %><tr <% if (totalCount==mark) { %>class="selectedRow"<% } %> ><td><%
 
         displayThumbnail(out, i0, thumbsize);
 
@@ -140,7 +147,9 @@ Clear:
 <%
         for (int i=1; i<=5; i++) {
             //if (set != i) {
-            %><a href="<%=editPage%>&op=<%=i%>">&gt;<%=i%></a> <%
+                MarkedVector mv = ImageInfo.customLists.get(i);
+
+            %><a class="membutt" href="<%=editPage%>&op=Move&dest=<%=mv.id%>">&gt;<%=mv.name%></a> <%
             //}
         }
         %><a href="sort.jsp?set=<%=set%>&min=<%=totalCount%>">sort</a><%
@@ -159,15 +168,40 @@ Clear:
     }
 %>
     </tr>
+    <tr <% if (-1==mark) { %>class="selectedRow"<% } %>><td>&nbsp;</td><td>&nbsp;</td></tr>
 </table>
-<H1>Memory Set <%=set%> (<%= group.size() %> images)
+<H1>Memory Set <%=group.name%> (<%= group.getMarkPosition() %>/<%= group.size() %> images)
     <font color=#0000AA>
     <%= msg %> </font></H1>
 <p>Query: $(<%=set%>)</p>
+<hr/>
 <form method="get" action="renumber.jsp">
 <input type="hidden" name="q" value="$(<%=set%>)">
 Renumber: <input type="text" name="newName" value="<%=lastPatt%>"/>
 <button type="submit">Renumber</button>
+</form>
+<hr/>
+<form method="get" action="renumber.jsp">
+<input type="hidden" name="q" value="$(<%=set%>)">
+Repattern: <input type="text" name="oldName" value="<%=lastPatt%>"/>
+<input type="text" name="newName" value="<%=lastPatt%>"/>
+<button type="submit">Repattern</button>
+</form>
+<hr/>
+<form method="get" action="renumber.jsp">
+Move All From Mark to: 
+<%
+String editPage = "compedit.jsp?set="+set+"&pos="+totalCount+"&min="+dispMin+"&go="+thisPageEncoded;
+for (int i=0; i<ImageInfo.customLists.size(); i++) {
+    MarkedVector mv = ImageInfo.customLists.get(i);
+    if (!group.id.equals(mv.id)) {
+        %><a class="membutt" href="<%=editPage%>&op=MoveAll&dest=<%=mv.id%>">&gt;<%=mv.name%></a> <%
+    }
+}
+%>
+</form>
+
+
 </BODY>
 </HTML>
 <%@ include file="functions.jsp"%>

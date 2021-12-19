@@ -91,7 +91,7 @@
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
-<HEAD><TITLE>Set <%=set%> (<%= group.size() %> images)</TITLE>
+<HEAD><TITLE>Set <%=set%> (<%= group.getMarkPosition() %>/<%= group.size() %> images)</TITLE>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="photoStyle.css" rel="stylesheet">
 </HEAD>
@@ -111,7 +111,7 @@
 Clear:
 <a href="clearSelection.jsp?set=<%=set%>&dest=<%=thisPageEncoded%>">clear<%=set%></a>
 - - - <%=mark%>
-Set <%=set%> - (<%= group.size() %> images)
+<b><%=group.name%></b> - (<%= group.getMarkPosition() %>/<%= group.size() %> images)
 (<a href="sel.jsp?set=<%=set%>&min=<%=dispMin%>">list</a>)
 <a href="show.jsp?q=s(<%=set%>)&o=none">S</a><br/>
 
@@ -122,7 +122,7 @@ Set <%=set%> - (<%= group.size() %> images)
     if (dispMin<group.size()) {
         i0 = group.get(dispMin);
     }
-    group.setMarkPosition(dispMin);
+    //group.setMarkPosition(dispMin);
     String chosenId = "" + group.id;
     if (i0!=null) {
         String imageURL = i0.getRelPath();
@@ -186,9 +186,6 @@ Set <%=set%> - (<%= group.size() %> images)
     int iii = 0;
     for (int i=1; i<=ImageInfo.customLists.size(); i++){
         MarkedVector destSet = ImageInfo.customLists.get(i-1);
-        if (chosenId.equals(destSet.id)) {
-            continue;
-        }
         rowCount++;
 
             
@@ -216,12 +213,18 @@ Set <%=set%> - (<%= group.size() %> images)
         String editPage = "compedit.jsp?set="+set+"&pos="+dispMin+"&min="
                            +dispMin+"&go="+thisPageEncoded;
 
+        if (chosenId.equals(destSet.id)) {
+        %>
+        <td style="padding:5px"><%=i%> 
+          <span><%=destSet.name%> (<%=destSet.id%>) <%=destSet.getMarkPosition()%>/<%=destSet.size()%></span>
+        </td>
+        <%
+        } else {
         %>
         <td style="padding:5px"><%=i%> 
           <a href="<%=editPage%>&op=Move&dest=<%=destSet.id%>"><img src="addicon.gif" border="0"></a>
           <a href="sort.jsp?set=<%=destSet.id%>">swap</a> 
-          <img src="removeicon.gif" border="0">
-          <span><%=destSet.name%> (<%=destSet.id%>)</span><br/>
+          <span><%=destSet.name%> (<%=destSet.id%>) <%=destSet.getMarkPosition()%>/<%=destSet.size()%></span><br/>
           <a href="photo/<%=imagePath1%>" target="photo">
              <img src="thumb/100/<%=imagePath1%>" width="<%=thumbsize%>" border="0"></a>
           <a href="photo/<%=imagePath2%>" target="photo">
@@ -230,6 +233,7 @@ Set <%=set%> - (<%= group.size() %> images)
              <img src="thumb/100/<%=imagePath3%>" width="<%=thumbsize%>" border="0"></a>
         </td>
         <%
+        }
         
         if (rowCount>2)
         {

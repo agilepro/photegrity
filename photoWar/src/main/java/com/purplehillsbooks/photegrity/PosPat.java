@@ -460,6 +460,21 @@ public class PosPat {
         return imageList;
     }
     
+    public JSONObject getListJSON() throws Exception {
+        JSONObject jo = new JSONObject();
+        jo.put("disk", diskMgr.diskName);
+        jo.put("path", localPath);
+        jo.put("pattern", pattern);
+        jo.put("symbol", getSymbol());
+        JSONArray tags = new JSONArray();
+        for (String tag : pathTags) {
+            tags.put(tag);
+        }
+        jo.put("tags", tags);
+        jo.put("imageCount", imageCount);
+        return jo;
+    }    
+    
     public JSONObject getFullMongoDoc() throws Exception {
         List<ImageInfo> imageList =  scanDiskForImages();
         return getFullMongoDoc(imageList);
@@ -469,17 +484,7 @@ public class PosPat {
         
         String symbol = getSymbol();
         
-        JSONObject jo = new JSONObject();
-        jo.put("disk", diskMgr.diskName);
-        
-        jo.put("path", localPath);
-        jo.put("pattern", pattern);
-        jo.put("symbol", getSymbol());
-        JSONArray tags = new JSONArray();
-        for (String tag : pathTags) {
-            tags.put(tag);
-        }
-        jo.put("tags", tags);
+        JSONObject jo = getListJSON();
         jo.put("imageCount", imageList.size());
         long totalSize = 0;
         for (ImageInfo ii : imageList) {

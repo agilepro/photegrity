@@ -346,8 +346,14 @@ NewName: <input type="text" name="newName" size="80" value="<%HTMLWriter.writeHt
 </tr>
 <tr>
     <td>getFilePath():</td>
+    <td><input type="text" style="width:100%"
+        value="<%HTMLWriter.writeHtml(out, ii.getFilePath().toString());%>"></input>
+    </td>
+</tr>
+<tr>
+    <td>Effective:</td>
     <td><input type="text" id="filepath" style="width:100%"
-        value="<%HTMLWriter.writeHtml(out, ii.getFilePath().toString());%>"></input><br/>
+        value="<%HTMLWriter.writeHtml(out, "h:/z/.y/"+ii.getRelPath().toString());%>"></input><br/>
         <button onClick="copyThePath()">Copy</button> 
     </td>
 </tr>

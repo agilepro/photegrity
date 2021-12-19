@@ -45,6 +45,7 @@
 
     // **** sort in a given order?
     String order = UtilityMethods.defParam(request, "o", "name");
+    
     String orderParam = "&o="+order;
 
     // **** show pictures?

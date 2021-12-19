@@ -458,9 +458,9 @@ public class DiskMgr {
         for (File folderPath : fileList) {
             DiskMgr dm = DiskMgr.findDiskMgrFromPath(folderPath);
             String relPath = dm.getRelativePath(folderPath);
-            mongo.clearAllFromDiskPath(dm.diskName, relPath);
             Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
             dm.scanDiskOneFolder(folderPath, imagesForDisk);
+            mongo.clearAllFromDiskPath(dm.diskName, relPath);
             dm.storeDiskInMongo(imagesForDisk);
         }
         mongo.close();

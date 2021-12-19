@@ -93,9 +93,9 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
             StringBuilder sb = new StringBuilder();
             sb.append((char)(65+rand.nextInt(26)));
             sb.append((char)(65+rand.nextInt(26)));
-            sb.append((char)(65+rand.nextInt(26)));
-            sb.append((char)(65+rand.nextInt(26)));
-            sb.append((char)(65+rand.nextInt(26)));
+            //sb.append((char)(65+rand.nextInt(26)));
+            //sb.append((char)(65+rand.nextInt(26)));
+            //sb.append((char)(65+rand.nextInt(26)));
             String trial = sb.toString();
             for (MarkedVector mv : others) {
                 if (trial.equals(mv.id)) {

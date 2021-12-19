@@ -107,6 +107,11 @@
             displayedPatterns.add(PosPat.findOrCreate(sortedKeys.get(i)));
         }
     }
+    JSONArray allSets = new JSONArray();
+    for (String myKey : sortedKeys) {
+        PosPat pp = PosPat.findOrCreate(myKey);
+        allSets.put(pp.getListJSON());
+    }
     
     String[] colors = {"#FDF5E6", "#FEF9F5"};
 
@@ -149,6 +154,8 @@
 var fileApp = angular.module('fileApp', []);
 fileApp.controller('fileCtrl', function ($scope, $http) {
     $scope.templatePattern = "<%JavaScriptWriter.encode(out,lastPatternName);%>";
+    $scope.allSets = <%allSets.write(out, 2, 2);%>;
+    $scope.showImages = <%= showImages %>;
     
     $scope.randomName= function() {
         var rez = "";

@@ -207,10 +207,9 @@
     public void generateStoreButtons(Writer out, String query) throws Exception {
         for (int i=0; i<5; i++) {
             MarkedVector mv = ImageInfo.customLists.get(i);
-            out.write("<a class=\"memdel\" href=\"clearSelection.jsp?set="+mv.id
-                +"\" target=\"sel"+mv.id+"\">X</a>"
-                +"<a class=\"membutt\" href=\"selectQuery.jsp?set="+mv.id+"&q="
-                +URLEncoder.encode(query)+"\" target=\"sel"+mv.id+"\">TO: "+mv.name+"</a>");
+            String url = "selectQuery.jsp?set="+mv.id+"&q="+URLEncoder.encode(query);
+            out.write("<a class=\"memdel\" href=\""+url+"&clear=yes\" target=\"sel"+mv.id+"\">X</a>");
+            out.write("<a class=\"membutt\" href=\""+url+"&clear=no\" target=\"sel"+mv.id+"\">&gt;"+mv.name+"</a>");
         }
     }
 

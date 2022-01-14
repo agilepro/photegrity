@@ -10,15 +10,20 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
     id 'war'
-    id 'com.bmuschko.docker-remote-api' version '6.7.0'
+    
+    //for automating build of container and upload to DockerHub
+    id "com.palantir.docker" version "0.32.0"
 }
-apply plugin: 'com.bmuschko.docker-remote-api'
+
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
+//project.version '1.0.0'
+project.description = "Image display and sorting site";
+project.archivesBaseName = 'photo';
 
 
 dependencies {
@@ -35,21 +40,21 @@ dependencies {
     implementation 'com.bmuschko:gradle-docker-plugin:6.7.0'  
 }
 
-task copyWar(type: Copy) {
-    dependsOn   'war'
-    from        "build/libs/photo.war"
-    into        'build/docker'
-}
-//task buildDockerImage(type: DockerBuildImage) {
-//    dependsOn   copyWar
-//    inputDir = file('docker/myapp')
-//    images.add('test/myapp:latest')
-//}
- 
-//build.dependsOn buildDockerImage
-build.dependsOn copyWar
 
-project.archivesBaseName = 'photo'
+ 
+docker {
+    dependsOn build
+    name 'hub.docker.com/kswenson6206/photegrity:1.0.0'
+    copySpec.from("build/libs")
+    tag 'DockerHub', "kswenson6206/photegrity:1.0.0"
+    //files photo.war
+    //buildArgs([BUILD_VERSION: 'version'])
+    //labels(['key': 'value'])
+    //pull true
+    //noCache true
+}
+
+
 
 
 //java source files are UTF-8

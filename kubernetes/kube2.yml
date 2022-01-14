@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+   name: photo
+   labels:
+      app: photo
+      type: frontend 
+spec:
+  template:
+    metadata:
+      name: photo
+      labels:
+          app: photo
+          type: frontend 
+    spec:
+      containers:
+          - name: first-try
+            image: nginx
+  replicas: 1       
+  selector: 
+    matchLabels: 
+      type: frontend
+
+        

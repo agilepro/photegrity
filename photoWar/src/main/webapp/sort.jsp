@@ -113,7 +113,7 @@ Clear:
 - - - <%=mark%>
 <b><%=group.name%></b> - (<%= group.getMarkPosition() %>/<%= group.size() %> images)
 (<a href="sel.jsp?set=<%=set%>&min=<%=dispMin%>">list</a>)
-<a href="show.jsp?q=s(<%=set%>)&o=none">S</a><br/>
+<a href="show.jsp?q=$(<%=set%>)&o=none">S</a><br/>
 
 <table><tr>
 <%

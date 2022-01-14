@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: empty-pod
+   labels:
+      name: empty-pod
+      app: photegrity
+spec:
+  containers:
+  - name: empty
+    image: nginx
+    ports: 
+    - containerPort: 80
+    volumeMounts:
+    - name: mongodb-persistence
+      mountPath: /data/db
+  volumes:
+    - name: mongodb-persistence
+      hostPath:
+        path: /run/desktop/mnt/host/c/MongoData/
+        type: DirectoryOrCreate
+

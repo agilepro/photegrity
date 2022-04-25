@@ -15,6 +15,7 @@
 %><%@page import="java.util.Hashtable"
 %><%@page import="java.util.Vector"
 %><%@page import="com.purplehillsbooks.streams.HTMLWriter"
+%><%@page import="com.purplehillsbooks.streams.JavaScriptWriter"
 %><%@page import="com.purplehillsbooks.json.JSONObject"
 %><%@page import="com.purplehillsbooks.json.JSONArray"
 %><%request.setCharacterEncoding("UTF-8");
@@ -252,8 +253,20 @@ console.log("foo");
 console.log("foo");
 var bunchApp = angular.module('bunchApp', ['ui.bootstrap']);
 bunchApp.controller('bunchCtrl', function ($scope, $http) {
-    $scope.query = "<%=query%>";
+    $scope.query = "<%JavaScriptWriter.encode(out,query);%>";
     console.log("Peekaboo");
+    $scope.lastPattern = "<%JavaScriptWriter.encode(out,lastPattern);%>";
+    $scope.clearSpaces = function() {
+        var rez = "";
+        for (var i = 0; i < $scope.lastPattern.length; i++) {
+          var ch = $scope.lastPattern[i];
+          if (ch!=' ') {
+              rez = rez.concat(ch);
+          }
+        }
+        $scope.lastPattern = rez;
+        console.log("clearSpaces", rez);
+    }
 });
 
 </script>
@@ -579,8 +592,11 @@ bunchApp.controller('bunchCtrl', function ($scope, $http) {
     <td><form method="GET" action="renumber.jsp">
         <input type="submit" value="Renumber All <%=recordCount%> Files">
         <input type="hidden" name="q" value="<%HTMLWriter.writeHtml(out,query);%>">
-        <input type="text" name="newName" value="<%=lastPattern%>">
-    </form></td>
+        <input type="text" name="newName" ng-model="lastPattern">
+    </form>
+    </td><td>
+    <button ng-click="clearSpaces()">ClearSpaces</button>
+    </td>
     
 </tr>    
 </table>

@@ -33,4 +33,24 @@
 		<nature>org.eclipse.jem.workbench.JavaEMFNature</nature>
 		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>1642199343697</id>
+			<name>src</name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*.jsp</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1642199391470</id>
+			<name>src/main/webapp</name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*.jsp</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>

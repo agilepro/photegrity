@@ -107,10 +107,12 @@
             displayedPatterns.add(PosPat.findOrCreate(sortedKeys.get(i)));
         }
     }
+    String lastPatternName = "";
     JSONArray allSets = new JSONArray();
     for (String myKey : sortedKeys) {
         PosPat pp = PosPat.findOrCreate(myKey);
         allSets.put(pp.getListJSON());
+        lastPatternName = pp.getPattern();
     }
     
     String[] colors = {"#FDF5E6", "#FEF9F5"};
@@ -127,7 +129,6 @@
         zingpat = "";
     }
     
-    String lastPatternName = "";
 
 
 %>
@@ -319,7 +320,7 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
     <tr><form action="changeSelection.jsp" method="get">
         <td>
 
-        <input type="submit" value="Change">
+        <button type="submit">Change</button>
         to <input type="text" name="p2" ng-model="templatePattern" size="40">
         from <b><%HTMLWriter.writeHtml(out,lastPatternName);%></b>
         <input type="hidden" name="p1" value="<%HTMLWriter.writeHtml(out,lastPatternName);%>">
@@ -378,116 +379,5 @@ fileApp.controller('fileCtrl', function ($scope, $http) {
 </BODY>
 </HTML>
 
-<%!public static void sortPatternsByCount(Vector<PatternInfo> patterns)
-        throws Exception
-    {
-        PatternsByCountComparator sc = new PatternsByCountComparator();
-        Collections.sort(patterns, sc);
-    }
 
-
-    static class PatternsByCountComparator implements Comparator
-    {
-        public PatternsByCountComparator() {}
-
-        public int compare(Object o1, Object o2)
-        {
-            if (!(o1 instanceof PatternInfo)) {
-                return -1;
-            }
-            if (!(o2 instanceof PatternInfo)) {
-                return 1;
-            }
-            if (((PatternInfo)o1).count > ((PatternInfo)o2).count) {
-                return -1;
-            }
-            else if (((PatternInfo)o1).count == ((PatternInfo)o2).count) {
-                return 0;
-            }
-            else {
-                return 1;
-            }
-        }
-    }
-
-    public
-    static
-    void
-    sortPatternsByName(Vector<PatternInfo> patterns)
-        throws Exception
-    {
-        PatternsByNameComparator sc = new PatternsByNameComparator();
-        Collections.sort(patterns, sc);
-    }
-
-
-    static class PatternsByNameComparator implements Comparator
-    {
-        public PatternsByNameComparator() {}
-
-        public int compare(Object o1, Object o2)
-        {
-            if (!(o1 instanceof PatternInfo)) {
-                return -1;
-            }
-            if (!(o2 instanceof PatternInfo)) {
-                return 1;
-            }
-            return ((PatternInfo)o1).pattern.compareToIgnoreCase(((PatternInfo)o2).pattern);
-        }
-    }
-
-    String x = "0123456789ABCDEF";
-
-    public String myEncode(String v)
-    {
-        StringBuffer res = new StringBuffer();
-        int last = v.length();
-        for (int i=0; i<last; i++) {
-            char ch = v.charAt(i);
-            if (ch < 32 || ch == '(' || ch == ')') {
-                addPercent(res, ch);
-            }
-            else if (ch < 128) {
-                res.append(ch);
-            }
-            else if (ch < 2048) {
-                int f = (int)(ch/64) + 128 + 64;
-                addPercent(res, f);
-                f = (int)(ch%64) + 128;
-                addPercent(res, f);
-            }
-            else {
-                int f = (int)(ch/64/64) + 128 + 64 + 32;
-                addPercent(res, f);
-                f = (int)((ch/64)%64) + 128;
-                addPercent(res, f);
-                f = (int)(ch%64) + 128;
-                addPercent(res, f);
-            }
-        }
-        return res.toString();
-    }
-
-    public void addPercent(StringBuffer res, int f)
-    {
-        res.append('%');
-        res.append(x.charAt(f/16));
-        res.append(x.charAt(f%16));
-    }
-
-    public int findTarget(Vector<JSONObject> imageSet, int targetNo) throws Exception {
-        if (targetNo<1)
-        {
-            return -1;
-        }
-        int pos = 0;
-        for (JSONObject ii : imageSet) {
-            if (ii.getInt("value") >= targetNo) {
-                return pos;
-            }
-            pos++;
-        }
-        return -1;
-    }%>
     <%@ include file="functions.jsp"%>

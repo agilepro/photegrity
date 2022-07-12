@@ -1688,7 +1688,7 @@ public class ErrorMessage implements Serializable {
      * is hereby forced to be far more complex than it needs to be.
      * 
      * List of resource bundles identified by the locale they belong to. The key
-     * of the hashmap is the locale. The value related value is a list (<code>Vector</code>)
+     * of the hashmap is the locale. The value related value is a list (<code>List</code>)
      * of resource bundles that are available for the locale.
      */
     private HashMap ibpmResourceBundles = null;

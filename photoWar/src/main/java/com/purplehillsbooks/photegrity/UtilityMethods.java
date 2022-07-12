@@ -5,7 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.Writer;
 import java.net.URLEncoder;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -28,7 +29,7 @@ public class UtilityMethods {
             throw new Exception("Program Logic Error: splitOnDelimiter called with a null string!");
         }
         try {
-            Vector<String> vec = new Vector<String>();
+            List<String> vec = new ArrayList<String>();
             int pos = 0;
             int last = str.length();
             while (pos < last) {
@@ -44,7 +45,7 @@ public class UtilityMethods {
             }
             String[] result = new String[vec.size()];
             for (int i = 0; i < vec.size(); i++) {
-                result[i] = vec.elementAt(i);
+                result[i] = vec.get(i);
             }
             return result;
         }

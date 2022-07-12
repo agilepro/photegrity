@@ -58,10 +58,8 @@ public class WebObject
 
     public void generateKeyValue()
     {
-        Enumeration<WebColumn> e = table.getSchema().elements();
         String newVal = null;
-        while (e.hasMoreElements()) {
-            WebColumn wc = e.nextElement();
+        for (WebColumn wc : table.getSchema()) {
             if (wc.isKey) {
                 if (newVal==null) {
                     newVal = getFieldValue(wc.colName);
@@ -109,17 +107,13 @@ public class WebObject
 
     public void setAllFieldsFromXML(Element parent)
     {
-        Enumeration<WebColumn> e = table.colOrder.elements();
-        while (e.hasMoreElements()) {
-            WebColumn wc = e.nextElement();
+        for (WebColumn wc : table.colOrder) {
             setFieldFromXML(parent, wc.colName);
         }
     }
 
 
-    public void createXMLFromField(Document d, Element parent, String fieldName)
-        throws Exception
-    {
+    public void createXMLFromField(Document d, Element parent, String fieldName) throws Exception {
         try {
             String val = getFieldValue(fieldName);
             if (val!=null) {
@@ -131,13 +125,8 @@ public class WebObject
         }
     }
 
-    public void createXMLAllFields(Document d, Element parent)
-        throws Exception
-    {
-        Enumeration<WebColumn> e = table.colOrder.elements();
-        while (e.hasMoreElements()) {
-            WebColumn wc = e.nextElement();
-
+    public void createXMLAllFields(Document d, Element parent) throws Exception {
+        for (WebColumn wc : table.colOrder) {
             createXMLFromField(d, parent, wc.colName);
         }
     }

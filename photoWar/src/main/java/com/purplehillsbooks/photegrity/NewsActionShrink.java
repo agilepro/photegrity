@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
@@ -23,7 +22,7 @@ public class NewsActionShrink extends NewsAction {
     public NewsActionShrink(String _query) throws Exception {
         query = _query;
         groupImages = new ArrayList<ImageInfo>();
-        //Vector<ImageInfo> origOrder = ImageInfo.imageQuery(query);
+        //ArrayList<ImageInfo> origOrder = ImageInfo.imageQuery(query);
         
         //now scramble them so that they are not done in the same order every time
         //Random r = new Random();

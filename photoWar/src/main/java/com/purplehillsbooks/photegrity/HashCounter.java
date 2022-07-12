@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.LineNumberReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
@@ -22,9 +22,9 @@ public class HashCounter extends Hashtable<String,Integer> {
     }
 
 
-    public static Enumeration<String> sort(Enumeration<String> unsorted) throws Exception {
+    public static List<String> sort(Enumeration<String> unsorted) throws Exception {
         try {
-            Vector<String> sortedKeys = new Vector<String>();
+            ArrayList<String> sortedKeys = new ArrayList<String>();
             while (unsorted.hasMoreElements()) {
                 sortedKeys.add(unsorted.nextElement());
             }
@@ -32,14 +32,14 @@ public class HashCounter extends Hashtable<String,Integer> {
             Comparator<String> sc = new StringComparator();
             Collections.sort(sortedKeys, sc);
 
-            return sortedKeys.elements();
+            return sortedKeys;
         } catch (Exception e) {
             throw new JSONException("Failure creating a sorted Enumeration object", e);
         }
     }
 
     public List<String> sortedKeys() {
-        Vector<String> keyList = new Vector<String>();
+        ArrayList<String> keyList = new ArrayList<String>();
         for (String key : keySet()) {
             keyList.add(key);
         }
@@ -51,7 +51,7 @@ public class HashCounter extends Hashtable<String,Integer> {
 
     public List<String> getSortedKeys(Hashtable<String, String> selected) throws Exception {
         try {
-            Vector<String> sortedKeys = new Vector<String>();
+            ArrayList<String> sortedKeys = new ArrayList<String>();
             sortedKeys.addAll(keySet());
 
             Comparator<String> sc = new SelectedComparator(selected);

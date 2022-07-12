@@ -1,8 +1,9 @@
 package com.purplehillsbooks.photegrity;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 import com.purplehillsbooks.json.JSONObject;
 
@@ -16,7 +17,7 @@ public class PatternInfo {
 
     public Hashtable<String,PatternInfo> diskMap;
 
-    public Vector<JSONObject> allImages;
+    public List<JSONObject> allImages;
 
     public PatternInfo(JSONObject image) throws Exception {
         pattern = image.getString("pattern");
@@ -25,7 +26,7 @@ public class PatternInfo {
         min = value;
         max = value;
         diskMap = new Hashtable<String,PatternInfo>(12);
-        allImages = new Vector<JSONObject>();
+        allImages = new ArrayList<JSONObject>();
 
         // it does not matter what we put in the hash table, the
         // test is just that something is there.

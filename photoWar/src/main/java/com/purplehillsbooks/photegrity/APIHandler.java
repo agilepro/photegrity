@@ -19,10 +19,10 @@ package com.purplehillsbooks.photegrity;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.Vector;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -164,7 +164,7 @@ public class APIHandler {
         }
         String pathAfterContext = requestURI.substring(contextPath.length() + servletPath.length() + 1);
         
-        Vector<String> res = new Vector<String>();
+        List<String> res = new ArrayList<String>();
         for (String val : pathAfterContext.split("/")) {
             res.add(URLDecoder.decode(val, "UTF-8"));
         }
@@ -196,10 +196,10 @@ public class APIHandler {
 
         JSONArray vecs = new JSONArray();
         @SuppressWarnings("unchecked")
-        Vector<String> destVec = (Vector<String>) session.getAttribute("destVec");
+        ArrayList<String> destVec = (ArrayList<String>) session.getAttribute("destVec2");
         if (destVec==null) {
-            destVec = new Vector<String>();
-            session.setAttribute("destVec", destVec);
+            destVec = new ArrayList<String>();
+            session.setAttribute("destVec2", destVec);
         }
         for (String vec : destVec) {
             vecs.put(vec);
@@ -249,9 +249,9 @@ public class APIHandler {
     private JSONObject setSessionFromJSON() throws Exception {
 
         @SuppressWarnings("unchecked")
-        Vector<String> destVec = (Vector<String>) session.getAttribute("destVec");
+        ArrayList<String> destVec = (ArrayList<String>) session.getAttribute("destVec2");
         if (destVec==null) {
-            destVec = new Vector<String>();
+            destVec = new ArrayList<String>();
             session.setAttribute("destVec", destVec);
         }
         
@@ -260,7 +260,7 @@ public class APIHandler {
             System.out.println("Got a zingFolder value: "+zingFolder);
             //first remove the folder if it exists later in the vector
             for (int i=0; i<destVec.size(); i++) {
-                if (destVec.elementAt(i).equals(zingFolder)) {
+                if (destVec.get(i).equals(zingFolder)) {
                     destVec.remove(i);
                     break;
                 }

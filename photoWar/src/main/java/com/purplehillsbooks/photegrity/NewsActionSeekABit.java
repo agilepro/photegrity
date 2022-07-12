@@ -1,9 +1,9 @@
 package com.purplehillsbooks.photegrity;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
@@ -17,7 +17,7 @@ import com.purplehillsbooks.streams.HTMLWriter;
 public class NewsActionSeekABit extends NewsAction {
     NewsBunch seeker;
     long startInt;
-    Vector<Long> giveUpList = new Vector<Long>();
+    List<Long> giveUpList = new ArrayList<Long>();
     int seekInc = -1;
     NewsGroup ng;
 
@@ -89,7 +89,7 @@ public class NewsActionSeekABit extends NewsAction {
         long deadline = System.currentTimeMillis() + 10000; // ten seconds
         int completedCount = 0;
         int downloadCount = 0;
-        Vector<NewsFile> completedFiles = new Vector<NewsFile>();
+        ArrayList<NewsFile> completedFiles = new ArrayList<NewsFile>();
         for (NewsFile nf : seeker.getFiles()) {
             if (nf.isComplete() && nf.getFailMsg() == null) {
                 completedCount++;

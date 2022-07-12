@@ -1,12 +1,12 @@
 package com.purplehillsbooks.photegrity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
@@ -16,8 +16,8 @@ public class GridData {
 
     public String query = "";
 
-    private Vector<ImageInfo> rawData = new Vector<ImageInfo>();
-    private Vector<Vector<JSONObject>> grid = new Vector<Vector<JSONObject>>();
+    private List<ImageInfo> rawData = new ArrayList<ImageInfo>();
+    private List<List<JSONObject>> grid = new ArrayList<List<JSONObject>>();
     private Hashtable<String, String> selectedColumns = new Hashtable<String, String>();
 
     /*
@@ -35,8 +35,8 @@ public class GridData {
     private NumericCounter totalPerRow = new NumericCounter();
     private HashCounter totalPerCol = new HashCounter();
     private NumericCounter selectedPerRow = new NumericCounter();
-    private Vector<Integer> totalRowMap = new Vector<Integer>();
-    private Vector<Integer> selectedRowMap = new Vector<Integer>();
+    private List<Integer> totalRowMap = new ArrayList<Integer>();
+    private List<Integer> selectedRowMap = new ArrayList<Integer>();
     private boolean needsRecalc = true;
 
     /**
@@ -72,10 +72,10 @@ public class GridData {
             totalPerRow = new NumericCounter();
             totalPerCol = new HashCounter();
             selectedPerRow = new NumericCounter();
-            totalRowMap = new Vector<Integer>();
-            selectedRowMap = new Vector<Integer>();
-            rawData = new Vector<ImageInfo>();
-            grid = new Vector<Vector<JSONObject>>();
+            totalRowMap = new ArrayList<Integer>();
+            selectedRowMap = new ArrayList<Integer>();
+            rawData = new ArrayList<ImageInfo>();
+            grid = new ArrayList<List<JSONObject>>();
             selectedColumns = new Hashtable<String, String>();
             singleRow = true;
         }
@@ -117,14 +117,14 @@ public class GridData {
         }
     }
 
-    public Vector<Integer> getRowMap() throws Exception {
+    public List<Integer> getRowMap() throws Exception {
         if (needsRecalc) {
             processQuery();
         }
         return totalRowMap;
     }
 
-    public Vector<Integer> getSelectedRowMap() throws Exception {
+    public List<Integer> getSelectedRowMap() throws Exception {
         if (needsRecalc) {
             processQuery();
         }
@@ -163,7 +163,7 @@ public class GridData {
     /**
      * temporarily needed for conversion.
      */
-    public Vector<Vector<JSONObject>> getEntireGrid() throws Exception {
+    public List<List<JSONObject>> getEntireGrid() throws Exception {
         if (needsRecalc) {
             processQuery();
         }
@@ -173,7 +173,7 @@ public class GridData {
     /**
      * temporarily needed for conversion.
      */
-    public Vector<JSONObject> getRow(int value) throws Exception {
+    public List<JSONObject> getRow(int value) throws Exception {
         if (needsRecalc) {
             processQuery();
         }
@@ -185,7 +185,7 @@ public class GridData {
             throw new JSONException("Internal consistency error, got row '{0}' for value '{1}' but grid has only '{2}' rows",
                     rowNum, value, grid.size());
         }
-        return grid.elementAt(rowNum);
+        return grid.get(rowNum);
     }
 
     public int getRowNumberForValue(int photoValue) throws Exception {
@@ -194,7 +194,7 @@ public class GridData {
         }
         int last = totalRowMap.size();
         for (int i = 0; i < last; i++) {
-            Integer iVal = totalRowMap.elementAt(i);
+            Integer iVal = totalRowMap.get(i);
             if (iVal.intValue() >= photoValue) {
                 return i;
             }
@@ -221,7 +221,7 @@ public class GridData {
         }
         MongoDB mongo = new MongoDB();
         JSONArray sets = mongo.querySets(query);
-        HashMap<Integer, Vector<JSONObject>> tempRows = new HashMap<Integer, Vector<JSONObject>>();
+        HashMap<Integer, List<JSONObject>> tempRows = new HashMap<Integer, List<JSONObject>>();
         
         for (JSONObject setRec : sets.getJSONObjectList()) {
             //String diskMgr = setRec.getString("diskMgr");
@@ -235,9 +235,9 @@ public class GridData {
                 //String fileName = image.getString("fileName");
                 //ImageInfo ii = ImageInfo.findImage2(diskMgr, localPath, fileName);
                     
-                Vector<JSONObject> rowVec = tempRows.get(value);
+                List<JSONObject> rowVec = tempRows.get(value);
                 if (rowVec==null) {
-                    rowVec = new Vector<JSONObject>();
+                    rowVec = new ArrayList<JSONObject>();
                     tempRows.put(value, rowVec);
                 }
                 rowVec.add(image);
@@ -258,7 +258,7 @@ public class GridData {
         totalRowMap.clear();
         selectedRowMap.clear();
 
-        for (Vector<JSONObject> rowVec : grid) {
+        for (List<JSONObject> rowVec : grid) {
             for (JSONObject ii : rowVec) {
                 int thisValue = ii.getInt("value");
                 String colVal = ii.getString("symbol");
@@ -280,7 +280,7 @@ public class GridData {
         Collections.sort(selectedRowMap);
 
         // now check that all selected columns are valid in this data set
-        Vector<String> removable = new Vector<String>();
+        ArrayList<String> removable = new ArrayList<String>();
         for (String testCol : selectedColumns.keySet()) {
             int num = numberInColumn(testCol);
             if (num == 0) {
@@ -301,7 +301,7 @@ public class GridData {
         Set<String> valueSet = new HashSet<String>();
         Set<String> colSet = new HashSet<String>();
         
-        for (Vector<JSONObject> rowVec : grid) {
+        for (List<JSONObject> rowVec : grid) {
             for (JSONObject ii : rowVec) {
                 int value = ii.getInt("value");
                 String thisValue = "??";

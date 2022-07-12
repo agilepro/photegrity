@@ -15,7 +15,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -269,32 +268,7 @@ public class DOMUtils {
         return list;
     }
 
-    /**
-     * Silly method. As part of porting this from the old XML parser to DOM, use
-     * this simple method to get child Elements. The old parser has a method for
-     * getting an Enumeration. That was used in hundreds of places. This simple
-     * method is an easy replacement for that.
-     * 
-     * @param from
-     *            - a Node/Element from which we want to get all the child
-     *            elements
-     * @return an Enumeration of org.w3c.dom.Element objects or an empty
-     *         Enumeration if there are no child elements
-     */
-
-    public static Enumeration<Element> getChildElements(Element from) {
-        Vector<Element> list = new Vector<Element>();
-        NodeList childNdList = from.getChildNodes();
-        for (int i = 0; i < childNdList.getLength(); i++) {
-            org.w3c.dom.Node n = childNdList.item(i);
-            if (n.getNodeType() != org.w3c.dom.Node.ELEMENT_NODE) {
-                continue;
-            }
-            list.add((Element) n);
-        }
-        return list.elements();
-    }
-
+ 
     public static Element getChildElement(Element parent, String name) {
         NodeList childNdList = parent.getChildNodes();
         for (int i = 0; i < childNdList.getLength(); i++) {
@@ -608,7 +582,7 @@ public class DOMUtils {
     }
 
     /**************************************************************************
-     * Title: A trivial Vector based NodeList implementation Description:
+     * Title: A trivial List based NodeList implementation Description:
      * 
      * @version 1.0
      */

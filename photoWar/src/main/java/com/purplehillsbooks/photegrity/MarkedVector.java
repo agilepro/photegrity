@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings("serial")
-public class MarkedVector extends java.util.Vector<ImageInfo> {
+public class MarkedVector extends java.util.ArrayList<ImageInfo> {
 
     private int     markPos = -1;
     public  String  name;
@@ -21,7 +21,7 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
     public void insertAtMark(ImageInfo obj) {
         normalizeMark();
         if (markPos >= 0) {
-            super.insertElementAt(obj, markPos);
+            super.set(markPos, obj);
             markPos++;
         }
         else {
@@ -34,7 +34,7 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
         if (index <= markPos) {
             markPos++;
         }
-        super.insertElementAt(obj, index);
+        super.set(index, obj);
     }
 
     public void removeElementAt(int index) {
@@ -42,7 +42,7 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
         if (index < markPos) {
             markPos--;
         }
-        super.removeElementAt(index);
+        super.remove(index);
     }
 
     public ImageInfo remove(int index) {
@@ -57,7 +57,7 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
     }
 
     public void moveToMark(int pos) {
-        ImageInfo temp = elementAt(pos);
+        ImageInfo temp = get(pos);
         removeElementAt(pos);
         insertAtMark(temp);
     }
@@ -77,7 +77,7 @@ public class MarkedVector extends java.util.Vector<ImageInfo> {
     }
 
     /**
-     * a lot of the default operations on Vector will manipulate the size, so
+     * a lot of the default operations on ArrayList will manipulate the size, so
      * make sure that the markPos is still valid.
      */
     private void normalizeMark() {

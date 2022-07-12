@@ -7,10 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.net.nntp.ArticleInfo;
 
@@ -269,7 +269,7 @@ public class NewsArticle {
             subj = subj.substring(0,digitOnEnd+1).trim();
         }
 
-        Vector<String> numVec = new Vector<String>();
+        List<String> numVec = new ArrayList<String>();
         StringBuffer buf = new StringBuffer();
         boolean doingNumbers = false;
         int copyPos = 0;
@@ -697,7 +697,7 @@ public class NewsArticle {
     }
 
     public void writeCacheLine(Writer w) throws Exception {
-        Vector<String> values = new Vector<String>();
+        ArrayList<String> values = new ArrayList<String>();
         values.add(Long.toString(getNumber()));
         values.add(headerSubject);
         values.add(headerFrom);

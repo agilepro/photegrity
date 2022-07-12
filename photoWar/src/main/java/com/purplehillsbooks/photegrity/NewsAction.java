@@ -1,9 +1,9 @@
 package com.purplehillsbooks.photegrity;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONObject;
 import com.purplehillsbooks.streams.NullWriter;
@@ -246,7 +246,7 @@ public abstract class NewsAction {
         return statusObject().toString();
     }
     static public List<NewsAction> getAllActions() {
-        Vector<NewsAction> ret = new Vector<NewsAction>();
+        List<NewsAction> ret = new ArrayList<NewsAction>();
         NewsAction tester = NewsBackground.lastActive;
         if (tester!=null) {
             ret.add(tester);

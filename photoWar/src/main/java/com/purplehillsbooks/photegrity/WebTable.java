@@ -2,11 +2,12 @@ package com.purplehillsbooks.photegrity;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,9 +32,9 @@ public class WebTable
     //This configuration setting must be set before reading a file.
     public static String dataDirectory = null;
 
-    Vector<WebColumn> colOrder = new Vector<WebColumn>();
+    List<WebColumn> colOrder = new ArrayList<WebColumn>();
 
-    Vector<WebObject> instances = new Vector<WebObject>();
+    List<WebObject> instances = new ArrayList<WebObject>();
 
     public String schemaName;
 
@@ -61,9 +62,7 @@ public class WebTable
         Element root = d.getDocumentElement();
         Element e_column_container = DOMUtils.getChildElement(root, "columns");
         if (e_column_container!=null) {
-            Enumeration<Element> e1 = DOMUtils.getChildElements(e_column_container);
-            while (e1.hasMoreElements()) {
-                Element child = e1.nextElement();
+            for (Element child : DOMUtils.getChildElementsList(e_column_container)) {
                 WebColumn wc = WebColumn.parseXML(child);
                 if (wc.dataType==0) {
                     throw new JSONException("some how the type is not set");
@@ -73,9 +72,7 @@ public class WebTable
         }
         Element e_rows_container = DOMUtils.getChildElement(root, "rows");
         if (e_rows_container!=null) {
-            Enumeration<Element> e2 = DOMUtils.getChildElements(e_rows_container);
-            while (e2.hasMoreElements()) {
-                Element e_row = e2.nextElement();
+            for (Element e_row : DOMUtils.getChildElementsList(e_rows_container)) {
                 WebObject wo = wt.createRow();
                 wo.setAllFieldsFromXML(e_row);
             }
@@ -138,17 +135,14 @@ public class WebTable
     * describes a particular value.
     * Must be implemented by the subclass.
     */
-    public Vector<WebColumn> getSchema()
+    public List<WebColumn> getSchema()
     {
         return colOrder;
     }
 
     public WebColumn getColumn(String name)
     {
-        Enumeration<WebColumn> e = colOrder.elements();
-        while (e.hasMoreElements()) {
-            WebColumn wc = e.nextElement();
-
+        for (WebColumn wc : colOrder) {
             if (name.equalsIgnoreCase(wc.colName)) {
                 return wc;
             }
@@ -172,9 +166,7 @@ public class WebTable
             }
             wc.setColName(this, newName);
 
-            Enumeration<WebObject> e = instances.elements();
-            while (e.hasMoreElements()) {
-                WebObject wo = e.nextElement();
+            for (WebObject wo : instances) {
                 wo.changeColumnName(oldName, wc);
             }
         }
@@ -189,20 +181,13 @@ public class WebTable
         throws Exception
     {
         try {
-            Enumeration<WebObject> e = instances.elements();
-            while (e.hasMoreElements()) {
-                WebObject wo = e.nextElement();
+            for (WebObject wo : instances) {
                 wo.generateKeyValue();
             }
         }
         catch (Exception e) {
             throw new JSONException("Can't regenerate key values in table '{0}'.", e, schemaName);
         }
-    }
-
-    public Enumeration<WebObject> getInstances()
-    {
-        return instances.elements();
     }
 
     public int instanceCount()
@@ -218,9 +203,7 @@ public class WebTable
     public WebObject findByKey(String searchVal)
         throws Exception
     {
-        Enumeration<WebObject> e = instances.elements();
-        while (e.hasMoreElements()) {
-            WebObject wo = e.nextElement();
+        for (WebObject wo : instances) {
             if (wo.keyEquals(searchVal)) {
                 return wo;
             }
@@ -228,18 +211,17 @@ public class WebTable
         return null;
     }
 
-    public Vector<WebObject> findMatching(String fieldName, String val)
+    public List<WebObject> findMatching(String fieldName, String val)
         throws Exception
     {
-        return restrictEquals(instances.elements(), fieldName, val);
+        return restrictEquals(instances, fieldName, val);
     }
 
-    public Vector<WebObject> restrictEquals(Enumeration<WebObject> source, String fieldName, String val)
+    public List<WebObject> restrictEquals(List<WebObject> source, String fieldName, String val)
         throws Exception
     {
-        Vector<WebObject> res = new Vector<WebObject>();
-        while (source.hasMoreElements()) {
-            WebObject wo = source.nextElement();
+        List<WebObject> res = new ArrayList<WebObject>();
+        for (WebObject wo : source) {
             if (wo.fieldEquals(fieldName, val)) {
                 res.add(wo);
             }
@@ -247,13 +229,12 @@ public class WebTable
         return res;
     }
 
-    public Vector<WebObject> restrictContains(Enumeration<WebObject> source, String fieldName, String searchVal)
+    public List<WebObject> restrictContains(List<WebObject> source, String fieldName, String searchVal)
         throws Exception
     {
-        Vector<WebObject> res = new Vector<WebObject>();
+        List<WebObject> res = new ArrayList<WebObject>();
         String lowerSearch = searchVal.toLowerCase();
-        while (source.hasMoreElements()) {
-            WebObject wo = source.nextElement();
+        for (WebObject wo : source) {
             String instVal = wo.getFieldValue(fieldName);
             if (instVal==null) {
                 continue;
@@ -267,13 +248,13 @@ public class WebTable
     }
 
 
-    public Vector<WebObject> sort(Enumeration<WebObject> source, String sortList)
+    public List<WebObject> sort(List<WebObject> source, String sortList)
         throws Exception
     {
         String[] sortBy = sortList.split(",");
-        Vector<WebObject> res = new Vector<WebObject>();
-        while (source.hasMoreElements()) {
-            res.add(source.nextElement());
+        List<WebObject> res = new ArrayList<WebObject>();
+        for (WebObject wo : source) {
+            res.add(wo);
         }
         Comparator<WebObject> c = new OrderByFieldList(sortBy);
         Collections.sort(res, c);

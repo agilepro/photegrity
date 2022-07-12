@@ -159,7 +159,7 @@ public class NewsGroup {
     }
 
     public static synchronized List<NewsBunch> getUnhiddenBunches() {
-        Vector<NewsBunch> ret = new Vector<NewsBunch>();
+        ArrayList<NewsBunch> ret = new ArrayList<NewsBunch>();
         for (NewsBunch nbunch : bunchIndex.values()) {
             if (nbunch.pState != NewsBunch.STATE_HIDDEN && nbunch.count > 0) {
                 ret.add(nbunch);
@@ -169,7 +169,7 @@ public class NewsGroup {
         return ret;
     }
     public static synchronized List<NewsBunch> getAllBunches() {
-        Vector<NewsBunch> ret = new Vector<NewsBunch>();
+        ArrayList<NewsBunch> ret = new ArrayList<NewsBunch>();
         for (NewsBunch npatt : bunchIndex.values()) {
             ret.add(npatt);
         }
@@ -178,7 +178,7 @@ public class NewsGroup {
     }
     public static synchronized List<NewsBunch> findBunchesWithPattern(String oldPattern) throws Exception {
         oldPattern = oldPattern.trim();
-        Vector<NewsBunch> retVal = new Vector<NewsBunch>();
+        ArrayList<NewsBunch> retVal = new ArrayList<NewsBunch>();
         for (NewsBunch aBunch : NewsGroup.getAllBunches()) {
             //skip all the hidden ones
             if (aBunch.pState==NewsBunch.STATE_HIDDEN) {
@@ -332,7 +332,7 @@ public class NewsGroup {
     
     
     public List<NewsArticle> getArticles() {
-        Vector<NewsArticle> ret = new Vector<NewsArticle>();
+        ArrayList<NewsArticle> ret = new ArrayList<NewsArticle>();
         for (NewsArticle art : index.values()) {
             ret.add(art);
         }
@@ -341,7 +341,7 @@ public class NewsGroup {
     }
 
     public List<NewsArticle> getArticlesDigest(String dig, String from) {
-        Vector<NewsArticle> ret = new Vector<NewsArticle>();
+        ArrayList<NewsArticle> ret = new ArrayList<NewsArticle>();
         for (NewsArticle art : index.values()) {
             if (dig.equals(art.getDigest()) && art.getHeaderFrom().equals(from)) {
                 ret.add(art);
@@ -617,7 +617,7 @@ public class NewsGroup {
         if (lowestToDisplay<lowestFetched) {
             lowestToDisplay = lowestFetched;
         }
-        List<NewsBunch> filteredBunches = new Vector<NewsBunch>();
+        List<NewsBunch> filteredBunches = new ArrayList<NewsBunch>();
         for (NewsBunch tBunch : getAllBunches()) {
             if (tBunch.minId>lowestToDisplay+displayWindow) {
                 continue;
@@ -636,7 +636,7 @@ public class NewsGroup {
      * @return
      */
     public synchronized List<NewsBunch> getFilteredBunches(String filter) throws Exception {
-        List<NewsBunch> filteredBunches = new Vector<NewsBunch>();
+        List<NewsBunch> filteredBunches = new ArrayList<NewsBunch>();
         for (NewsBunch tBunch : getBunchesInRange()) {
             if (tBunch.digest.indexOf(filter)>=0) {
                 filteredBunches.add(tBunch);
@@ -722,7 +722,7 @@ public class NewsGroup {
      * scanned them by this time, and this will free up memory and file space.
      */
     public synchronized void discardArticleRange(long rangeStart, long rangeEnd) {
-        Vector<NewsArticle> toRemove = new Vector<NewsArticle>();
+        ArrayList<NewsArticle> toRemove = new ArrayList<NewsArticle>();
         for (NewsArticle art : index.values()) {
             if (art.articleNo > rangeStart && art.articleNo < rangeEnd) {
                 toRemove.add(art);
@@ -737,7 +737,7 @@ public class NewsGroup {
         }
 
         //now clean out the error entries
-        Vector<Long> errorsToForget = new Vector<Long>();
+        ArrayList<Long> errorsToForget = new ArrayList<Long>();
         for (Long aNum : errorIndex.keySet()) {
             if (aNum > rangeStart && aNum < rangeEnd) {
                 errorsToForget.add(aNum);

@@ -3,10 +3,10 @@ package com.purplehillsbooks.photegrity;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
 
@@ -15,7 +15,7 @@ import com.purplehillsbooks.json.JSONException;
  */
 
 public class NewsFile {
-    private Vector<NewsArticle> parts;
+    private List<NewsArticle> parts;
     private NewsBunch nBunch;
     //private String fileName;
     private FracturedFileName fracName;
@@ -23,7 +23,7 @@ public class NewsFile {
 
     public NewsFile(String _fileName, NewsBunch _bnch) throws Exception {
         nBunch = _bnch;
-        parts = new Vector<NewsArticle>();
+        parts = new ArrayList<NewsArticle>();
         fracName = FracturedFileName.parseFile(_fileName);
         refreshMapping();
     }
@@ -32,7 +32,7 @@ public class NewsFile {
         if (parts.size()>0) {
             //check with the bunch again ... the template might have changed
             //this will get the file name from the template from the bunch
-            String fileName = parts.elementAt(0).getFileName();
+            String fileName = parts.get(0).getFileName();
             //refresh the pattern from the file name
             fracName = FracturedFileName.parseFile(fileName);
         }

@@ -2,9 +2,9 @@ package com.purplehillsbooks.photegrity;
 
 import java.io.File;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.json.JSONObject;
@@ -16,7 +16,7 @@ import com.purplehillsbooks.streams.HTMLWriter;
 
 public class NewsActionDownloadAll extends NewsAction {
     NewsBunch seeker;
-    Vector<String> alreadyTried = new Vector<String>();
+    ArrayList<String> alreadyTried = new ArrayList<String>();
 
     public NewsActionDownloadAll(NewsBunch _seeker) throws Exception {
         seeker = _seeker;
@@ -70,7 +70,7 @@ public class NewsActionDownloadAll extends NewsAction {
         }
         int scheduleCount = 0;
         List<NewsFile> files = seeker.getFiles();
-        List<NewsFile> filteredSet = new Vector<NewsFile>();
+        List<NewsFile> filteredSet = new ArrayList<NewsFile>();
         int downCount = 0;
         int skipCount = 0;
         int schedCount = 0;

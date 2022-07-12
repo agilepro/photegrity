@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
@@ -75,9 +74,9 @@ public class PosPat {
     public File getFilePath(String fileName) {
         return new File(getFolderPath(), fileName);
     }
-    public Vector<File> getMatchingFiles() {
+    public List<File> getMatchingFiles() {
         File folder = getFolderPath();
-        Vector<File> children = new Vector<File>();
+        ArrayList<File> children = new ArrayList<File>();
         for (File child : folder.listFiles()) {
             if (child.getName().startsWith(pattern)) {
                 children.add(child);
@@ -221,7 +220,7 @@ public class PosPat {
     }
 
     public static List<PosPat> filterByTag(List<PosPat> input, String tag) {
-        Vector<PosPat> res = new Vector<PosPat>();
+        ArrayList<PosPat> res = new ArrayList<PosPat>();
         for (PosPat pp : input) {
             if (pp.hasTag(tag)  && pp.imageCount>0) {
                 res.add(pp);
@@ -246,11 +245,11 @@ public class PosPat {
      * it is public static, so just pass in the string and get vector back,
      * no side effects.
      */
-    public static Vector<String> parsePathTags(String path) {
+    public static List<String> parsePathTags(String path) {
         String pathlc = path.toLowerCase();
         int startPos = 0;
         int pos = 0;
-        Vector<String> res = new Vector<String>();
+        ArrayList<String> res = new ArrayList<String>();
         while (pos<pathlc.length()) {
             char ch = pathlc.charAt(pos);
             if (ch==':' || ch=='.' || ch=='/'  || ch=='\\') {

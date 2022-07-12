@@ -1,9 +1,10 @@
 package com.purplehillsbooks.photegrity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 import com.purplehillsbooks.json.JSONException;
 
@@ -15,9 +16,9 @@ public class NumericCounter extends Hashtable<Integer,Integer> {
     }
 
 
-    public Vector<Integer> getSortedKeys() throws Exception {
+    public List<Integer> getSortedKeys() throws Exception {
         try {
-            Vector<Integer> sortedKeys = new Vector<Integer>();
+            ArrayList<Integer> sortedKeys = new ArrayList<Integer>();
             Enumeration<Integer> unsorted = keys();
             while (unsorted.hasMoreElements()) {
                 sortedKeys.add(unsorted.nextElement());

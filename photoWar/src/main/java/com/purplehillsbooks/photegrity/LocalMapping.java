@@ -7,9 +7,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import com.purplehillsbooks.streams.CSVHelper;
 
@@ -105,7 +105,7 @@ public class LocalMapping {
         Writer fw = new OutputStreamWriter(fos, "UTF-8");
 
         for (LocalMapping map : allMapping.values()) {
-            Vector<String> values = new Vector<String>();
+            ArrayList<String> values = new ArrayList<String>();
             values.add(map.source.getSymbol());
             values.add(map.dest.getSymbol());
             if (map.enabled) {

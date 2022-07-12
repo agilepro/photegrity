@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
@@ -26,7 +25,7 @@ public class ImageInfo
     public String  tail;     // rest of the file name after the number
 
     private int    fileSize;
-    private Vector<String> tagNames;
+    private ArrayList<String> tagNames;
     public int    randomValue;  //each image is assigned a random value for random sorting
 
     public boolean isIndex = false;
@@ -63,7 +62,7 @@ public class ImageInfo
         value = 0;
         tail = "";
         fileSize = 0;
-        tagNames = new Vector<String>();
+        tagNames = new ArrayList<String>();
         randomValue = 0;
         isIndex = false;
     }
@@ -76,7 +75,7 @@ public class ImageInfo
     
     private ImageInfo(File filePath) throws Exception {
         diskMgr = DiskMgr.findDiskMgrFromPath(filePath);
-        tagNames = new Vector<String>();
+        tagNames = new ArrayList<String>();
         randomValue = randGen.nextInt(1000000000);
 
         fileName = filePath.getName();
@@ -311,7 +310,7 @@ public class ImageInfo
 
 
 
-    public Vector<String> getTagNames() throws Exception {
+    public List<String> getTagNames() throws Exception {
         return tagNames;
     }
 
@@ -630,7 +629,7 @@ public class ImageInfo
 
 
 
-    public static Vector<ImageInfo> imageQuery(String query) throws Exception {
+    public static List<ImageInfo> imageQuery(String query) throws Exception {
         if (query.startsWith("$")) {
             //offset 0 is $
             //offset 1 must be (
@@ -653,7 +652,7 @@ public class ImageInfo
         mongo.close();
         long queryTime = System.currentTimeMillis() - startTime;
         
-        Vector<ImageInfo> res = new Vector<ImageInfo>();
+        ArrayList<ImageInfo> res = new ArrayList<ImageInfo>();
         for (JSONObject set : list.getJSONObjectList()) {
             JSONArray images = set.getJSONArray("images");
             for (JSONObject image : images.getJSONObjectList()) {

@@ -6,11 +6,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONArray;
 import com.purplehillsbooks.json.JSONException;
@@ -42,7 +42,7 @@ public class NewsBunch {
 
     private NewsGroup newsGroup;
     private int specialTokenIndex = -2; // -2 means not determined yet
-    private Vector<PosPat> sites = null;
+    private List<PosPat> sites = null;
 
     //This is a unique key JUST for this session!
     public long bunchKey;
@@ -277,7 +277,7 @@ public class NewsBunch {
 
 
     public void writeCacheLine(Writer fw) throws Exception {
-        Vector<String> values = new Vector<String>();
+        ArrayList<String> values = new ArrayList<String>();
         values.add(digest);
         String store = disk.diskName + ":" + pathInDisk;
         values.add(store);
@@ -717,7 +717,7 @@ public class NewsBunch {
             }
             file.addArticle(art);
         }
-        Vector<NewsFile> results = new Vector<NewsFile>();
+        ArrayList<NewsFile> results = new ArrayList<NewsFile>();
         for (NewsFile nf : files.values()) {
             results.add(nf);
             countTotal++;
@@ -1263,12 +1263,12 @@ public class NewsBunch {
         lastTouch = System.currentTimeMillis();
     }
 
-    public Vector<PosPat> getPosPatList() throws Exception {
-        Vector<PosPat> tsites = sites;
+    public List<PosPat> getPosPatList() throws Exception {
+        List<PosPat> tsites = sites;
         if (tsites!=null) {
             return tsites;
         }
-        tsites = new Vector<PosPat>();
+        tsites = new ArrayList<PosPat>();
         if (fracTemplate == null || fracTemplate.isEmpty()
                 || pathInDisk == null || pathInDisk.length()==0 ) {
             //without a template or path we can not find any of them, return empty
@@ -1297,7 +1297,7 @@ public class NewsBunch {
      * the digest, the location, or the extra tags.
      */
     static public List<NewsBunch> filterThese(List<NewsBunch> src, String filter) {
-        List<NewsBunch> filteredPatterns = new Vector<NewsBunch>();
+        List<NewsBunch> filteredPatterns = new ArrayList<NewsBunch>();
         if (filter!=null && filter.length()>0) {
             for (NewsBunch tpatt : src) {
                 if (tpatt.digest.indexOf(filter)>=0) {
@@ -1371,7 +1371,7 @@ public class NewsBunch {
         JSONArray pplist = new JSONArray();
         JSONArray patList = new JSONArray();
         if (hasTemplate()) {
-            Vector<PosPat> vpp = getPosPatList();
+            List<PosPat> vpp = getPosPatList();
             for (PosPat ppinst : vpp) {
                 patList.put(ppinst.getPattern());
                 pplist.put(ppinst.getSymbol());

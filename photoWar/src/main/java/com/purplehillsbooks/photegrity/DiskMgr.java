@@ -13,7 +13,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.servlet.ServletContext;
 
@@ -47,7 +46,7 @@ public class DiskMgr {
     public static HashCounter globalSize = null;
     
     private static Hashtable<String, DiskMgr> diskList = null;
-    private static Vector<File> newsFiles = null;
+    private static ArrayList<File> newsFiles = null;
 
     /**
      * This is a list of paths separated by semicolons of all the places to look
@@ -56,7 +55,7 @@ public class DiskMgr {
     private static File rootFolder;
     public static File thumbPath;   // archive + slash + thumbs + slash
 
-    public static List<String> masterGroups = new Vector<String>();
+    public static List<String> masterGroups = new ArrayList<String>();
 
     
     public static void initPhotoServer(ServletContext sc) throws Exception {
@@ -186,7 +185,7 @@ public class DiskMgr {
     }
 
     public static List<DiskMgr> getAllDiskMgr() {
-        Vector<DiskMgr> retval = new Vector<DiskMgr>();
+        ArrayList<DiskMgr> retval = new ArrayList<DiskMgr>();
         retval.addAll(diskList.values());
         Collections.sort(retval, new DiskMgrComparator());
         return retval;
@@ -299,7 +298,7 @@ public class DiskMgr {
             diskList.clear();
         }
         diskList = null;
-        newsFiles = new Vector<File>();
+        newsFiles = new ArrayList<File>();
         masterGroups.clear();
     }
 
@@ -316,7 +315,7 @@ public class DiskMgr {
         }
 
         Hashtable<String, DiskMgr> tempTable = new Hashtable<String, DiskMgr>();
-        Vector<File> newNewsList = new Vector<File>();
+        ArrayList<File> newNewsList = new ArrayList<File>();
 
         File[] children = rootFolder.listFiles();
         if (children==null) {
@@ -354,7 +353,7 @@ public class DiskMgr {
         return tempTable;
     }
 
-    public static synchronized Vector<File> getNewsFiles() throws Exception {
+    public static synchronized List<File> getNewsFiles() throws Exception {
 
         if (newsFiles == null) {
             getDiskList();
@@ -363,7 +362,7 @@ public class DiskMgr {
         return newsFiles;
     }
 
-    private void scanDiskRecursive(File scanFile, Vector<ImageInfo> answer, Writer out)
+    private void scanDiskRecursive(File scanFile, List<ImageInfo> answer, Writer out)
             throws Exception {
         try {
             if (!scanFile.exists()) {
@@ -390,7 +389,7 @@ public class DiskMgr {
 
             if (scanFile.isFile() && (fileNamelc.endsWith(".jpg"))) {
                 ImageInfo ii = ImageInfo.genFromFile(scanFile);
-                answer.addElement(ii);
+                answer.add(ii);
             }
         }
         catch (Exception e) {
@@ -398,7 +397,7 @@ public class DiskMgr {
         }
     }
 
-    private void scanDiskOneFolder(File scanFile, Vector<ImageInfo> answer) throws Exception {
+    private void scanDiskOneFolder(File scanFile, List<ImageInfo> answer) throws Exception {
         System.out.println("scanDiskOneFolder: "+scanFile);
         try {
             if (!scanFile.exists()) {
@@ -411,7 +410,7 @@ public class DiskMgr {
                 String childName = child.getName();
                 if (child.isFile() && (childName.endsWith(".jpg") || childName.endsWith(".JPG"))) {
                     ImageInfo ii = ImageInfo.genFromFile(child);
-                    answer.addElement(ii);
+                    answer.add(ii);
                 }
             }
         }
@@ -427,7 +426,7 @@ public class DiskMgr {
 
             // now scan the disk for files
             // String auxDirName = mainFolder + "extra";
-            Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
+            ArrayList<ImageInfo> imagesForDisk = new ArrayList<ImageInfo>();
             scanDiskRecursive(mainFolder, imagesForDisk, out);
 
             out.write("\n<li><hr/></li>\n<li>Directories have been scanned, now accepting</li>");
@@ -458,7 +457,7 @@ public class DiskMgr {
         for (File folderPath : fileList) {
             DiskMgr dm = DiskMgr.findDiskMgrFromPath(folderPath);
             String relPath = dm.getRelativePath(folderPath);
-            Vector<ImageInfo> imagesForDisk = new Vector<ImageInfo>();
+            ArrayList<ImageInfo> imagesForDisk = new ArrayList<ImageInfo>();
             dm.scanDiskOneFolder(folderPath, imagesForDisk);
             mongo.clearAllFromDiskPath(dm.diskName, relPath);
             dm.storeDiskInMongo(imagesForDisk);
@@ -792,10 +791,10 @@ public class DiskMgr {
     }
 
     
-    public void storeDiskInMongo(Vector<ImageInfo> imagesForDisk) throws Exception {
+    public void storeDiskInMongo(List<ImageInfo> imagesForDisk) throws Exception {
         MongoDB mongo = new MongoDB();
         
-        List<String> allPP = new Vector<String>();
+        List<String> allPP = new ArrayList<String>();
         //first, find all the pospat symbols
         for (ImageInfo ii : imagesForDisk) {
             String symbol = ii.getPatternSymbol();

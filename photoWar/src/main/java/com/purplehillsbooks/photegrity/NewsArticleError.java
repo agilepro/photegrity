@@ -1,8 +1,8 @@
 package com.purplehillsbooks.photegrity;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import com.purplehillsbooks.json.JSONException;
 import com.purplehillsbooks.streams.CSVHelper;
@@ -73,7 +73,7 @@ public class NewsArticleError {
     }
 
     public void writeCacheLine(Writer w) throws Exception {
-        Vector<String> values = new Vector<String>();
+        List<String> values = new ArrayList<String>();
         values.add(Long.toString(articleNo));
         values.add(Integer.toString(errorCount));
         values.add(Long.toString(lastErrorTime));

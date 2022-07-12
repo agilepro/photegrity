@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import com.purplehillsbooks.streams.CSVHelper;
 
@@ -32,7 +32,7 @@ public class Stats {
 
 
 
-    private static Vector<Stats> history = new Vector<Stats>();
+    private static List<Stats> history = new ArrayList<Stats>();
     private static File outputFolder;
     private static String outputFileName;
 
@@ -92,7 +92,7 @@ public class Stats {
         long newDur = -durationTotal;
         long newFileCount = -fileCount;
 
-        Vector<File> newsFileList = DiskMgr.getNewsFiles();
+        List<File> newsFileList = DiskMgr.getNewsFiles();
         for (File newsFile : newsFileList)  {
             File folder = newsFile.getParentFile();
             for (File child : folder.listFiles()) {
@@ -134,15 +134,15 @@ public class Stats {
      * bin, to the start time of the next bin (or until current time for the last
      * bin).
      */
-    public static synchronized Vector<Stats> recalcBins(long[] binStamps) throws Exception {
+    public static synchronized List<Stats> recalcBins(long[] binStamps) throws Exception {
 
-        Vector<Stats> res  = new Vector<Stats>();
+        ArrayList<Stats> res  = new ArrayList<Stats>();
         for (@SuppressWarnings("unused") long binVal : binStamps) {
             //create a bunch of empty stats objects
             res.add(new Stats());
         }
 
-        Vector<File> newsFileList = DiskMgr.getNewsFiles();
+        List<File> newsFileList = DiskMgr.getNewsFiles();
         for (File newsFile : newsFileList)  {
             File folder = newsFile.getParentFile();
             for (File child : folder.listFiles()) {
@@ -216,7 +216,7 @@ public class Stats {
      * @param containingFolder is the place where the file will be created
      */
     public static void initializeStats(File containingFolder) {
-        history = new Vector<Stats>();
+        history = new ArrayList<Stats>();
         outputFolder = containingFolder;
         outputFileName = "s"+System.currentTimeMillis();
     }
@@ -231,7 +231,7 @@ public class Stats {
         Writer fw = new OutputStreamWriter(fos, "UTF-8");
 
         for (Stats stat : history) {
-            Vector<String> values = new Vector<String>();
+            ArrayList<String> values = new ArrayList<String>();
             values.add(Long.toString(stat.timeStamp));
             values.add(Long.toString(stat.rawBytes));
             values.add(Long.toString(stat.finishedBytes));

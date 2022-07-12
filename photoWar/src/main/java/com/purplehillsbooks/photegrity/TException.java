@@ -1,9 +1,10 @@
 package com.purplehillsbooks.photegrity;
 
-import java.util.Vector;
 import java.util.ResourceBundle;
 import java.util.Locale;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * TException is a base exception that that implements language independence as
@@ -32,7 +33,7 @@ public class TException extends Exception {
     /**
      * List of parameters that will be included in the error message
      */
-    protected Vector<String> params = new Vector<String>();
+    protected List<String> params = new ArrayList<String>();
 
     /**
      * Constructs a TException for the given property key.
@@ -66,7 +67,7 @@ public class TException extends Exception {
      * @return The list of parameters associated with this exception.
      * @publish internal
      */
-    public Vector<String> getParams() {
+    public List<String> getParams() {
         return params;
     }
 
@@ -94,7 +95,7 @@ public class TException extends Exception {
      *            message.
      * @publish internal
      */
-    public void setParams(Vector<String> newParams) {
+    public void setParams(List<String> newParams) {
         params = newParams;
     }
 
